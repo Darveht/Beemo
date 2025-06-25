@@ -481,42 +481,12 @@ function showTikTokPlayer(title, startEpisode = 1) {
         return episodeUrls[episodeNumber] || null;
     }
 
-    // Función mejorada para manejar URLs de Streamable
+    // Función mejorada para manejar URLs de Streamable como fondo
     async function createStreamablePlayer(streamableUrl) {
         try {
             showNotification('Cargando video...', 'info');
             
-            // Crear contenedor de carga
-            const loadingContainer = document.createElement('div');
-            loadingContainer.style.cssText = `
-                position: fixed !important;
-                top: 0 !important;
-                left: 0 !important;
-                width: 100vw !important;
-                height: 100vh !important;
-                background: #000 !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                z-index: 999998 !important;
-            `;
-            
-            loadingContainer.innerHTML = `
-                <div style="text-align: center; color: white;">
-                    <div class="loading-spinner" style="margin: 0 auto 1rem auto;"></div>
-                    <h3>Cargando video...</h3>
-                    <p>Preparando reproductor</p>
-                </div>
-            `;
-            
-            document.body.appendChild(loadingContainer);
-            
-            // Configurar body para video de fondo
-            document.body.style.overflow = 'hidden';
-            document.body.style.margin = '0';
-            document.body.style.padding = '0';
-            
-            // Crear iframe de Streamable como fondo
+            // Crear iframe de Streamable como fondo del reproductor
             const iframe = document.createElement('iframe');
             iframe.id = 'streamablePlayer';
             iframe.src = streamableUrl;
@@ -527,13 +497,11 @@ function showTikTokPlayer(title, startEpisode = 1) {
                 position: fixed !important;
                 top: 0 !important;
                 left: 0 !important;
-                z-index: -1 !important;
+                z-index: 1 !important;
                 background: #000 !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                opacity: 0 !important;
-                transition: opacity 0.5s ease !important;
-                pointer-events: none !important;
+                object-fit: cover !important;
             `;
             iframe.setAttribute('allowfullscreen', '');
             iframe.setAttribute('webkitallowfullscreen', '');
@@ -541,99 +509,32 @@ function showTikTokPlayer(title, startEpisode = 1) {
             iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media');
             iframe.setAttribute('loading', 'eager');
             
-            // Crear botón de cierre mínimo
-            const closeBtn = document.createElement('button');
-            closeBtn.innerHTML = '×';
-            closeBtn.style.cssText = `
-                position: fixed !important;
-                top: 20px !important;
-                right: 20px !important;
-                width: 40px !important;
-                height: 40px !important;
-                background: rgba(0, 0, 0, 0.8) !important;
-                color: white !important;
-                border: none !important;
-                border-radius: 50% !important;
-                font-size: 24px !important;
-                cursor: pointer !important;
-                z-index: 9999999 !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                font-weight: bold !important;
-            `;
-            
-            // Función de cierre mejorada
-            const closeVideo = () => {
-                // Remover iframe
-                if (iframe.parentNode) {
-                    iframe.parentNode.removeChild(iframe);
-                }
-                
-                // Remover loading
-                if (loadingContainer.parentNode) {
-                    loadingContainer.parentNode.removeChild(loadingContainer);
-                }
-                
-                // Restaurar estilos del body
-                document.body.style.overflow = '';
-                document.body.style.margin = '';
-                document.body.style.padding = '';
-                
-                // Cerrar reproductor
-                const player = document.querySelector('.tiktok-player');
-                if (player) {
-                    player.remove();
-                }
-                
-                showNotification('Video cerrado', 'info');
-            };
-            
-            closeBtn.onclick = closeVideo;
+            // Insertar el iframe en el contenedor del video
+            const videoContent = document.getElementById('videoContent');
+            if (videoContent) {
+                videoContent.innerHTML = '';
+                videoContent.appendChild(iframe);
+            }
             
             // Manejar carga del iframe
             iframe.onload = () => {
-                // Remover pantalla de carga
-                if (loadingContainer.parentNode) {
-                    loadingContainer.parentNode.removeChild(loadingContainer);
-                }
-                
-                // Mostrar iframe
-                iframe.style.opacity = '1';
                 showNotification('Video cargado correctamente', 'success');
             };
             
             // Manejar error de carga
             iframe.onerror = () => {
                 showNotification('Error cargando video, usando modo simulado', 'warning');
-                closeVideo();
-                
-                // Cargar modo simulado como fallback
-                setTimeout(() => {
-                    loadSimulatedEpisode(currentEpisode);
-                }, 500);
+                loadSimulatedEpisode(currentEpisode);
             };
             
             // Timeout de seguridad
             setTimeout(() => {
-                if (loadingContainer.parentNode) {
-                    showNotification('Carga lenta detectada, mostrando video...', 'info');
-                    if (loadingContainer.parentNode) {
-                        loadingContainer.parentNode.removeChild(loadingContainer);
-                    }
-                    iframe.style.opacity = '1';
-                }
-            }, 5000);
+                showNotification('Video listo para reproducir', 'info');
+            }, 3000);
             
-            // Agregar iframe después del loading
-            document.body.appendChild(iframe);
-            
-            // Agregar botón de cierre
-            document.body.appendChild(closeBtn);
-            
-            // Retornar contenedor simple
+            // Retornar contenedor
             const container = document.createElement('div');
-            container.appendChild(document.createTextNode('Video loaded'));
+            container.appendChild(iframe);
             
             return container;
         } catch (error) {
