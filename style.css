@@ -950,13 +950,14 @@ body.video-playing .tiktok-player * {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: #000000;
+    background: transparent;
     border-radius: 0;
     overflow: hidden;
-    z-index: 10001;
+    z-index: 1;
+    pointer-events: none;
 }
 
-/* Video en pantalla completa sin controles externos */
+/* Video como fondo con controles visibles encima */
 #mainVideo {
     width: 100vw !important;
     height: 100vh !important;
@@ -964,11 +965,11 @@ body.video-playing .tiktok-player * {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
-    z-index: 1 !important;
+    z-index: -1 !important;
     background: #000 !important;
     border: none !important;
     outline: none !important;
-    cursor: none;
+    cursor: default;
 }
 
 /* Bloquear controles nativos del video */
@@ -1041,14 +1042,15 @@ body.video-playing .tiktok-player * {
 }
 
 .video-controls-tiktok {
-    position: absolute;
+    position: fixed;
     right: 1rem;
     top: 50%;
     transform: translateY(-50%);
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    z-index: 10;
+    z-index: 100;
+    pointer-events: auto;
 }
 
 .tiktok-btn {
@@ -1077,12 +1079,18 @@ body.video-playing .tiktok-player * {
 }
 
 .video-info-tiktok {
-    position: absolute;
+    position: fixed;
     bottom: 1rem;
     left: 1rem;
     right: 5rem;
     color: white;
-    z-index: 10;
+    z-index: 100;
+    pointer-events: auto;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .video-title-tiktok {
@@ -1112,7 +1120,7 @@ body.video-playing .tiktok-player * {
 }
 
 .close-player {
-    position: absolute;
+    position: fixed;
     top: 1rem;
     left: 1rem;
     background: rgba(0, 0, 0, 0.8);
@@ -1125,9 +1133,10 @@ body.video-playing .tiktok-player * {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 10;
+    z-index: 100;
     backdrop-filter: blur(10px);
     transition: all 0.2s ease;
+    pointer-events: auto;
 }
 
 .close-player:hover {
@@ -2170,7 +2179,7 @@ body.video-playing .tiktok-player * {
 }
 
 .play-control-overlay {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
@@ -2180,8 +2189,9 @@ body.video-playing .tiktok-player * {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    z-index: 15;
+    z-index: 50;
     cursor: pointer;
+    pointer-events: auto;
 }
 
 .video-play-btn {
