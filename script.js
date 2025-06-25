@@ -486,18 +486,35 @@ function showTikTokPlayer(title, startEpisode = 1) {
         try {
             showNotification('Cargando video...', 'info');
             
+            // Crear contenedor de carga
+            const loadingContainer = document.createElement('div');
+            loadingContainer.style.cssText = `
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                background: #000 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                z-index: 999998 !important;
+            `;
+            
+            loadingContainer.innerHTML = `
+                <div style="text-align: center; color: white;">
+                    <div class="loading-spinner" style="margin: 0 auto 1rem auto;"></div>
+                    <h3>Cargando video...</h3>
+                    <p>Preparando reproductor</p>
+                </div>
+            `;
+            
+            document.body.appendChild(loadingContainer);
+            
             // Ocultar completamente todos los elementos de la página
             document.body.style.overflow = 'hidden';
             document.body.style.margin = '0';
             document.body.style.padding = '0';
-            
-            // Ocultar todos los elementos existentes
-            const allElements = document.querySelectorAll('*:not(.tiktok-player):not(.video-container-tiktok)');
-            allElements.forEach(el => {
-                if (!el.closest('.tiktok-player')) {
-                    el.style.display = 'none';
-                }
-            });
             
             // Crear iframe de Streamable completamente inmersivo
             const iframe = document.createElement('iframe');
@@ -514,6 +531,8 @@ function showTikTokPlayer(title, startEpisode = 1) {
                 background: #000 !important;
                 margin: 0 !important;
                 padding: 0 !important;
+                opacity: 0 !important;
+                transition: opacity 0.5s ease !important;
             `;
             iframe.setAttribute('allowfullscreen', '');
             iframe.setAttribute('webkitallowfullscreen', '');
@@ -543,11 +562,17 @@ function showTikTokPlayer(title, startEpisode = 1) {
                 font-weight: bold !important;
             `;
             
-            closeBtn.onclick = () => {
-                // Restaurar todos los elementos
-                allElements.forEach(el => {
-                    el.style.display = '';
-                });
+            // Función de cierre mejorada
+            const closeVideo = () => {
+                // Remover iframe
+                if (iframe.parentNode) {
+                    iframe.parentNode.removeChild(iframe);
+                }
+                
+                // Remover loading
+                if (loadingContainer.parentNode) {
+                    loadingContainer.parentNode.removeChild(loadingContainer);
+                }
                 
                 // Restaurar estilos del body
                 document.body.style.overflow = '';
@@ -563,14 +588,56 @@ function showTikTokPlayer(title, startEpisode = 1) {
                 showNotification('Video cerrado', 'info');
             };
             
-            // Agregar elementos al contenedor
+            closeBtn.onclick = closeVideo;
+            
+            // Manejar carga del iframe
+            iframe.onload = () => {
+                // Remover pantalla de carga
+                if (loadingContainer.parentNode) {
+                    loadingContainer.parentNode.removeChild(loadingContainer);
+                }
+                
+                // Mostrar iframe
+                iframe.style.opacity = '1';
+                showNotification('Video cargado correctamente', 'success');
+            };
+            
+            // Manejar error de carga
+            iframe.onerror = () => {
+                showNotification('Error cargando video, usando modo simulado', 'warning');
+                closeVideo();
+                
+                // Cargar modo simulado como fallback
+                setTimeout(() => {
+                    loadSimulatedEpisode(currentEpisode);
+                }, 500);
+            };
+            
+            // Timeout de seguridad
+            setTimeout(() => {
+                if (loadingContainer.parentNode) {
+                    showNotification('Carga lenta detectada, mostrando video...', 'info');
+                    if (loadingContainer.parentNode) {
+                        loadingContainer.parentNode.removeChild(loadingContainer);
+                    }
+                    iframe.style.opacity = '1';
+                }
+            }, 5000);
+            
+            // Agregar iframe después del loading
+            document.body.appendChild(iframe);
+            
+            // Agregar botón de cierre
+            document.body.appendChild(closeBtn);
+            
+            // Retornar contenedor simple
             const container = document.createElement('div');
-            container.appendChild(iframe);
-            container.appendChild(closeBtn);
+            container.appendChild(document.createTextNode('Video loaded'));
             
             return container;
         } catch (error) {
             console.log('Error creando reproductor:', error);
+            showNotification('Error de carga, usando modo simulado', 'error');
             return null;
         }
     }
@@ -605,15 +672,22 @@ function showTikTokPlayer(title, startEpisode = 1) {
             `;
 
             try {
+                // Limpiar contenido anterior
+                videoContent.innerHTML = `
+                    <div class="loading-video-container" style="width: 100vw; height: 100vh; background: #000; display: flex; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; z-index: 1;">
+                        <div style="text-align: center; color: white;">
+                            <div class="loading-spinner" style="margin: 0 auto 1rem auto;"></div>
+                            <h3>Cargando Episodio ${episodeNumber}...</h3>
+                            <p>Preparando reproductor optimizado</p>
+                        </div>
+                    </div>
+                `;
+                
                 // Crear reproductor completamente inmersivo
                 const playerContainer = await createStreamablePlayer(videoUrl);
                 
                 if (playerContainer) {
-                    // Reemplazar todo el contenido con el reproductor
-                    videoContent.innerHTML = '';
-                    videoContent.appendChild(playerContainer);
-                    
-                    showNotification(`Reproduciendo Episodio ${episodeNumber} - Solo video`, 'success');
+                    showNotification(`Episodio ${episodeNumber} cargado correctamente`, 'success');
                     
                     // Configurar seguimiento básico del progreso
                     let currentTime = 0;
@@ -645,7 +719,7 @@ function showTikTokPlayer(title, startEpisode = 1) {
                 
             } catch (error) {
                 console.log('Error cargando video:', error);
-                showNotification('Cargando modo alternativo...', 'warning');
+                showNotification('Error de carga, usando modo simulado', 'warning');
                 loadSimulatedEpisode(episodeNumber);
             }
         } else {
