@@ -1494,69 +1494,133 @@ function showAdModal() {
     const closeBtn = document.getElementById('adClose');
     const progress = document.getElementById('adProgress');
 
+    // Bloquear scroll del body y hacer pantalla completa
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.height = '100%';
+    
     modal.classList.add('active');
     closeBtn.style.display = 'none';
 
     // Update ad content with Netflix video
     const adContent = modal.querySelector('.ad-content');
     adContent.innerHTML = `
-        <div class="netflix-ad-container">
+        <div class="netflix-ad-container-fullscreen">
             <video 
                 id="netflixAdVideo" 
                 width="100%" 
-                height="400px" 
+                height="100%" 
                 autoplay 
                 muted
-                style="border-radius: 12px; object-fit: cover;"
+                playsinline
+                webkit-playsinline
+                controls="false"
+                style="object-fit: cover; background: #000;"
             >
                 <source src="https://www.dropbox.com/scl/fi/oa2blfwyvg84csw5w13ky/copy_0B8A47E6-5756-4AA7-A69F-FF4E6C6A3194.mov?rlkey=pxs3j8ujtrnyhpf9u7qn6iyl1&st=uy6kb9o7&raw=1" type="video/mp4">
                 Tu navegador no soporta el elemento de video.
             </video>
-            <div class="netflix-ad-overlay">
-                <div class="netflix-logo">
-                    <h2 style="color: #e50914; font-weight: 800; font-size: 2rem;">NETFLIX</h2>
+            <div class="netflix-ad-overlay-fullscreen">
+                <div class="netflix-logo-fullscreen">
+                    <h2 style="color: #e50914; font-weight: 800; font-size: 2.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">NETFLIX</h2>
                 </div>
-                <div class="netflix-cta">
-                    <h3 style="color: white; margin-bottom: 1rem;">¿Te gustó lo que viste?</h3>
-                    <button class="netflix-download-btn" id="netflixDownloadBtn">
-                        📱 Descargar Netflix
+                <div class="netflix-cta-fullscreen">
+                    <h3 style="color: white; margin-bottom: 1.5rem; font-size: 1.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">¿Te gustó lo que viste?</h3>
+                    <button class="netflix-download-btn-fullscreen" id="netflixDownloadBtn">
+                        📱 Descargar Netflix Ahora
                     </button>
                 </div>
+            </div>
+            <div class="ad-timer-overlay">
+                <span id="adTimerDisplay">30</span>
             </div>
         </div>
     `;
 
     const video = document.getElementById('netflixAdVideo');
     const downloadBtn = document.getElementById('netflixDownloadBtn');
+    const timerDisplay = document.getElementById('adTimerDisplay');
+
+    // Prevenir controles nativos del video
+    video.setAttribute('disablePictureInPicture', '');
+    video.setAttribute('controlsList', 'nodownload nofullscreen noremoteplayback');
+    
+    // Bloquear eventos de click en el video
+    video.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    });
+    
+    video.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        return false;
+    });
 
     // Netflix download button functionality
-    downloadBtn.addEventListener('click', () => {
-        // Check if user is on mobile
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    downloadBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         
-        if (isMobile) {
-            // Try to open Netflix app or App Store/Play Store
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-            const isAndroid = /Android/.test(navigator.userAgent);
-            
+        // Detectar dispositivo y redireccionar
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+        const isAndroid = /android/i.test(userAgent);
+        
+        try {
             if (isIOS) {
-                window.open('https://apps.apple.com/app/netflix/id363590051', '_blank');
+                // Intentar abrir la app de Netflix primero, luego App Store
+                const netflixAppURL = 'netflix://';
+                const appStoreURL = 'https://apps.apple.com/app/netflix/id363590051';
+                
+                // Crear iframe oculto para intentar abrir la app
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = netflixAppURL;
+                document.body.appendChild(iframe);
+                
+                // Si no se abre la app, redirigir a App Store
+                setTimeout(() => {
+                    document.body.removeChild(iframe);
+                    window.open(appStoreURL, '_blank');
+                }, 1000);
+                
             } else if (isAndroid) {
-                window.open('https://play.google.com/store/apps/details?id=com.netflix.mediaclient', '_blank');
+                // Intentar abrir la app de Netflix primero, luego Play Store
+                const netflixAppURL = 'intent://www.netflix.com/#Intent;package=com.netflix.mediaclient;scheme=https;end';
+                const playStoreURL = 'https://play.google.com/store/apps/details?id=com.netflix.mediaclient';
+                
+                try {
+                    window.location.href = netflixAppURL;
+                } catch (e) {
+                    window.open(playStoreURL, '_blank');
+                }
+                
+                // Fallback a Play Store después de 1 segundo
+                setTimeout(() => {
+                    window.open(playStoreURL, '_blank');
+                }, 1000);
+                
             } else {
-                window.open('https://www.netflix.com/download', '_blank');
+                // Desktop - abrir sitio web de Netflix
+                window.open('https://www.netflix.com', '_blank');
             }
-        } else {
+            
+            showNotification('¡Redirigiendo a Netflix! 🎬', 'success');
+            
+        } catch (error) {
+            console.error('Error al redireccionar:', error);
+            // Fallback general
             window.open('https://www.netflix.com', '_blank');
         }
-        
-        showNotification('¡Redirigiendo a Netflix! 🎬', 'success');
     });
 
     let timeLeft = 30;
     const interval = setInterval(() => {
         timeLeft--;
         timer.textContent = timeLeft;
+        timerDisplay.textContent = timeLeft;
         progress.style.width = `${((30 - timeLeft) / 30) * 100}%`;
 
         if (timeLeft <= 0) {
@@ -1565,16 +1629,23 @@ function showAdModal() {
             addCoins(20);
             
             // Show interactive Netflix CTA
-            const netflixCta = modal.querySelector('.netflix-cta');
+            const netflixCta = modal.querySelector('.netflix-cta-fullscreen');
             if (netflixCta) {
                 netflixCta.style.display = 'block';
-                netflixCta.style.animation = 'bounceIn 0.5s ease';
+                netflixCta.style.animation = 'slideUpFromBottom 0.6s ease';
             }
             
             setTimeout(() => {
                 modal.classList.remove('active');
                 timer.textContent = '30';
                 progress.style.width = '0%';
+                
+                // Restaurar scroll del body
+                document.body.style.overflow = '';
+                document.body.style.position = '';
+                document.body.style.width = '';
+                document.body.style.height = '';
+                
                 // Reset ad content for next time
                 adContent.innerHTML = `
                     <div class="ad-placeholder">
@@ -1585,9 +1656,23 @@ function showAdModal() {
                         </div>
                     </div>
                 `;
-            }, 5000); // Give more time to interact with Netflix button
+            }, 5000);
         }
     }, 1000);
+    
+    // Manejar cierre del modal
+    const originalCloseHandler = closeBtn.onclick;
+    closeBtn.onclick = () => {
+        // Restaurar scroll del body
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+        document.body.style.height = '';
+        
+        if (originalCloseHandler) {
+            originalCloseHandler();
+        }
+    };
 }
 
 function shareWithFriends() {
