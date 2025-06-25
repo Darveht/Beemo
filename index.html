@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beemo</title>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://js.stripe.com/v3/"></script></head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-left">
+                <ul class="nav-menu">
+                    <li><a href="#" class="nav-link active">Inicio</a></li>
+                    <li><a href="#" class="nav-link">Series</a></li>
+                    <li><a href="#" class="nav-link">Mi Lista</a></li>
+                </ul>
+            </div>
+            <div class="nav-right">
+                <div class="search-bar-container">
+                    <svg class="search-icon-bar" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"/>
+                    </svg>
+                    <input type="text" placeholder="Buscar series y dramas..." class="search-bar-input" id="searchBarInput">
+                </div>
+                <button class="rewards-btn" id="rewardsBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2zM12 15.4l3.76 2.27-.87-4.26 3.1-3.02-4.34-.63L12 5.4l-1.65 4.36-4.34.63 3.1 3.02-.87 4.26L12 15.4z"/>
+                    </svg>
+                    <span class="coin-count" id="coinCount">0</span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">El Emperador Eterno</h1>
+            <p class="hero-description">
+                Una épica historia de amor y poder en la antigua China. Cada episodio de 1 minuto te mantendrá al borde de tu asiento.
+            </p>
+            <div class="hero-buttons">
+                <button class="btn btn-primary">Reproducir</button>
+                <button class="btn btn-secondary">Mi Lista</button>
+            </div>
+            <div class="hero-info">
+                <span class="rating">9.2</span>
+                <span class="year">2024</span>
+                <span class="episodes">45 episodios</span>
+                <span class="duration">1 min cada uno</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Categories -->
+    <section class="categories-section">
+        <div class="categories-carousel">
+            <div class="category-chip active" data-category="todos">Todos</div>
+            <div class="category-chip" data-category="nuevos">Nuevos</div>
+            <div class="category-chip" data-category="populares">Populares</div>
+            <div class="category-chip" data-category="romance">Romance</div>
+            <div class="category-chip" data-category="accion">Acción</div>
+            <div class="category-chip" data-category="comedia">Comedia</div>
+            <div class="category-chip" data-category="fantasia">Fantasía</div>
+        </div>
+    </section>
+
+
+
+    <!-- Search Modal -->
+    <div class="search-modal-overlay" id="searchModal">
+        <div class="search-modal-container">
+            <div class="search-header">
+                <div class="search-input-container">
+                    <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"/>
+                    </svg>
+                    <input type="text" placeholder="Buscar series y dramas" class="search-input" id="searchInput" autocomplete="off">
+                </div>
+                <button class="search-close" id="searchClose">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="search-content">
+                <div class="search-suggestions">
+                    <h3>Populares</h3>
+                    <div class="suggestion-item">Romance Histórico</div>
+                    <div class="suggestion-item">Artes Marciales</div>
+                    <div class="suggestion-item">Comedia Romántica</div>
+                    <div class="suggestion-item">Drama Imperial</div>
+                    <div class="suggestion-item">Fantasía Antigua</div>
+                </div>
+
+                <div class="search-results" id="searchResults" style="display: none;">
+                    <h3>Resultados</h3>
+                    <div class="results-list" id="resultsList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monetization Modal -->
+    <div class="monetization-modal-overlay" id="monetizationModal">
+        <div class="monetization-modal-container">
+            <div class="monetization-header">
+                <h2>💰 Centro de Recompensas</h2>
+                <button class="monetization-close" id="monetizationClose">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="monetization-content">
+                <div class="coin-balance">
+                    <div class="coin-icon">🪙</div>
+                    <div class="balance-info">
+                        <h3 id="modalCoinCount">0 Monedas</h3>
+                        <p>Usa tus monedas para desbloquear episodios premium</p>
+                    </div>
+                </div>
+
+                <div class="earn-methods">
+                    <h3>Gana Monedas</h3>
+
+                    <div class="earn-option">
+                        <div class="earn-icon">📺</div>
+                        <div class="earn-info">
+                            <h4>Ver Anuncio</h4>
+                            <p>Gana 20 monedas por cada anuncio de 30 segundos</p>
+                        </div>
+                        <button class="earn-btn" id="watchAdBtn">Ver Anuncio</button>
+                    </div>
+
+                    <div class="earn-option">
+                        <div class="earn-icon">📤</div>
+                        <div class="earn-info">
+                            <h4>Compartir con Amigos</h4>
+                            <p>Gana 50 monedas cuando un amigo abra tu enlace</p>
+                        </div>
+                        <button class="earn-btn" id="shareBtn">Compartir</button>
+                    </div>
+                </div>
+
+                <div class="unlock-episodes">
+                    <h3>Desbloquear Episodios</h3>
+                    <p>Episodios 1-8: Gratis</p>
+                    <p>Episodios 9+: 30 monedas cada uno</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ad Modal -->
+    <div class="ad-modal-overlay" id="adModal">
+        <div class="ad-modal-container">
+            <div class="ad-header">
+                <span class="ad-timer">Anuncio: <span id="adTimer">30</span>s</span>
+                <button class="ad-close" id="adClose" style="display: none;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="ad-content">
+                <div class="ad-placeholder">
+                    <h2>🎬 Anuncio Publicitario</h2>
+                    <p>Este es un anuncio simulado de 30 segundos</p>
+                    <div class="ad-progress">
+                        <div class="ad-progress-fill" id="adProgress"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div class="notification-container" id="notificationContainer"></div>
+
+    <!-- Content Feed -->
+    <main class="content-feed">
+        <!-- Trending Section -->
+        <section class="content-section">
+            <h2 class="section-title">Trending</h2>
+            <div class="content-grid">
+                <div class="content-card">
+                    <img src="https://via.placeholder.com/280x400/1a1a1a/fff?text=Drama+1" alt="Drama 1">
+                    <div class="card-info">
+                        <h3>Amor en la Dinastía Tang</h3>
+                        <p>8.9 • 30 eps • 2024</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="content-card">
+                    <img src="https://via.placeholder.com/280x400/1a1a1a/fff?text=Drama+2" alt="Drama 2">
+                    <div class="card-info">
+                        <h3>El Príncipe Perdido</h3>
+                        <p>9.1 • 25 eps • 2024</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="content-card">
+                    <img src="https://via.placeholder.com/280x400/1a1a1a/fff?text=Drama+3" alt="Drama 3">
+                    <div class="card-info">
+                        <h3>Guerreros del Jade</h3>
+                        <p>8.7 • 40 eps • 2024</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="content-card">
+                    <img src="https://via.placeholder.com/280x400/1a1a1a/fff?text=Drama+4" alt="Drama 4">
+                    <div class="card-info">
+                        <h3>La Médica Imperial</h3>
+                        <p>9.3 • 35 eps • 2024</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="content-card">
+                    <img src="https://via.placeholder.com/280x400/1a1a1a/fff?text=Drama+5" alt="Drama 5">
+                    <div class="card-info">
+                        <h3>Secretos de la Corte</h3>
+                        <p>8.8 • 28 eps • 2024</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="content-card">
+                    <img src="https://via.placeholder.com/280x400/1a1a1a/fff?text=Drama+6" alt="Drama 6">
+                    <div class="card-info">
+                        <h3>El Jardín Secreto</h3>
+                        <p>8.6 • 22 eps • 2024</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recently Added -->
+        <section class="content-section">
+            <h2 class="section-title">Recién Agregados</h2>
+            <div class="content-grid">
+                <div class="content-card">
+                    <img src="https://via.placeholder.com/280x400/2a2a2a/fff?text=Nuevo+1" alt="Nuevo 1">
+                    <div class="card-info">
+                        <h3>Destino de Espadas</h3>
+                        <p>9.0 • 38 eps • 2024</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="content-card">
+                    <img src="https://via.placeholder.com/280x400/2a2a2a/fff?text=Nuevo+2" alt="Nuevo 2">
+                    <div class="card-info">
+                        <h3>Luna de Primavera</h3>
+                        <p>8.9 • 32 eps • 2024</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="content-card">
+                    <img src="https://via.placeholder.com/280x400/2a2a2a/fff?text=Nuevo+3" alt="Nuevo 3">
+                    <div class="card-info">
+                        <h3>El Último General</h3>
+                        <p>8.5 • 26 eps • 2024</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="content-card">
+                    <img src="https://via.placeholder.com/280x400/2a2a2a/fff?text=Nuevo+4" alt="Nuevo 4">
+                    <div class="card-info">
+                        <h3>Corazón de Bambú</h3>
+                        <p>9.2 • 20 eps • 2024</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Continue Watching -->
+        <section class="content-section">
+            <h2 class="section-title">Continuar Viendo</h2>
+            <div class="content-grid continue-section">
+                <div class="content-card continue-card">
+                    <img src="https://via.placeholder.com/280x400/3a3a3a/fff?text=Continuar+1" alt="Continuar 1">
+                    <div class="progress-indicator">
+                        <div class="progress-fill" style="width: 65%"></div>
+                    </div>
+                    <div class="card-info">
+                        <h3>El Emperador Eterno</h3>
+                        <p>Episodio 12 de 45</p>
+                    </div>
+                    <button class="play-btn">▶</button>
+                </div>
+                <div class="content-card continue-card">
+                    <img src="https://via.placeholder.com/280x400/3a3a3a/fff?text=Continuar+2" alt="Continuar 2">
+                    <div class="progress-indicator">
+                        <div class="progress-fill" style="width: 30%"></div>
+                    </div>
+                    <div class="card-info">
+                        <h3>Amor en la Dinastía Tang</h3>
+                        <p>Episodio 8 de 30</p>
+                    </div>
+                    <button class="play-btn">▶</button>
+                </div>
+                <div class="content-card continue-card">
+                    <img src="https://via.placeholder.com/280x400/3a3a3a/fff?text=Continuar+3" alt="Continuar 3">
+                    <div class="progress-indicator">
+                        <div class="progress-fill" style="width: 80%"></div>
+                    </div>
+                    <div class="card-info">
+                        <h3>La Médica Imperial</h3>
+                        <p>Episodio 28 de 35</p>
+                    </div>
+                    <button class="play-btn">▶</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Beemo</h4>
+                <p>La mejor plataforma para disfrutar de dramas y novelas chinas con episodios cortos perfectos para cualquier momento.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Contenido</h4>
+                <ul>
+                    <li><a href="#">Series</a></li>
+                    <li><a href="#">Películas</a></li>
+                    <li><a href="#">Documentales</a></li>
+                    <li><a href="#">Infantil</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Ayuda</h4>
+                <ul>
+                    <li><a href="#">Centro de Ayuda</a></li>
+                    <li><a href="#">Contacto</a></li>
+                    <li><a href="#">Términos de Uso</a></li>
+                    <li><a href="#">Privacidad</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Beemo. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
