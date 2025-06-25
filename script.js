@@ -378,6 +378,21 @@ function updateContinueWatchingSection() {
     `).join('');
 }
 
+// Función para obtener títulos de episodios
+function getEpisodeTitle(seriesTitle, episodeNumber) {
+    const episodeTitles = {
+        'La Niña de los Cuatro CEO': {
+            1: 'El Encuentro Destinado',
+            2: 'Primeras Impresiones',
+            3: 'La Propuesta Inesperada',
+            4: 'Secretos del Pasado',
+            5: 'Conflictos de Poder'
+        }
+    };
+    
+    return episodeTitles[seriesTitle]?.[episodeNumber] || 'Continuación de la Historia';
+}
+
 // TikTok Style Video Player
 function showTikTokPlayer(title, startEpisode = 1) {
     // Prevent scroll issues
@@ -385,21 +400,41 @@ function showTikTokPlayer(title, startEpisode = 1) {
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
     
+    // Buscar información de la serie
+    const seriesData = getAllSeries().find(series => series.title === title);
+    const hasRealVideo = seriesData && seriesData.videoUrl;
+
     const player = document.createElement('div');
     player.className = 'tiktok-player';
-    player.innerHTML = `
-        <div class="video-container-tiktok">
-            <button class="close-player">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
-                </svg>
-            </button>
-            <div class="video-placeholder-tiktok">
+    
+    if (hasRealVideo) {
+        player.innerHTML = `
+            <div class="video-container-tiktok">
+                <button class="close-player">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                    </svg>
+                </button>
+                <video 
+                    id="mainVideo" 
+                    width="100%" 
+                    height="100%" 
+                    autoplay 
+                    muted="false"
+                    playsinline
+                    webkit-playsinline
+                    controls="false"
+                    preload="metadata"
+                    style="object-fit: cover; background: #000;"
+                >
+                    <source src="${seriesData.videoUrl}" type="video/mp4">
+                    Tu navegador no soporta el elemento de video.
+                </video>
                 <div class="video-info-tiktok">
                     <h3 class="video-title-tiktok">${title}</h3>
-                    <p class="video-description-tiktok">Episodio ${startEpisode} - "El Despertar"</p>
+                    <p class="video-description-tiktok">Episodio ${startEpisode} - "${getEpisodeTitle(title, startEpisode)}"</p>
                     <div class="video-progress-tiktok">
-                        <div class="video-progress-fill"></div>
+                        <div class="video-progress-fill" id="videoProgressBar"></div>
                     </div>
                 </div>
                 <div class="video-controls-tiktok">
@@ -410,12 +445,12 @@ function showTikTokPlayer(title, startEpisode = 1) {
                     </button>
                     <button class="tiktok-btn play-pause-btn" id="playPauseBtn">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M8 5v14l11-7z"/>
+                            <path id="playPauseIcon" d="M8 5v14l11-7z"/>
                         </svg>
                     </button>
                     <button class="tiktok-btn mute-btn" id="muteBtn">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                            <path id="muteIcon" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
                         </svg>
                     </button>
                     <button class="tiktok-btn episodes-btn" id="episodesBtn">
@@ -424,12 +459,178 @@ function showTikTokPlayer(title, startEpisode = 1) {
                         </svg>
                     </button>
                 </div>
+                <div class="play-control-overlay" id="playControlOverlay" style="display: none;">
+                    <button class="video-play-btn" id="videoPlayBtn">
+                        <svg width="60" height="60" viewBox="0 0 24 24" fill="white">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                    <p style="color: white; margin-top: 1rem; font-size: 1.1rem;">Toca para reproducir</p>
+                </div>
             </div>
-        </div>
-    `;
+        `;
+    } else {
+        player.innerHTML = `
+            <div class="video-container-tiktok">
+                <button class="close-player">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                    </svg>
+                </button>
+                <div class="video-placeholder-tiktok">
+                    <div class="video-info-tiktok">
+                        <h3 class="video-title-tiktok">${title}</h3>
+                        <p class="video-description-tiktok">Episodio ${startEpisode} - "El Despertar"</p>
+                        <div class="video-progress-tiktok">
+                            <div class="video-progress-fill"></div>
+                        </div>
+                    </div>
+                    <div class="video-controls-tiktok">
+                        <button class="tiktok-btn like-btn" id="likeBtn">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                            </svg>
+                        </button>
+                        <button class="tiktok-btn play-pause-btn" id="playPauseBtn">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M8 5v14l11-7z"/>
+                            </svg>
+                        </button>
+                        <button class="tiktok-btn mute-btn" id="muteBtn">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                            </svg>
+                        </button>
+                        <button class="tiktok-btn episodes-btn" id="episodesBtn">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
 
     document.body.appendChild(player);
     setTimeout(() => player.classList.add('active'), 100);
+
+    // Configurar controles de video real si existe
+    if (hasRealVideo) {
+        const video = document.getElementById('mainVideo');
+        const progressBar = document.getElementById('videoProgressBar');
+        const playControl = document.getElementById('playControlOverlay');
+        const playBtn = document.getElementById('videoPlayBtn');
+
+        // Detectar si es iOS
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        
+        // Configurar video para iOS
+        if (isIOS) {
+            video.muted = true;
+            video.autoplay = false;
+            playControl.style.display = 'flex';
+        } else {
+            video.muted = false;
+            playControl.style.display = 'none';
+        }
+
+        // Función para iniciar reproducción
+        const startPlayback = async () => {
+            try {
+                video.muted = false;
+                video.volume = 1.0;
+                await video.play();
+                playControl.style.display = 'none';
+                setTimeout(() => {
+                    video.muted = false;
+                }, 100);
+            } catch (error) {
+                console.log('Error al reproducir video:', error);
+                try {
+                    video.muted = true;
+                    await video.play();
+                    playControl.style.display = 'none';
+                } catch (fallbackError) {
+                    console.log('Error en fallback:', fallbackError);
+                }
+            }
+        };
+
+        // Event listeners para reproducción
+        if (playBtn) {
+            playBtn.addEventListener('click', startPlayback);
+            playControl.addEventListener('click', startPlayback);
+        }
+
+        // Intentar reproducción automática
+        if (!isIOS) {
+            video.play().catch(() => {
+                playControl.style.display = 'flex';
+            });
+        }
+
+        // Actualizar barra de progreso
+        video.addEventListener('timeupdate', () => {
+            if (video.duration > 0) {
+                const progress = (video.currentTime / video.duration) * 100;
+                progressBar.style.width = `${progress}%`;
+                
+                // Actualizar historial de visualización
+                if (video.currentTime % 5 === 0) {
+                    addToWatchHistory(title, currentEpisode, progress);
+                }
+            }
+        });
+
+        // Mostrar animación 2 segundos antes del final
+        let animationTriggered = false;
+        video.addEventListener('timeupdate', () => {
+            if (video.duration > 0) {
+                const progress = (video.currentTime / video.duration) * 100;
+                progressBar.style.width = `${progress}%`;
+                
+                // Actualizar historial de visualización
+                if (video.currentTime % 5 === 0) {
+                    addToWatchHistory(title, currentEpisode, progress);
+                }
+                
+                // Activar animación 2 segundos antes del final
+                const timeLeft = video.duration - video.currentTime;
+                if (timeLeft <= 2 && timeLeft > 1.5 && !animationTriggered) {
+                    animationTriggered = true;
+                    // Pausar el video
+                    video.pause();
+                    
+                    showChapterEndAnimation(() => {
+                        handleEpisodeTransition(currentEpisode + 1, title, player);
+                        animationTriggered = false;
+                    });
+                }
+            }
+        });
+        
+        // Mantener el evento ended como respaldo
+        video.addEventListener('ended', () => {
+            if (!animationTriggered) {
+                showChapterEndAnimation(() => {
+                    handleEpisodeTransition(currentEpisode + 1, title, player);
+                });
+            }
+        });
+
+        // Bloquear controles nativos del video
+        video.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        });
+        
+        video.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            return false;
+        });
+    }
 
     // Simulate video progress tracking
     let currentEpisode = startEpisode;
@@ -445,9 +646,10 @@ function showTikTokPlayer(title, startEpisode = 1) {
         
         // Auto advance to next episode after 60 seconds
         if (watchTime >= 60) {
-            watchTime = 0;
-            currentEpisode++;
-            player.querySelector('.video-description-tiktok').textContent = `Episodio ${currentEpisode} - "Continuación"`;
+            showChapterEndAnimation(() => {
+                watchTime = 0;
+                handleEpisodeTransition(currentEpisode + 1, title, player);
+            });
         }
     }, 1000);
 
@@ -472,20 +674,49 @@ function showTikTokPlayer(title, startEpisode = 1) {
         showNotification(likeBtn.classList.contains('liked') ? 'Agregado a favoritos' : 'Removido de favoritos');
     });
 
-    let isPlaying = true;
+    let isPlaying = hasRealVideo ? false : true;
     playPauseBtn.addEventListener('click', () => {
-        isPlaying = !isPlaying;
-        playPauseBtn.innerHTML = isPlaying ? 
-            '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>' :
-            '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+        if (hasRealVideo) {
+            const video = document.getElementById('mainVideo');
+            const playPauseIcon = document.getElementById('playPauseIcon');
+            
+            if (video.paused) {
+                video.play();
+                isPlaying = true;
+                playPauseIcon.setAttribute('d', 'M6 19h4V5H6v14zm8-14v14h4V5h-4z');
+            } else {
+                video.pause();
+                isPlaying = false;
+                playPauseIcon.setAttribute('d', 'M8 5v14l11-7z');
+            }
+        } else {
+            isPlaying = !isPlaying;
+            const playPauseIcon = playPauseBtn.querySelector('path');
+            playPauseIcon.setAttribute('d', isPlaying ? 'M6 19h4V5H6v14zm8-14v14h4V5h-4z' : 'M8 5v14l11-7z');
+        }
     });
 
     let isMuted = false;
     muteBtn.addEventListener('click', () => {
-        isMuted = !isMuted;
-        muteBtn.innerHTML = isMuted ?
-            '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>' :
-            '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>';
+        if (hasRealVideo) {
+            const video = document.getElementById('mainVideo');
+            const muteIcon = document.getElementById('muteIcon');
+            
+            isMuted = !video.muted;
+            video.muted = isMuted;
+            
+            muteIcon.setAttribute('d', isMuted ? 
+                'M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z' :
+                'M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z'
+            );
+        } else {
+            isMuted = !isMuted;
+            const muteIcon = muteBtn.querySelector('path');
+            muteIcon.setAttribute('d', isMuted ?
+                'M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z' :
+                'M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z'
+            );
+        }
     });
 
     episodesBtn.addEventListener('click', () => {
@@ -650,6 +881,16 @@ function hideExpandedSearch() {
 
 function getAllSeries() {
     return [
+        { 
+            title: 'La Niña de los Cuatro CEO', 
+            rating: '9.5', 
+            episodes: '45 eps', 
+            year: '2024', 
+            genre: 'Romance Empresarial', 
+            thumbnail: 'https://via.placeholder.com/280x400/ff1493/fff?text=La+Niña+CEO',
+            description: 'Una joven prodigio se convierte en la protegida de cuatro poderosos CEOs, navegando el mundo empresarial mientras descubre el amor.',
+            videoUrl: 'https://www.dropbox.com/scl/fi/su7cuwd60sz89hsonies4/copy_7675023E-5F80-4FA6-9FC0-E017CD157EE5.mov?rlkey=56om33xqkm4j4rngju9jqvp5o&st=3hzprvjo&raw=1'
+        },
         { 
             title: 'Amor en la Dinastía Tang', 
             rating: '8.9', 
@@ -1113,7 +1354,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const heroPlayBtn = document.querySelector('.btn-primary');
     if (heroPlayBtn) {
         heroPlayBtn.addEventListener('click', () => {
-            showTikTokPlayer('El Emperador Eterno');
+            showTikTokPlayer('La Niña de los Cuatro CEO');
         });
     }
 
@@ -1794,6 +2035,212 @@ function handleEpisodeClick(episodeNum) {
             return false;
         }
     }
+}
+
+// Chapter End Animation with Ocean Wave Effect and Elegant Explosion
+function showChapterEndAnimation(callback) {
+    // Crear overlay con efecto de onda oceánica
+    const videoOverlay = document.createElement('div');
+    videoOverlay.className = 'video-ocean-effect';
+    videoOverlay.innerHTML = `
+        <div class="ocean-wave-container">
+            <div class="wave wave-1"></div>
+            <div class="wave wave-2"></div>
+            <div class="wave wave-3"></div>
+            <div class="wave wave-4"></div>
+        </div>
+        <div class="video-freeze-effect"></div>
+    `;
+
+    // Agregar overlay al video actual
+    const videoContainer = document.querySelector('.video-container-tiktok, .video-placeholder-tiktok');
+    if (videoContainer) {
+        videoContainer.appendChild(videoOverlay);
+    }
+
+    // Activar efecto de congelamiento con ondas
+    setTimeout(() => {
+        videoOverlay.classList.add('active');
+        
+        // Crear animación principal después del efecto de onda
+        setTimeout(() => {
+            showMainChapterAnimation(callback);
+        }, 2000);
+    }, 100);
+}
+
+function showMainChapterAnimation(callback) {
+    const animationOverlay = document.createElement('div');
+    animationOverlay.className = 'chapter-loading-animation';
+    animationOverlay.innerHTML = `
+        <div class="loading-container">
+            <div class="loading-dots">
+                <div class="loading-dot"></div>
+                <div class="loading-dot"></div>
+                <div class="loading-dot"></div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(animationOverlay);
+
+    // Reproducir sonido con iframe de YouTube
+    const youtubeFrame = document.createElement('iframe');
+    youtubeFrame.style.display = 'none';
+    youtubeFrame.src = 'https://www.youtube.com/embed/dz6Lp_PyX_Q?autoplay=1&start=0&end=4&controls=0&modestbranding=1&rel=0&showinfo=0&mute=0';
+    youtubeFrame.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+    document.body.appendChild(youtubeFrame);
+
+    // Activar animación
+    setTimeout(() => {
+        animationOverlay.classList.add('active');
+    }, 100);
+
+    // Remover después de 3 segundos
+    setTimeout(() => {
+        animationOverlay.classList.add('fade-out');
+        
+        // Limpiar overlay del video también
+        const videoOverlay = document.querySelector('.video-ocean-effect');
+        if (videoOverlay) {
+            videoOverlay.remove();
+        }
+        
+        setTimeout(() => {
+            if (document.body.contains(animationOverlay)) {
+                document.body.removeChild(animationOverlay);
+            }
+            if (document.body.contains(youtubeFrame)) {
+                document.body.removeChild(youtubeFrame);
+            }
+            if (callback) callback();
+        }, 500);
+    }, 3000);
+}
+
+// Función para manejar transición entre episodios
+function handleEpisodeTransition(nextEpisode, seriesTitle, playerElement) {
+    // Verificar si el episodio está disponible
+    if (nextEpisode <= 8) {
+        // Episodios gratis, avanzar automáticamente
+        currentEpisode = nextEpisode;
+        const descriptionElement = playerElement.querySelector('.video-description-tiktok');
+        if (descriptionElement) {
+            descriptionElement.textContent = `Episodio ${nextEpisode} - "${getEpisodeTitle(seriesTitle, nextEpisode)}"`;
+        }
+        showNotification(`Reproduciendo Episodio ${nextEpisode}`, 'success');
+    } else {
+        // Episodios premium - verificar monedas o mostrar suscripción
+        if (unlockedEpisodes.includes(nextEpisode)) {
+            // Ya desbloqueado, continuar
+            currentEpisode = nextEpisode;
+            const descriptionElement = playerElement.querySelector('.video-description-tiktok');
+            if (descriptionElement) {
+                descriptionElement.textContent = `Episodio ${nextEpisode} - "${getEpisodeTitle(seriesTitle, nextEpisode)}"`;
+            }
+            showNotification(`Reproduciendo Episodio ${nextEpisode}`, 'success');
+        } else if (userCoins >= 30) {
+            // Auto-desbloquear con monedas
+            if (unlockEpisode(nextEpisode)) {
+                currentEpisode = nextEpisode;
+                const descriptionElement = playerElement.querySelector('.video-description-tiktok');
+                if (descriptionElement) {
+                    descriptionElement.textContent = `Episodio ${nextEpisode} - "${getEpisodeTitle(seriesTitle, nextEpisode)}"`;
+                }
+                showNotification(`Episodio ${nextEpisode} desbloqueado automáticamente`, 'success');
+            }
+        } else {
+            // Mostrar modal de suscripción/monetización
+            showSubscriptionModal(nextEpisode, seriesTitle, playerElement);
+        }
+    }
+}
+
+// Función para mostrar modal de suscripción
+function showSubscriptionModal(episodeNumber, seriesTitle, playerElement) {
+    const subscriptionModal = document.createElement('div');
+    subscriptionModal.className = 'subscription-modal-overlay';
+    subscriptionModal.innerHTML = `
+        <div class="subscription-modal-container">
+            <div class="subscription-header">
+                <h2>Episodio Premium</h2>
+                <button class="subscription-close" id="subscriptionClose">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="subscription-content">
+                <div class="episode-info">
+                    <h3>${seriesTitle}</h3>
+                    <p>Episodio ${episodeNumber} - "${getEpisodeTitle(seriesTitle, episodeNumber)}"</p>
+                </div>
+                <div class="subscription-message">
+                    <div class="lock-icon-large">
+                        <svg width="60" height="60" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM15.1 8H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/>
+                        </svg>
+                    </div>
+                    <h4>Episodio Premium Bloqueado</h4>
+                    <p>Los episodios a partir del 8 requieren monedas para desbloquearse</p>
+                    <div class="cost-info">
+                        <span class="cost-amount">30 monedas</span>
+                        <span class="cost-description">por episodio</span>
+                    </div>
+                </div>
+                <div class="subscription-options">
+                    <button class="subscription-btn primary" id="earnCoinsBtn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        Ganar Monedas Gratis
+                    </button>
+                    <button class="subscription-btn secondary" id="buyCoinsBtn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
+                        </svg>
+                        Comprar Monedas
+                    </button>
+                </div>
+                <div class="current-balance">
+                    <p>Monedas actuales: <span class="balance-count">${userCoins}</span></p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(subscriptionModal);
+    setTimeout(() => subscriptionModal.classList.add('active'), 100);
+
+    // Event listeners
+    const closeBtn = subscriptionModal.querySelector('#subscriptionClose');
+    const earnCoinsBtn = subscriptionModal.querySelector('#earnCoinsBtn');
+    const buyCoinsBtn = subscriptionModal.querySelector('#buyCoinsBtn');
+
+    closeBtn.addEventListener('click', () => {
+        subscriptionModal.classList.remove('active');
+        setTimeout(() => document.body.removeChild(subscriptionModal), 300);
+    });
+
+    earnCoinsBtn.addEventListener('click', () => {
+        subscriptionModal.classList.remove('active');
+        setTimeout(() => document.body.removeChild(subscriptionModal), 300);
+        showMonetizationModal();
+    });
+
+    buyCoinsBtn.addEventListener('click', () => {
+        subscriptionModal.classList.remove('active');
+        setTimeout(() => document.body.removeChild(subscriptionModal), 300);
+        showMonetizationModal();
+    });
+
+    // Click outside to close
+    subscriptionModal.addEventListener('click', (e) => {
+        if (e.target === subscriptionModal) {
+            subscriptionModal.classList.remove('active');
+            setTimeout(() => document.body.removeChild(subscriptionModal), 300);
+        }
+    });
 }
 
 // Enhanced search functionality
