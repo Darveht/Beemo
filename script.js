@@ -391,6 +391,152 @@ function getEpisodeTitle(seriesTitle, episodeNumber) {
     return episodeTitles[seriesTitle]?.[episodeNumber] || 'Continuación de la Historia';
 }
 
+// Sistema de Likes en Tiempo Real
+let socket;
+let likesCache = new Map();
+
+// Conectar a WebSocket para actualizaciones en tiempo real
+function initializeLikesSystem() {
+    socket = io();
+    
+    socket.on('connect', () => {
+        console.log('Conectado al sistema de likes en tiempo real');
+    });
+    
+    socket.on('likeUpdate', (data) => {
+        updateLikesDisplay(data.contentId, data.likesCount, data.likesFormatted);
+        likesCache.set(data.contentId, data);
+    });
+    
+    socket.on('disconnect', () => {
+        console.log('Desconectado del sistema de likes');
+    });
+}
+
+// Obtener likes de un contenido
+async function getLikes(contentId) {
+    try {
+        const response = await fetch(`/api/likes/${contentId}`);
+        const data = await response.json();
+        likesCache.set(contentId, data);
+        return data;
+    } catch (error) {
+        console.error('Error al obtener likes:', error);
+        return { contentId, likesCount: 0, likesFormatted: '0' };
+    }
+}
+
+// Dar/quitar like
+async function toggleLike(contentId, contentType = 'series') {
+    try {
+        const response = await fetch(`/api/likes/${contentId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ contentType })
+        });
+        
+        const data = await response.json();
+        updateLikesDisplay(contentId, data.likesCount, data.likesFormatted);
+        
+        // Mostrar notificación
+        const action = data.action === 'added' ? 'agregado' : 'removido';
+        showNotification(`Like ${action} - ${data.likesFormatted} total`, 'success');
+        
+        return data;
+    } catch (error) {
+        console.error('Error al dar like:', error);
+        showNotification('Error al procesar like', 'error');
+        return null;
+    }
+}
+
+// Verificar si usuario ya dio like
+async function checkUserLike(contentId) {
+    try {
+        const response = await fetch(`/api/likes/${contentId}/check`);
+        const data = await response.json();
+        return data.liked;
+    } catch (error) {
+        console.error('Error al verificar like:', error);
+        return false;
+    }
+}
+
+// Actualizar display de likes en la interfaz
+function updateLikesDisplay(contentId, likesCount, likesFormatted) {
+    // Actualizar en cards de contenido
+    const contentCards = document.querySelectorAll(`[data-content-id="${contentId}"]`);
+    contentCards.forEach(card => {
+        const likesDisplay = card.querySelector('.likes-display');
+        if (likesDisplay) {
+            likesDisplay.textContent = likesFormatted;
+        }
+    });
+    
+    // Actualizar en reproductor activo
+    const activePlayer = document.querySelector('.tiktok-player');
+    if (activePlayer) {
+        const likesCounter = activePlayer.querySelector('.likes-counter');
+        if (likesCounter) {
+            likesCounter.textContent = likesFormatted;
+        }
+    }
+    
+    // Actualizar en hero section si es el contenido principal
+    if (contentId === 'la-nina-ceo') {
+        const heroLikes = document.querySelector('.hero-likes');
+        if (heroLikes) {
+            heroLikes.textContent = `❤️ ${likesFormatted} likes`;
+        }
+    }
+}
+
+// Inicializar likes para contenido visible
+async function initializeContentLikes() {
+    const contentCards = document.querySelectorAll('.content-card');
+    
+    for (const card of contentCards) {
+        const title = card.querySelector('h3')?.textContent;
+        if (title) {
+            const contentId = generateContentId(title);
+            card.setAttribute('data-content-id', contentId);
+            
+            // Agregar display de likes si no existe
+            if (!card.querySelector('.likes-display')) {
+                const cardInfo = card.querySelector('.card-info');
+                if (cardInfo) {
+                    const likesElement = document.createElement('div');
+                    likesElement.className = 'likes-display';
+                    likesElement.style.cssText = `
+                        color: #f91880;
+                        font-size: 0.8rem;
+                        margin-top: 0.25rem;
+                        display: flex;
+                        align-items: center;
+                        gap: 0.25rem;
+                    `;
+                    likesElement.innerHTML = '❤️ <span>0</span>';
+                    cardInfo.appendChild(likesElement);
+                }
+            }
+            
+            // Obtener likes actuales
+            const likesData = await getLikes(contentId);
+            updateLikesDisplay(contentId, likesData.likesCount, likesData.likesFormatted);
+        }
+    }
+}
+
+// Generar ID de contenido desde título
+function generateContentId(title) {
+    return title.toLowerCase()
+        .replace(/[^a-z0-9]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+}
+
 // TikTok Style Video Player con navegación por episodios
 function showTikTokPlayer(title, startEpisode = 1) {
     // Prevent scroll issues
@@ -433,6 +579,7 @@ function showTikTokPlayer(title, startEpisode = 1) {
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                     </svg>
+                    <span class="likes-counter" id="likesCounter">0</span>
                 </button>
                 <button class="tiktok-btn play-pause-btn" id="playPauseBtn">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -1073,10 +1220,66 @@ function showTikTokPlayer(title, startEpisode = 1) {
         showNotification('Reproductor cerrado', 'info');
     });
 
-    likeBtn.addEventListener('click', () => {
-        likeBtn.classList.toggle('liked');
-        showNotification(likeBtn.classList.contains('liked') ? 'Agregado a favoritos' : 'Removido de favoritos');
+    // Configurar sistema de likes para este reproductor
+    const contentId = generateContentId(title) + (startEpisode > 1 ? `-ep${startEpisode}` : '');
+    const likesCounter = document.getElementById('likesCounter');
+    
+    // Unirse a la sala de WebSocket para este contenido
+    if (socket) {
+        socket.emit('joinContent', contentId);
+    }
+    
+    // Cargar likes actuales
+    getLikes(contentId).then(data => {
+        likesCounter.textContent = data.likesFormatted;
+        updateLikesDisplay(contentId, data.likesCount, data.likesFormatted);
     });
+    
+    // Verificar si usuario ya dio like
+    checkUserLike(contentId).then(liked => {
+        if (liked) {
+            likeBtn.classList.add('liked');
+        }
+    });
+
+    likeBtn.addEventListener('click', async () => {
+        const wasLiked = likeBtn.classList.contains('liked');
+        
+        // Optimistic UI update
+        likeBtn.classList.toggle('liked');
+        const currentCount = parseInt(likesCounter.textContent.replace(/[KMB]/g, '')) || 0;
+        const newCount = wasLiked ? currentCount - 1 : currentCount + 1;
+        likesCounter.textContent = formatLikesCount(newCount);
+        
+        // Procesar like en servidor
+        const result = await toggleLike(contentId, startEpisode > 1 ? 'episode' : 'series');
+        
+        if (result) {
+            // Actualizar con datos reales del servidor
+            likesCounter.textContent = result.likesFormatted;
+            if (result.action === 'added') {
+                likeBtn.classList.add('liked');
+            } else {
+                likeBtn.classList.remove('liked');
+            }
+        } else {
+            // Revertir cambio optimistic si hubo error
+            likeBtn.classList.toggle('liked');
+            likesCounter.textContent = formatLikesCount(currentCount);
+        }
+    });
+    
+    // Función local para formatear números
+    function formatLikesCount(count) {
+        if (count >= 1000000000) {
+            return (count / 1000000000).toFixed(1) + 'B';
+        } else if (count >= 1000000) {
+            return (count / 1000000).toFixed(1) + 'M';
+        } else if (count >= 1000) {
+            return (count / 1000).toFixed(1) + 'K';
+        }
+        return count.toString();
+    }
 
     let isPlaying = true;
     playPauseBtn.addEventListener('click', () => {
@@ -2538,6 +2741,22 @@ function performSearchBar(query) {
     }
 }
 
+// Función para cargar script de Socket.IO
+function loadSocketIO() {
+    return new Promise((resolve, reject) => {
+        if (window.io) {
+            resolve();
+            return;
+        }
+        
+        const script = document.createElement('script');
+        script.src = '/socket.io/socket.io.js';
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error('Error cargando Socket.IO'));
+        document.head.appendChild(script);
+    });
+}
+
 // Content sections visible immediately
 document.addEventListener('DOMContentLoaded', () => {
     const contentSections = document.querySelectorAll('.content-section');
@@ -2723,6 +2942,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize expanded search with all series
     displayExpandedSearchResults(getAllSeries());
+    
+    // Inicializar sistema de likes
+    if (isAuthenticated) {
+        loadSocketIO().then(() => {
+            initializeLikesSystem();
+            initializeContentLikes();
+        }).catch(error => {
+            console.error('Error inicializando sistema de likes:', error);
+        });
+    }
 });
 
 // Card form validation
