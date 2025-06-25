@@ -341,11 +341,9 @@ function addToWatchHistory(title, episode, progress) {
 
 function getCurrentSeriesThumbnail(title) {
     const thumbnails = {
-        'El Emperador Eterno': 'https://via.placeholder.com/280x400/3a3a3a/fff?text=Continuar+1',
-        'Amor en la Dinastía Tang': 'https://via.placeholder.com/280x400/3a3a3a/fff?text=Continuar+2',
-        'La Médica Imperial': 'https://via.placeholder.com/280x400/3a3a3a/fff?text=Continuar+3'
+        'La Niña de los Cuatro CEO': 'https://www.dropbox.com/scl/fi/r24wdvq29de6w6djkaqsc/IMG_4044.png?rlkey=5e2lge2dv00n427p0i5jdqxgy&st=65b6ye7u&raw=1'
     };
-    return thumbnails[title] || 'https://via.placeholder.com/280x400/3a3a3a/fff?text=Serie';
+    return thumbnails[title] || 'https://www.dropbox.com/scl/fi/r24wdvq29de6w6djkaqsc/IMG_4044.png?rlkey=5e2lge2dv00n427p0i5jdqxgy&st=65b6ye7u&raw=1';
 }
 
 function updateContinueWatchingSection() {
@@ -887,117 +885,9 @@ function getAllSeries() {
             episodes: '45 eps', 
             year: '2024', 
             genre: 'Romance Empresarial', 
-            thumbnail: 'https://via.placeholder.com/280x400/ff1493/fff?text=La+Niña+CEO',
+            thumbnail: 'https://www.dropbox.com/scl/fi/r24wdvq29de6w6djkaqsc/IMG_4044.png?rlkey=5e2lge2dv00n427p0i5jdqxgy&st=65b6ye7u&raw=1',
             description: 'Una joven prodigio se convierte en la protegida de cuatro poderosos CEOs, navegando el mundo empresarial mientras descubre el amor.',
-            videoUrl: 'https://www.dropbox.com/scl/fi/su7cuwd60sz89hsonies4/copy_7675023E-5F80-4FA6-9FC0-E017CD157EE5.mov?rlkey=56om33xqkm4j4rngju9jqvp5o&st=3hzprvjo&raw=1'
-        },
-        { 
-            title: 'Amor en la Dinastía Tang', 
-            rating: '8.9', 
-            episodes: '30 eps', 
-            year: '2024', 
-            genre: 'Romance Histórico', 
-            thumbnail: 'https://via.placeholder.com/280x400/1a1a1a/fff?text=Drama+1',
-            description: 'Una épica historia de amor ambientada en la gloriosa Dinastía Tang, donde el destino une a dos almas destinadas a estar juntas.'
-        },
-        { 
-            title: 'El Príncipe Perdido', 
-            rating: '9.1', 
-            episodes: '25 eps', 
-            year: '2024', 
-            genre: 'Artes Marciales', 
-            thumbnail: 'https://via.placeholder.com/280x400/1a1a1a/fff?text=Drama+2',
-            description: 'Un príncipe exiliado debe dominar las artes marciales para reclamar su trono y vengar la traición a su familia.'
-        },
-        { 
-            title: 'Guerreros del Jade', 
-            rating: '8.7', 
-            episodes: '40 eps', 
-            year: '2024', 
-            genre: 'Artes Marciales', 
-            thumbnail: 'https://via.placeholder.com/280x400/1a1a1a/fff?text=Drama+3',
-            description: 'En busca del legendario Jade del Dragón, guerreros de diferentes escuelas se enfrentan en batallas épicas.'
-        },
-        { 
-            title: 'La Médica Imperial', 
-            rating: '9.3', 
-            episodes: '35 eps', 
-            year: '2024', 
-            genre: 'Drama Imperial', 
-            thumbnail: 'https://via.placeholder.com/280x400/1a1a1a/fff?text=Drama+4',
-            description: 'Una talentosa médica navega por las intrigas de la corte imperial mientras lucha por salvar vidas y encontrar el amor.'
-        },
-        { 
-            title: 'Secretos de la Corte', 
-            rating: '8.8', 
-            episodes: '28 eps', 
-            year: '2024', 
-            genre: 'Drama Imperial', 
-            thumbnail: 'https://via.placeholder.com/280x400/1a1a1a/fff?text=Drama+5',
-            description: 'Conspiraciones palaciegas y secretos ocultos ponen en peligro el imperio mientras la verdad lucha por salir a la luz.'
-        },
-        { 
-            title: 'El Jardín Secreto', 
-            rating: '8.6', 
-            episodes: '22 eps', 
-            year: '2024', 
-            genre: 'Romance', 
-            thumbnail: 'https://via.placeholder.com/280x400/1a1a1a/fff?text=Drama+6',
-            description: 'En un jardín mágico escondido, dos corazones solitarios encuentran la sanación y el amor verdadero.'
-        },
-        { 
-            title: 'Destino de Espadas', 
-            rating: '9.0', 
-            episodes: '38 eps', 
-            year: '2024', 
-            genre: 'Artes Marciales', 
-            thumbnail: 'https://via.placeholder.com/280x400/2a2a2a/fff?text=Nuevo+1',
-            description: 'Maestros espadachines compiten por la espada legendaria que determinará el destino del mundo marcial.'
-        },
-        { 
-            title: 'Luna de Primavera', 
-            rating: '8.9', 
-            episodes: '32 eps', 
-            year: '2024', 
-            genre: 'Romance', 
-            thumbnail: 'https://via.placeholder.com/280x400/2a2a2a/fff?text=Nuevo+2',
-            description: 'Un romance que florece como la primavera entre una noble dama y un erudito talentoso en la antigua China.'
-        },
-        { 
-            title: 'El Último General', 
-            rating: '8.5', 
-            episodes: '26 eps', 
-            year: '2024', 
-            genre: 'Artes Marciales', 
-            thumbnail: 'https://via.placeholder.com/280x400/2a2a2a/fff?text=Nuevo+3',
-            description: 'El último general de un reino caído debe reunir a los guerreros dispersos para una batalla final por la libertad.'
-        },
-        { 
-            title: 'Corazón de Bambú', 
-            rating: '9.2', 
-            episodes: '20 eps', 
-            year: '2024', 
-            genre: 'Romance', 
-            thumbnail: 'https://via.placeholder.com/280x400/2a2a2a/fff?text=Nuevo+4',
-            description: 'Como el bambú que se dobla pero no se rompe, este amor resiste todas las adversidades del destino.'
-        },
-        { 
-            title: 'El Emperador Eterno', 
-            rating: '9.2', 
-            episodes: '45 eps', 
-            year: '2024', 
-            genre: 'Fantasía Antigua', 
-            thumbnail: 'https://via.placeholder.com/280x400/3a3a3a/fff?text=Continuar+1',
-            description: 'Un emperador inmortal debe enfrentar amenazas ancestrales mientras protege su reino y encuentra el amor verdadero.'
-        },
-        { 
-            title: 'Romance Eterno', 
-            rating: '8.9', 
-            episodes: '45 eps', 
-            year: '2024', 
-            genre: 'Romance Histórico', 
-            thumbnail: 'https://via.placeholder.com/280x400/1a1a1a/fff?text=Romance+1',
-            description: 'Una historia de amor que trasciende el tiempo y las vidas, donde dos almas están destinadas a encontrarse.'
+            videoUrl: 'https://www.dropbox.com/scl/fi/docmcwiuv2373hgfr660o/copy_8F810EF0-17AD-47D4-9B91-0B6B5899C202.mov?rlkey=me4ac8zdelnkr5x9qbsm8gd03&st=bjbwzokc&raw=1'
         }
     ];
 }
