@@ -451,21 +451,7 @@ function showTikTokPlayer(title, startEpisode = 1) {
                 </button>
             </div>
             
-            <!-- Navegación tipo TikTok -->
-            <div class="tiktok-navigation">
-                <button class="nav-btn prev-btn" id="prevEpisodeBtn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/>
-                    </svg>
-                    <span>Anterior</span>
-                </button>
-                <button class="nav-btn next-btn" id="nextEpisodeBtn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/>
-                    </svg>
-                    <span>Siguiente</span>
-                </button>
-            </div>
+            
             
             <div class="play-control-overlay" id="playControlOverlay" style="display: none;">
                 <button class="video-play-btn" id="videoPlayBtn">
@@ -483,16 +469,59 @@ function showTikTokPlayer(title, startEpisode = 1) {
 
     // Función para obtener URL del episodio
     function getEpisodeVideoUrl(episodeNumber) {
-        // Por ahora todos los episodios usan el mismo video
-        // En el futuro aquí podrías tener URLs específicas por episodio
-        if (seriesData && seriesData.videoUrl) {
-            return seriesData.videoUrl;
+        // URLs específicas para cada episodio de "La Niña de los Cuatro CEO"
+        const episodeUrls = {
+            1: 'https://streamtape.com/v/aYYV2bMjLvuxjyy/copy_83C56A17-4254-477E-9770-8722C1307B84.mov',
+            2: 'https://streamtape.com/v/EPISODE2_URL/episode_2.mov', // Reemplazar con URL real del episodio 2
+            3: 'https://streamtape.com/v/EPISODE3_URL/episode_3.mov', // Reemplazar con URL real del episodio 3
+            4: 'https://streamtape.com/v/EPISODE4_URL/episode_4.mov', // Reemplazar con URL real del episodio 4
+            5: 'https://streamtape.com/v/EPISODE5_URL/episode_5.mov', // Reemplazar con URL real del episodio 5
+            // Agregar más episodios según sea necesario
+        };
+        
+        // Retornar URL específica del episodio o null si no existe
+        return episodeUrls[episodeNumber] || null;
+    }
+
+    // Función para extraer URL de video directo de Streamtape
+    async function getStreamtapeDirectUrl(streamtapeUrl) {
+        try {
+            showNotification('Cargando video...', 'info');
+            
+            // Extraer el ID del video de la URL de Streamtape
+            const videoId = streamtapeUrl.split('/v/')[1]?.split('/')[0];
+            if (!videoId) {
+                throw new Error('URL de Streamtape inválida');
+            }
+
+            // Intentar múltiples formatos de URL directo de Streamtape
+            const possibleUrls = [
+                `https://streamtape.com/get_video?id=${videoId}`,
+                `https://streamtape.com/e/${videoId}`,
+                streamtapeUrl, // URL original como fallback
+            ];
+
+            for (const url of possibleUrls) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'HEAD',
+                        mode: 'no-cors'
+                    });
+                    return url; // Si no hay error, usar esta URL
+                } catch (e) {
+                    continue; // Probar siguiente URL
+                }
+            }
+
+            return streamtapeUrl; // Fallback a URL original
+        } catch (error) {
+            console.log('Error obteniendo URL directa:', error);
+            return streamtapeUrl; // Fallback a URL original
         }
-        return null;
     }
 
     // Función para cargar episodio
-    function loadEpisode(episodeNumber) {
+    async function loadEpisode(episodeNumber) {
         const videoContent = document.getElementById('videoContent');
         const episodeDescription = document.getElementById('episodeDescription');
         const progressBar = document.getElementById('videoProgressBar');
@@ -509,40 +538,148 @@ function showTikTokPlayer(title, startEpisode = 1) {
         const videoUrl = getEpisodeVideoUrl(episodeNumber);
         
         if (videoUrl) {
+            // Mostrar indicador de carga
             videoContent.innerHTML = `
-                <video 
-                    id="mainVideo" 
-                    width="100%" 
-                    height="100%" 
-                    autoplay 
-                    muted="false"
-                    playsinline
-                    webkit-playsinline
-                    controls="false"
-                    preload="metadata"
-                    style="object-fit: cover; background: #000;"
-                >
-                    <source src="${videoUrl}" type="video/mp4">
-                    Tu navegador no soporta el elemento de video.
-                </video>
-            `;
-            
-            setupVideoPlayer();
-        } else {
-            videoContent.innerHTML = `
-                <div class="video-placeholder-tiktok" style="width: 100%; height: 100%; background: linear-gradient(135deg, #1d9bf0 0%, #1a8cd8 100%); display: flex; align-items: center; justify-content: center;">
+                <div class="loading-video-container" style="width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center;">
                     <div style="text-align: center; color: white;">
-                        <h2>Episodio ${episodeNumber}</h2>
-                        <p>Reproduciendo en modo simulado</p>
+                        <div class="loading-spinner" style="margin: 0 auto 1rem auto;"></div>
+                        <h3>Cargando Episodio ${episodeNumber}...</h3>
+                        <p>Conectando con Streamtape...</p>
                     </div>
                 </div>
             `;
-            
-            setupSimulatedPlayer();
+
+            try {
+                // Intentar cargar como iframe de Streamtape primero
+                const streamtapeId = videoUrl.split('/v/')[1]?.split('/')[0];
+                if (streamtapeId && videoUrl.includes('streamtape.com')) {
+                    videoContent.innerHTML = `
+                        <iframe 
+                            id="streamtapeIframe"
+                            src="https://streamtape.com/e/${streamtapeId}"
+                            width="100%" 
+                            height="100%" 
+                            frameborder="0" 
+                            scrolling="no" 
+                            allowfullscreen
+                            allow="autoplay; encrypted-media"
+                            style="border: none; background: #000;"
+                        ></iframe>
+                        <div class="iframe-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 1;">
+                            <div class="episode-info-overlay" style="position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 10px 15px; border-radius: 10px; color: white;">
+                                <h4 style="margin: 0; font-size: 1rem;">Episodio ${episodeNumber}</h4>
+                                <p style="margin: 5px 0 0 0; font-size: 0.8rem; opacity: 0.8;">${getEpisodeTitle(title, episodeNumber)}</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    setupIframePlayer();
+                } else {
+                    // Fallback a video element con URL optimizada
+                    const directUrl = await getStreamtapeDirectUrl(videoUrl);
+                    videoContent.innerHTML = `
+                        <video 
+                            id="mainVideo" 
+                            width="100%" 
+                            height="100%" 
+                            autoplay 
+                            muted="false"
+                            playsinline
+                            webkit-playsinline
+                            controls="false"
+                            preload="metadata"
+                            crossorigin="anonymous"
+                            style="object-fit: cover; background: #000;"
+                        >
+                            <source src="${directUrl}" type="video/mp4">
+                            <source src="${videoUrl}" type="video/mp4">
+                            Tu navegador no soporta el elemento de video.
+                        </video>
+                    `;
+                    
+                    setupVideoPlayer();
+                }
+            } catch (error) {
+                console.log('Error cargando video:', error);
+                showNotification('Error cargando video. Usando modo simulado.', 'warning');
+                loadSimulatedEpisode(episodeNumber);
+            }
+        } else {
+            loadSimulatedEpisode(episodeNumber);
         }
+    }
+
+    // Función separada para episodios simulados
+    function loadSimulatedEpisode(episodeNumber) {
+        const videoContent = document.getElementById('videoContent');
+        videoContent.innerHTML = `
+            <div class="video-placeholder-tiktok" style="width: 100%; height: 100%; background: linear-gradient(135deg, #1d9bf0 0%, #1a8cd8 100%); display: flex; align-items: center; justify-content: center;">
+                <div style="text-align: center; color: white;">
+                    <h2>Episodio ${episodeNumber}</h2>
+                    <p>Reproduciendo en modo simulado</p>
+                    <p style="font-size: 0.9rem; opacity: 0.8; margin-top: 1rem;">La URL del video será cargada cuando esté disponible</p>
+                </div>
+            </div>
+        `;
         
-        // Actualizar navegación
-        updateNavigationButtons();
+        setupSimulatedPlayer();
+    }
+
+    // Función para configurar reproductor de iframe
+    function setupIframePlayer() {
+        const iframe = document.getElementById('streamtapeIframe');
+        const progressBar = document.getElementById('videoProgressBar');
+        
+        if (!iframe) return;
+
+        // Ocultar indicador de carga después de cargar iframe
+        setTimeout(() => {
+            showNotification('Video cargado exitosamente', 'success');
+        }, 2000);
+
+        // Simular progreso para iframe (ya que no podemos acceder al contenido del iframe)
+        let simulatedTime = 0;
+        const simulatedDuration = 60; // 1 minuto por episodio
+
+        const progressInterval = setInterval(() => {
+            simulatedTime += 1;
+            const progress = Math.min((simulatedTime / simulatedDuration) * 100, 100);
+            progressBar.style.width = `${progress}%`;
+
+            // Actualizar historial cada 5 segundos
+            if (simulatedTime % 5 === 0) {
+                addToWatchHistory(title, currentEpisode, progress);
+            }
+
+            // Activar animación 2 segundos antes del final
+            const timeLeft = simulatedDuration - simulatedTime;
+            if (timeLeft <= 2 && timeLeft > 1 && !animationTriggered) {
+                animationTriggered = true;
+                clearInterval(progressInterval);
+                
+                showChapterEndAnimation(() => {
+                    transitionToNextEpisode();
+                });
+            }
+
+            // Si llegamos al final
+            if (simulatedTime >= simulatedDuration) {
+                clearInterval(progressInterval);
+                if (!animationTriggered) {
+                    showChapterEndAnimation(() => {
+                        transitionToNextEpisode();
+                    });
+                }
+            }
+        }, 1000);
+
+        // Limpiar interval cuando se cierre el reproductor
+        const playerElement = iframe.closest('.tiktok-player');
+        if (playerElement) {
+            playerElement.addEventListener('remove', () => {
+                clearInterval(progressInterval);
+            });
+        }
     }
 
     // Función para configurar reproductor de video real
@@ -703,48 +840,12 @@ function showTikTokPlayer(title, startEpisode = 1) {
         }
     }
 
-    // Función para actualizar botones de navegación
-    function updateNavigationButtons() {
-        const prevBtn = document.getElementById('prevEpisodeBtn');
-        const nextBtn = document.getElementById('nextEpisodeBtn');
-        
-        // Botón anterior
-        if (currentEpisode <= 1) {
-            prevBtn.style.opacity = '0.5';
-            prevBtn.style.pointerEvents = 'none';
-        } else {
-            prevBtn.style.opacity = '1';
-            prevBtn.style.pointerEvents = 'auto';
-        }
-        
-        // Botón siguiente
-        if (currentEpisode >= 45) {
-            nextBtn.style.opacity = '0.5';
-            nextBtn.style.pointerEvents = 'none';
-        } else {
-            nextBtn.style.opacity = '1';
-            nextBtn.style.pointerEvents = 'auto';
-        }
-    }
+    // Función de navegación eliminada - control automático por video
 
     // Cargar episodio inicial
     loadEpisode(currentEpisode);
 
-    // Event listeners para navegación
-    const prevBtn = document.getElementById('prevEpisodeBtn');
-    const nextBtn = document.getElementById('nextEpisodeBtn');
-    
-    prevBtn.addEventListener('click', () => {
-        if (currentEpisode > 1) {
-            currentEpisode--;
-            loadEpisode(currentEpisode);
-            showNotification(`Episodio ${currentEpisode}`, 'info');
-        }
-    });
-    
-    nextBtn.addEventListener('click', () => {
-        transitionToNextEpisode();
-    });
+    // Navegación eliminada - solo se puede avanzar automáticamente al terminar episodio
 
     // Navegación con gestos de swipe (opcional para el futuro)
     let startY = 0;
@@ -1032,7 +1133,7 @@ function getAllSeries() {
             genre: 'Romance Empresarial', 
             thumbnail: 'https://www.dropbox.com/scl/fi/r24wdvq29de6w6djkaqsc/IMG_4044.png?rlkey=5e2lge2dv00n427p0i5jdqxgy&st=65b6ye7u&raw=1',
             description: 'Una joven prodigio se convierte en la protegida de cuatro poderosos CEOs, navegando el mundo empresarial mientras descubre el amor.',
-            videoUrl: 'https://www.dropbox.com/scl/fi/docmcwiuv2373hgfr660o/copy_8F810EF0-17AD-47D4-9B91-0B6B5899C202.mov?rlkey=me4ac8zdelnkr5x9qbsm8gd03&st=bjbwzokc&raw=1'
+            hasMultipleEpisodes: true
         }
     ];
 }
