@@ -472,60 +472,44 @@ function showTikTokPlayer(title, startEpisode = 1) {
         // URLs específicas para cada episodio de "La Niña de los Cuatro CEO"
         const episodeUrls = {
             1: 'https://streamtape.com/v/aYYV2bMjLvuxjyy/copy_83C56A17-4254-477E-9770-8722C1307B84.mov',
-            2: 'https://streamtape.com/v/EPISODE2_URL/episode_2.mov', // Reemplazar con URL real del episodio 2
-            3: 'https://streamtape.com/v/EPISODE3_URL/episode_3.mov', // Reemplazar con URL real del episodio 3
-            4: 'https://streamtape.com/v/EPISODE4_URL/episode_4.mov', // Reemplazar con URL real del episodio 4
-            5: 'https://streamtape.com/v/EPISODE5_URL/episode_5.mov', // Reemplazar con URL real del episodio 5
-            // Agregar más episodios según sea necesario
+            2: 'https://streamtape.com/v/aYYV2bMjLvuxjyy/copy_83C56A17-4254-477E-9770-8722C1307B84.mov', // Usando mismo video para demostración
+            3: 'https://streamtape.com/v/aYYV2bMjLvuxjyy/copy_83C56A17-4254-477E-9770-8722C1307B84.mov',
+            4: 'https://streamtape.com/v/aYYV2bMjLvuxjyy/copy_83C56A17-4254-477E-9770-8722C1307B84.mov',
+            5: 'https://streamtape.com/v/aYYV2bMjLvuxjyy/copy_83C56A17-4254-477E-9770-8722C1307B84.mov',
         };
         
-        // Retornar URL específica del episodio o null si no existe
         return episodeUrls[episodeNumber] || null;
     }
 
-    // Función para obtener URL directa sin iframe (evita anuncios y controles)
-    async function getStreamtapeDirectUrl(streamtapeUrl) {
+    // Función mejorada para manejar URLs de Streamtape
+    async function createStreamtapePlayer(streamtapeUrl) {
         try {
-            showNotification('Preparando video en pantalla completa...', 'info');
+            showNotification('Cargando reproductor...', 'info');
             
-            // Extraer el ID del video de la URL de Streamtape
-            const videoId = streamtapeUrl.split('/v/')[1]?.split('/')[0];
-            if (!videoId) {
-                throw new Error('URL de Streamtape inválida');
-            }
-
-            // Generar URLs alternativas para evitar anuncios y obtener video directo
-            const directUrls = [
-                `https://streamtape.com/get_video?id=${videoId}&expires=${Date.now() + 3600000}`,
-                `https://streamtape.com/streamtape/${videoId}.mp4`,
-                `https://streamtape.com/videos/${videoId}.mp4`,
-                streamtapeUrl.replace('/v/', '/get_video?id=').replace(/\/[^/]*$/, ''),
-            ];
-
-            // Intentar cada URL
-            for (const url of directUrls) {
-                try {
-                    const testVideo = document.createElement('video');
-                    testVideo.crossOrigin = 'anonymous';
-                    
-                    return new Promise((resolve) => {
-                        testVideo.onloadedmetadata = () => resolve(url);
-                        testVideo.onerror = () => resolve(null);
-                        testVideo.src = url;
-                        
-                        // Timeout después de 2 segundos
-                        setTimeout(() => resolve(null), 2000);
-                    });
-                } catch (e) {
-                    continue;
-                }
-            }
-
-            // Fallback: usar proxy para evitar anuncios
-            return `https://cors-anywhere.herokuapp.com/${streamtapeUrl}`;
+            // Crear iframe de Streamtape optimizado para pantalla completa
+            const iframe = document.createElement('iframe');
+            iframe.id = 'streamtapePlayer';
+            iframe.src = streamtapeUrl;
+            iframe.style.cssText = `
+                width: 100vw !important;
+                height: 100vh !important;
+                border: none !important;
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                z-index: 1 !important;
+                background: #000 !important;
+            `;
+            iframe.setAttribute('allowfullscreen', '');
+            iframe.setAttribute('webkitallowfullscreen', '');
+            iframe.setAttribute('mozallowfullscreen', '');
+            iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media');
+            iframe.setAttribute('loading', 'eager');
+            
+            return iframe;
         } catch (error) {
-            console.log('Usando método alternativo para evitar anuncios:', error);
-            return streamtapeUrl;
+            console.log('Error creando reproductor:', error);
+            return null;
         }
     }
 
@@ -543,7 +527,7 @@ function showTikTokPlayer(title, startEpisode = 1) {
         watchTime = 0;
         animationTriggered = false;
         
-        // Cargar video o placeholder
+        // Cargar video
         const videoUrl = getEpisodeVideoUrl(episodeNumber);
         
         if (videoUrl) {
@@ -552,73 +536,48 @@ function showTikTokPlayer(title, startEpisode = 1) {
                 <div class="loading-video-container" style="width: 100vw; height: 100vh; background: #000; display: flex; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; z-index: 1;">
                     <div style="text-align: center; color: white;">
                         <div class="loading-spinner" style="margin: 0 auto 1rem auto;"></div>
-                        <h3>Preparando Episodio ${episodeNumber} en Pantalla Completa...</h3>
-                        <p>Optimizando reproducción sin anuncios...</p>
+                        <h3>Cargando Episodio ${episodeNumber}...</h3>
+                        <p>Preparando reproductor optimizado</p>
                     </div>
                 </div>
             `;
 
             try {
-                // Obtener URL directa para evitar iframe con anuncios
-                const directUrl = await getStreamtapeDirectUrl(videoUrl);
+                // Crear reproductor iframe optimizado
+                const iframe = await createStreamtapePlayer(videoUrl);
                 
-                // Crear reproductor de video en pantalla completa sin controles externos
-                videoContent.innerHTML = `
-                    <video 
-                        id="mainVideo" 
-                        width="100%" 
-                        height="100%" 
-                        autoplay 
-                        muted="false"
-                        playsinline
-                        webkit-playsinline
-                        controls="false"
-                        preload="auto"
-                        crossorigin="anonymous"
-                        style="
-                            object-fit: cover; 
-                            background: #000;
-                            width: 100vw !important;
-                            height: 100vh !important;
-                            position: fixed;
-                            top: 0;
-                            left: 0;
-                            z-index: 1;
-                        "
-                    >
-                        <source src="${directUrl}" type="video/mp4">
-                        <source src="${videoUrl.replace('/v/', '/get_video?id=').split('/')[0]}.mp4" type="video/mp4">
-                        <source src="${videoUrl}" type="video/mp4">
-                        Tu navegador no soporta el elemento de video.
-                    </video>
-                    <div class="video-fullscreen-overlay" style="
-                        position: fixed; 
-                        top: 0; 
-                        left: 0; 
-                        right: 0; 
-                        bottom: 0; 
-                        pointer-events: none; 
-                        z-index: 2;
-                        background: transparent;
-                    ">
+                if (iframe) {
+                    // Reemplazar contenido con iframe
+                    videoContent.innerHTML = '';
+                    videoContent.appendChild(iframe);
+                    
+                    // Agregar overlay de información
+                    const overlay = document.createElement('div');
+                    overlay.innerHTML = `
                         <div class="episode-info-overlay" style="
-                            position: absolute; 
+                            position: fixed; 
                             top: 20px; 
                             left: 20px; 
-                            background: rgba(0,0,0,0.8); 
+                            background: rgba(0,0,0,0.9); 
                             padding: 15px 20px; 
                             border-radius: 15px; 
                             color: white;
                             backdrop-filter: blur(10px);
-                            border: 1px solid rgba(255,255,255,0.2);
+                            border: 1px solid rgba(255,255,255,0.3);
+                            z-index: 10;
+                            pointer-events: none;
                         ">
                             <h4 style="margin: 0; font-size: 1.2rem; font-weight: 700;">Episodio ${episodeNumber}</h4>
                             <p style="margin: 8px 0 0 0; font-size: 0.9rem; opacity: 0.8;">${getEpisodeTitle(title, episodeNumber)}</p>
                         </div>
-                    </div>
-                `;
-                
-                setupFullscreenVideoPlayer();
+                    `;
+                    videoContent.appendChild(overlay);
+                    
+                    showNotification(`Reproduciendo Episodio ${episodeNumber}`, 'success');
+                    setupStreamtapePlayer(iframe, episodeNumber);
+                } else {
+                    throw new Error('No se pudo crear el reproductor');
+                }
                 
             } catch (error) {
                 console.log('Error cargando video:', error);
@@ -644,6 +603,48 @@ function showTikTokPlayer(title, startEpisode = 1) {
         `;
         
         setupSimulatedPlayer();
+    }
+
+    // Función para configurar reproductor Streamtape
+    function setupStreamtapePlayer(iframe, episodeNumber) {
+        const progressBar = document.getElementById('videoProgressBar');
+        
+        // Simular progreso automático (ya que no podemos acceder al iframe de Streamtape)
+        let currentTime = 0;
+        const duration = 60; // 1 minuto por episodio
+        
+        const progressInterval = setInterval(() => {
+            currentTime += 1;
+            const progress = (currentTime / duration) * 100;
+            progressBar.style.width = `${Math.min(progress, 100)}%`;
+            
+            // Actualizar historial cada 5 segundos
+            if (currentTime % 5 === 0) {
+                addToWatchHistory(title, episodeNumber, progress);
+            }
+            
+            // Mostrar animación 3 segundos antes del final
+            if (currentTime >= duration - 3 && !animationTriggered) {
+                animationTriggered = true;
+                
+                setTimeout(() => {
+                    clearInterval(progressInterval);
+                    showChapterEndAnimation(() => {
+                        transitionToNextEpisode();
+                    });
+                }, 3000);
+            }
+        }, 1000);
+        
+        // Guardar interval para limpieza
+        iframe.progressInterval = progressInterval;
+        
+        // Cleanup cuando se cierre
+        iframe.addEventListener('remove', () => {
+            if (progressInterval) {
+                clearInterval(progressInterval);
+            }
+        });
     }
 
     // Función para configurar reproductor en pantalla completa sin anuncios
@@ -1007,16 +1008,29 @@ function showTikTokPlayer(title, startEpisode = 1) {
     const episodesBtn = player.querySelector('#episodesBtn');
 
     closeBtn.addEventListener('click', () => {
+        // Limpiar todos los intervals y recursos
         if (watchInterval) clearInterval(watchInterval);
+        
+        // Limpiar iframe y sus intervals
+        const iframe = document.getElementById('streamtapePlayer');
+        if (iframe && iframe.progressInterval) {
+            clearInterval(iframe.progressInterval);
+        }
+        
+        // Restaurar estilos del body
         document.body.style.overflow = '';
         document.body.style.position = '';
         document.body.style.width = '';
+        
+        // Cerrar reproductor
         player.classList.remove('active');
         setTimeout(() => {
             if (document.body.contains(player)) {
                 document.body.removeChild(player);
             }
         }, 300);
+        
+        showNotification('Reproductor cerrado', 'info');
     });
 
     likeBtn.addEventListener('click', () => {
