@@ -391,7 +391,7 @@ function getEpisodeTitle(seriesTitle, episodeNumber) {
     return episodeTitles[seriesTitle]?.[episodeNumber] || 'Continuación de la Historia';
 }
 
-// TikTok Style Video Player
+// TikTok Style Video Player con navegación por episodios
 function showTikTokPlayer(title, startEpisode = 1) {
     // Prevent scroll issues
     document.body.style.overflow = 'hidden';
@@ -400,19 +400,116 @@ function showTikTokPlayer(title, startEpisode = 1) {
     
     // Buscar información de la serie
     const seriesData = getAllSeries().find(series => series.title === title);
-    const hasRealVideo = seriesData && seriesData.videoUrl;
+    let currentEpisode = startEpisode;
+    let watchInterval;
+    let watchTime = 0;
+    let animationTriggered = false;
 
     const player = document.createElement('div');
     player.className = 'tiktok-player';
     
-    if (hasRealVideo) {
-        player.innerHTML = `
-            <div class="video-container-tiktok">
-                <button class="close-player">
+    // Crear contenedor del reproductor
+    player.innerHTML = `
+        <div class="video-container-tiktok">
+            <button class="close-player">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                </svg>
+            </button>
+            
+            <!-- Video o placeholder que cambiará dinámicamente -->
+            <div id="videoContent"></div>
+            
+            <div class="video-info-tiktok">
+                <h3 class="video-title-tiktok">${title}</h3>
+                <p class="video-description-tiktok" id="episodeDescription">Episodio ${currentEpisode} - "${getEpisodeTitle(title, currentEpisode)}"</p>
+                <div class="video-progress-tiktok">
+                    <div class="video-progress-fill" id="videoProgressBar"></div>
+                </div>
+            </div>
+            
+            <div class="video-controls-tiktok">
+                <button class="tiktok-btn like-btn" id="likeBtn">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                     </svg>
                 </button>
+                <button class="tiktok-btn play-pause-btn" id="playPauseBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path id="playPauseIcon" d="M8 5v14l11-7z"/>
+                    </svg>
+                </button>
+                <button class="tiktok-btn mute-btn" id="muteBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path id="muteIcon" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                    </svg>
+                </button>
+                <button class="tiktok-btn episodes-btn" id="episodesBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Navegación tipo TikTok -->
+            <div class="tiktok-navigation">
+                <button class="nav-btn prev-btn" id="prevEpisodeBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/>
+                    </svg>
+                    <span>Anterior</span>
+                </button>
+                <button class="nav-btn next-btn" id="nextEpisodeBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/>
+                    </svg>
+                    <span>Siguiente</span>
+                </button>
+            </div>
+            
+            <div class="play-control-overlay" id="playControlOverlay" style="display: none;">
+                <button class="video-play-btn" id="videoPlayBtn">
+                    <svg width="60" height="60" viewBox="0 0 24 24" fill="white">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                </button>
+                <p style="color: white; margin-top: 1rem; font-size: 1.1rem;">Toca para reproducir</p>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(player);
+    setTimeout(() => player.classList.add('active'), 100);
+
+    // Función para obtener URL del episodio
+    function getEpisodeVideoUrl(episodeNumber) {
+        // Por ahora todos los episodios usan el mismo video
+        // En el futuro aquí podrías tener URLs específicas por episodio
+        if (seriesData && seriesData.videoUrl) {
+            return seriesData.videoUrl;
+        }
+        return null;
+    }
+
+    // Función para cargar episodio
+    function loadEpisode(episodeNumber) {
+        const videoContent = document.getElementById('videoContent');
+        const episodeDescription = document.getElementById('episodeDescription');
+        const progressBar = document.getElementById('videoProgressBar');
+        
+        // Actualizar información del episodio
+        episodeDescription.textContent = `Episodio ${episodeNumber} - "${getEpisodeTitle(title, episodeNumber)}"`;
+        progressBar.style.width = '0%';
+        
+        // Reset watch time and animation
+        watchTime = 0;
+        animationTriggered = false;
+        
+        // Cargar video o placeholder
+        const videoUrl = getEpisodeVideoUrl(episodeNumber);
+        
+        if (videoUrl) {
+            videoContent.innerHTML = `
                 <video 
                     id="mainVideo" 
                     width="100%" 
@@ -425,100 +522,37 @@ function showTikTokPlayer(title, startEpisode = 1) {
                     preload="metadata"
                     style="object-fit: cover; background: #000;"
                 >
-                    <source src="${seriesData.videoUrl}" type="video/mp4">
+                    <source src="${videoUrl}" type="video/mp4">
                     Tu navegador no soporta el elemento de video.
                 </video>
-                <div class="video-info-tiktok">
-                    <h3 class="video-title-tiktok">${title}</h3>
-                    <p class="video-description-tiktok">Episodio ${startEpisode} - "${getEpisodeTitle(title, startEpisode)}"</p>
-                    <div class="video-progress-tiktok">
-                        <div class="video-progress-fill" id="videoProgressBar"></div>
+            `;
+            
+            setupVideoPlayer();
+        } else {
+            videoContent.innerHTML = `
+                <div class="video-placeholder-tiktok" style="width: 100%; height: 100%; background: linear-gradient(135deg, #1d9bf0 0%, #1a8cd8 100%); display: flex; align-items: center; justify-content: center;">
+                    <div style="text-align: center; color: white;">
+                        <h2>Episodio ${episodeNumber}</h2>
+                        <p>Reproduciendo en modo simulado</p>
                     </div>
                 </div>
-                <div class="video-controls-tiktok">
-                    <button class="tiktok-btn like-btn" id="likeBtn">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                        </svg>
-                    </button>
-                    <button class="tiktok-btn play-pause-btn" id="playPauseBtn">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                            <path id="playPauseIcon" d="M8 5v14l11-7z"/>
-                        </svg>
-                    </button>
-                    <button class="tiktok-btn mute-btn" id="muteBtn">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                            <path id="muteIcon" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-                        </svg>
-                    </button>
-                    <button class="tiktok-btn episodes-btn" id="episodesBtn">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/>
-                        </svg>
-                    </button>
-                </div>
-                <div class="play-control-overlay" id="playControlOverlay" style="display: none;">
-                    <button class="video-play-btn" id="videoPlayBtn">
-                        <svg width="60" height="60" viewBox="0 0 24 24" fill="white">
-                            <path d="M8 5v14l11-7z"/>
-                        </svg>
-                    </button>
-                    <p style="color: white; margin-top: 1rem; font-size: 1.1rem;">Toca para reproducir</p>
-                </div>
-            </div>
-        `;
-    } else {
-        player.innerHTML = `
-            <div class="video-container-tiktok">
-                <button class="close-player">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
-                    </svg>
-                </button>
-                <div class="video-placeholder-tiktok">
-                    <div class="video-info-tiktok">
-                        <h3 class="video-title-tiktok">${title}</h3>
-                        <p class="video-description-tiktok">Episodio ${startEpisode} - "El Despertar"</p>
-                        <div class="video-progress-tiktok">
-                            <div class="video-progress-fill"></div>
-                        </div>
-                    </div>
-                    <div class="video-controls-tiktok">
-                        <button class="tiktok-btn like-btn" id="likeBtn">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                            </svg>
-                        </button>
-                        <button class="tiktok-btn play-pause-btn" id="playPauseBtn">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M8 5v14l11-7z"/>
-                            </svg>
-                        </button>
-                        <button class="tiktok-btn mute-btn" id="muteBtn">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-                            </svg>
-                        </button>
-                        <button class="tiktok-btn episodes-btn" id="episodesBtn">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
+            `;
+            
+            setupSimulatedPlayer();
+        }
+        
+        // Actualizar navegación
+        updateNavigationButtons();
     }
 
-    document.body.appendChild(player);
-    setTimeout(() => player.classList.add('active'), 100);
-
-    // Configurar controles de video real si existe
-    if (hasRealVideo) {
+    // Función para configurar reproductor de video real
+    function setupVideoPlayer() {
         const video = document.getElementById('mainVideo');
         const progressBar = document.getElementById('videoProgressBar');
         const playControl = document.getElementById('playControlOverlay');
         const playBtn = document.getElementById('videoPlayBtn');
+
+        if (!video) return;
 
         // Detectar si es iOS
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -575,21 +609,7 @@ function showTikTokPlayer(title, startEpisode = 1) {
                 progressBar.style.width = `${progress}%`;
                 
                 // Actualizar historial de visualización
-                if (video.currentTime % 5 === 0) {
-                    addToWatchHistory(title, currentEpisode, progress);
-                }
-            }
-        });
-
-        // Mostrar animación 2 segundos antes del final
-        let animationTriggered = false;
-        video.addEventListener('timeupdate', () => {
-            if (video.duration > 0) {
-                const progress = (video.currentTime / video.duration) * 100;
-                progressBar.style.width = `${progress}%`;
-                
-                // Actualizar historial de visualización
-                if (video.currentTime % 5 === 0) {
+                if (Math.floor(video.currentTime) % 5 === 0) {
                     addToWatchHistory(title, currentEpisode, progress);
                 }
                 
@@ -597,22 +617,20 @@ function showTikTokPlayer(title, startEpisode = 1) {
                 const timeLeft = video.duration - video.currentTime;
                 if (timeLeft <= 2 && timeLeft > 1.5 && !animationTriggered) {
                     animationTriggered = true;
-                    // Pausar el video
                     video.pause();
                     
                     showChapterEndAnimation(() => {
-                        handleEpisodeTransition(currentEpisode + 1, title, player);
-                        animationTriggered = false;
+                        transitionToNextEpisode();
                     });
                 }
             }
         });
         
-        // Mantener el evento ended como respaldo
+        // Evento cuando termina el video
         video.addEventListener('ended', () => {
             if (!animationTriggered) {
                 showChapterEndAnimation(() => {
-                    handleEpisodeTransition(currentEpisode + 1, title, player);
+                    transitionToNextEpisode();
                 });
             }
         });
@@ -630,28 +648,129 @@ function showTikTokPlayer(title, startEpisode = 1) {
         });
     }
 
-    // Simulate video progress tracking
-    let currentEpisode = startEpisode;
-    let watchTime = 0;
-    const watchInterval = setInterval(() => {
-        watchTime += 1;
-        const progress = Math.min((watchTime / 60) * 100, 100); // 60 seconds = 100%
+    // Función para configurar reproductor simulado
+    function setupSimulatedPlayer() {
+        const progressBar = document.getElementById('videoProgressBar');
         
-        // Update watch history every 5 seconds
-        if (watchTime % 5 === 0) {
-            addToWatchHistory(title, currentEpisode, progress);
+        // Limpiar interval anterior si existe
+        if (watchInterval) {
+            clearInterval(watchInterval);
         }
         
-        // Auto advance to next episode after 60 seconds
-        if (watchTime >= 60) {
-            showChapterEndAnimation(() => {
-                watchTime = 0;
-                handleEpisodeTransition(currentEpisode + 1, title, player);
-            });
-        }
-    }, 1000);
+        // Simular progreso del video
+        watchInterval = setInterval(() => {
+            watchTime += 1;
+            const progress = Math.min((watchTime / 60) * 100, 100); // 60 seconds = 100%
+            progressBar.style.width = `${progress}%`;
+            
+            // Update watch history every 5 seconds
+            if (watchTime % 5 === 0) {
+                addToWatchHistory(title, currentEpisode, progress);
+            }
+            
+            // Auto advance to next episode after 60 seconds
+            if (watchTime >= 60) {
+                showChapterEndAnimation(() => {
+                    transitionToNextEpisode();
+                });
+            }
+        }, 1000);
+    }
 
-    // Event listeners
+    // Función para transición al siguiente episodio
+    function transitionToNextEpisode() {
+        const nextEpisode = currentEpisode + 1;
+        
+        if (nextEpisode <= 45) { // Máximo 45 episodios
+            if (nextEpisode <= 8 || unlockedEpisodes.includes(nextEpisode)) {
+                // Episodio disponible
+                currentEpisode = nextEpisode;
+                loadEpisode(currentEpisode);
+                showNotification(`Reproduciendo Episodio ${currentEpisode}`, 'success');
+            } else if (userCoins >= 30) {
+                // Auto-desbloquear con monedas
+                if (unlockEpisode(nextEpisode)) {
+                    currentEpisode = nextEpisode;
+                    loadEpisode(currentEpisode);
+                    showNotification(`Episodio ${currentEpisode} desbloqueado automáticamente`, 'success');
+                }
+            } else {
+                // Mostrar modal de suscripción
+                showSubscriptionModal(nextEpisode, title, player);
+            }
+        } else {
+            showNotification('Has llegado al final de la serie', 'info');
+        }
+    }
+
+    // Función para actualizar botones de navegación
+    function updateNavigationButtons() {
+        const prevBtn = document.getElementById('prevEpisodeBtn');
+        const nextBtn = document.getElementById('nextEpisodeBtn');
+        
+        // Botón anterior
+        if (currentEpisode <= 1) {
+            prevBtn.style.opacity = '0.5';
+            prevBtn.style.pointerEvents = 'none';
+        } else {
+            prevBtn.style.opacity = '1';
+            prevBtn.style.pointerEvents = 'auto';
+        }
+        
+        // Botón siguiente
+        if (currentEpisode >= 45) {
+            nextBtn.style.opacity = '0.5';
+            nextBtn.style.pointerEvents = 'none';
+        } else {
+            nextBtn.style.opacity = '1';
+            nextBtn.style.pointerEvents = 'auto';
+        }
+    }
+
+    // Cargar episodio inicial
+    loadEpisode(currentEpisode);
+
+    // Event listeners para navegación
+    const prevBtn = document.getElementById('prevEpisodeBtn');
+    const nextBtn = document.getElementById('nextEpisodeBtn');
+    
+    prevBtn.addEventListener('click', () => {
+        if (currentEpisode > 1) {
+            currentEpisode--;
+            loadEpisode(currentEpisode);
+            showNotification(`Episodio ${currentEpisode}`, 'info');
+        }
+    });
+    
+    nextBtn.addEventListener('click', () => {
+        transitionToNextEpisode();
+    });
+
+    // Navegación con gestos de swipe (opcional para el futuro)
+    let startY = 0;
+    let endY = 0;
+    
+    player.addEventListener('touchstart', (e) => {
+        startY = e.touches[0].clientY;
+    });
+    
+    player.addEventListener('touchend', (e) => {
+        endY = e.changedTouches[0].clientY;
+        const deltaY = startY - endY;
+        
+        // Swipe hacia arriba = siguiente episodio
+        if (deltaY > 50) {
+            transitionToNextEpisode();
+        }
+        // Swipe hacia abajo = episodio anterior
+        else if (deltaY < -50 && currentEpisode > 1) {
+            currentEpisode--;
+            loadEpisode(currentEpisode);
+            showNotification(`Episodio ${currentEpisode}`, 'info');
+        }
+    });
+
+    // Event listeners para botones de control
     const closeBtn = player.querySelector('.close-player');
     const likeBtn = player.querySelector('#likeBtn');
     const playPauseBtn = player.querySelector('#playPauseBtn');
@@ -659,12 +778,16 @@ function showTikTokPlayer(title, startEpisode = 1) {
     const episodesBtn = player.querySelector('#episodesBtn');
 
     closeBtn.addEventListener('click', () => {
-        clearInterval(watchInterval);
+        if (watchInterval) clearInterval(watchInterval);
         document.body.style.overflow = '';
         document.body.style.position = '';
         document.body.style.width = '';
         player.classList.remove('active');
-        setTimeout(() => document.body.removeChild(player), 300);
+        setTimeout(() => {
+            if (document.body.contains(player)) {
+                document.body.removeChild(player);
+            }
+        }, 300);
     });
 
     likeBtn.addEventListener('click', () => {
@@ -672,12 +795,12 @@ function showTikTokPlayer(title, startEpisode = 1) {
         showNotification(likeBtn.classList.contains('liked') ? 'Agregado a favoritos' : 'Removido de favoritos');
     });
 
-    let isPlaying = hasRealVideo ? false : true;
+    let isPlaying = true;
     playPauseBtn.addEventListener('click', () => {
-        if (hasRealVideo) {
-            const video = document.getElementById('mainVideo');
-            const playPauseIcon = document.getElementById('playPauseIcon');
-            
+        const video = document.getElementById('mainVideo');
+        const playPauseIcon = document.getElementById('playPauseIcon');
+        
+        if (video) {
             if (video.paused) {
                 video.play();
                 isPlaying = true;
@@ -688,18 +811,24 @@ function showTikTokPlayer(title, startEpisode = 1) {
                 playPauseIcon.setAttribute('d', 'M8 5v14l11-7z');
             }
         } else {
+            // Para reproductor simulado
             isPlaying = !isPlaying;
-            const playPauseIcon = playPauseBtn.querySelector('path');
-            playPauseIcon.setAttribute('d', isPlaying ? 'M6 19h4V5H6v14zm8-14v14h4V5h-4z' : 'M8 5v14l11-7z');
+            if (isPlaying) {
+                setupSimulatedPlayer();
+                playPauseIcon.setAttribute('d', 'M6 19h4V5H6v14zm8-14v14h4V5h-4z');
+            } else {
+                if (watchInterval) clearInterval(watchInterval);
+                playPauseIcon.setAttribute('d', 'M8 5v14l11-7z');
+            }
         }
     });
 
     let isMuted = false;
     muteBtn.addEventListener('click', () => {
-        if (hasRealVideo) {
-            const video = document.getElementById('mainVideo');
-            const muteIcon = document.getElementById('muteIcon');
-            
+        const video = document.getElementById('mainVideo');
+        const muteIcon = document.getElementById('muteIcon');
+        
+        if (video) {
             isMuted = !video.muted;
             video.muted = isMuted;
             
@@ -709,7 +838,6 @@ function showTikTokPlayer(title, startEpisode = 1) {
             );
         } else {
             isMuted = !isMuted;
-            const muteIcon = muteBtn.querySelector('path');
             muteIcon.setAttribute('d', isMuted ?
                 'M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z' :
                 'M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z'
@@ -718,11 +846,11 @@ function showTikTokPlayer(title, startEpisode = 1) {
     });
 
     episodesBtn.addEventListener('click', () => {
-        showEpisodesModal(title);
+        showEpisodesModal(title, currentEpisode);
     });
 }
 
-function showEpisodesModal(seriesTitle) {
+function showEpisodesModal(seriesTitle, currentEpisodeNum = 1) {
     const modal = document.createElement('div');
     modal.className = 'episodes-modal';
     modal.innerHTML = `
@@ -735,7 +863,7 @@ function showEpisodesModal(seriesTitle) {
             </button>
         </div>
         <div class="episodes-list">
-            ${generateEpisodesList()}
+            ${generateEpisodesList(currentEpisodeNum)}
         </div>
     `;
 
@@ -757,17 +885,34 @@ function showEpisodesModal(seriesTitle) {
                 episodeItems.forEach(ep => ep.classList.remove('current'));
                 item.classList.add('current');
                 modal.classList.remove('active');
-                setTimeout(() => document.body.removeChild(modal), 300);
+                setTimeout(() => {
+                    if (document.body.contains(modal)) {
+                        document.body.removeChild(modal);
+                    }
+                }, 300);
+                
+                // Cerrar reproductor actual y abrir nuevo episodio
+                const currentPlayer = document.querySelector('.tiktok-player');
+                if (currentPlayer) {
+                    currentPlayer.classList.remove('active');
+                    setTimeout(() => {
+                        if (document.body.contains(currentPlayer)) {
+                            document.body.removeChild(currentPlayer);
+                        }
+                        showTikTokPlayer(seriesTitle, episodeNum);
+                    }, 300);
+                }
             }
         });
     });
 }
 
-function generateEpisodesList() {
+function generateEpisodesList(currentEpisode = 1) {
     let episodes = '';
     for (let i = 1; i <= 45; i++) {
         const isLocked = i > 8 && !unlockedEpisodes.includes(i);
         const canUnlock = isLocked && userCoins >= 30;
+        const isCurrent = i === currentEpisode;
         const lockIcon = isLocked ? `
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="lock-icon">
                 <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM15.1 8H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/>
@@ -775,7 +920,7 @@ function generateEpisodesList() {
         ` : '';
 
         episodes += `
-            <div class="episode-item ${i === 1 ? 'current' : ''} ${isLocked ? 'locked' : ''} ${canUnlock ? 'can-unlock' : ''}" data-episode="${i}">
+            <div class="episode-item ${isCurrent ? 'current' : ''} ${isLocked ? 'locked' : ''} ${canUnlock ? 'can-unlock' : ''}" data-episode="${i}">
                 <div class="episode-number">
                     ${i} 
                     ${lockIcon}
@@ -2008,42 +2153,11 @@ function showMainChapterAnimation(callback) {
     }, 3000);
 }
 
-// Función para manejar transición entre episodios
+// Función para manejar transición entre episodios (legacy - mantenida para compatibilidad)
 function handleEpisodeTransition(nextEpisode, seriesTitle, playerElement) {
-    // Verificar si el episodio está disponible
-    if (nextEpisode <= 8) {
-        // Episodios gratis, avanzar automáticamente
-        currentEpisode = nextEpisode;
-        const descriptionElement = playerElement.querySelector('.video-description-tiktok');
-        if (descriptionElement) {
-            descriptionElement.textContent = `Episodio ${nextEpisode} - "${getEpisodeTitle(seriesTitle, nextEpisode)}"`;
-        }
-        showNotification(`Reproduciendo Episodio ${nextEpisode}`, 'success');
-    } else {
-        // Episodios premium - verificar monedas o mostrar suscripción
-        if (unlockedEpisodes.includes(nextEpisode)) {
-            // Ya desbloqueado, continuar
-            currentEpisode = nextEpisode;
-            const descriptionElement = playerElement.querySelector('.video-description-tiktok');
-            if (descriptionElement) {
-                descriptionElement.textContent = `Episodio ${nextEpisode} - "${getEpisodeTitle(seriesTitle, nextEpisode)}"`;
-            }
-            showNotification(`Reproduciendo Episodio ${nextEpisode}`, 'success');
-        } else if (userCoins >= 30) {
-            // Auto-desbloquear con monedas
-            if (unlockEpisode(nextEpisode)) {
-                currentEpisode = nextEpisode;
-                const descriptionElement = playerElement.querySelector('.video-description-tiktok');
-                if (descriptionElement) {
-                    descriptionElement.textContent = `Episodio ${nextEpisode} - "${getEpisodeTitle(seriesTitle, nextEpisode)}"`;
-                }
-                showNotification(`Episodio ${nextEpisode} desbloqueado automáticamente`, 'success');
-            }
-        } else {
-            // Mostrar modal de suscripción/monetización
-            showSubscriptionModal(nextEpisode, seriesTitle, playerElement);
-        }
-    }
+    // Esta función ahora es manejada directamente en showTikTokPlayer
+    // Mantenida para compatibilidad con código existente
+    console.log(`Transición legacy a episodio ${nextEpisode}`);
 }
 
 // Función para mostrar modal de suscripción
