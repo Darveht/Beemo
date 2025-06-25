@@ -142,7 +142,7 @@
     <div class="monetization-modal-overlay" id="monetizationModal">
         <div class="monetization-modal-container-fullscreen">
             <div class="monetization-header">
-                <h2>💰 Centro de Recompensas</h2>
+                <h2>Centro de Recompensas</h2>
                 <button class="monetization-close" id="monetizationClose">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -152,7 +152,7 @@
 
             <div class="monetization-content">
                 <div class="coin-balance">
-                    <div class="coin-icon">🪙</div>
+                    <div class="coin-icon">C</div>
                     <div class="balance-info">
                         <h3 id="modalCoinCount">0 Monedas</h3>
                         <p>Usa tus monedas para desbloquear episodios premium</p>
@@ -164,7 +164,7 @@
                         <h3>Gana Monedas Gratis</h3>
 
                         <div class="earn-option">
-                            <div class="earn-icon">📺</div>
+                            <div class="earn-icon">AD</div>
                             <div class="earn-info">
                                 <h4>Ver Anuncio</h4>
                                 <p>Gana 20 monedas por cada anuncio de 30 segundos</p>
@@ -173,7 +173,7 @@
                         </div>
 
                         <div class="earn-option">
-                            <div class="earn-icon">📤</div>
+                            <div class="earn-icon">SH</div>
                             <div class="earn-info">
                                 <h4>Compartir con Amigos</h4>
                                 <p>Gana 50 monedas cuando un amigo abra tu enlace</p>
@@ -220,9 +220,85 @@
                         <p>Episodios 1-8: Gratis</p>
                         <p>Episodios 9+: 30 monedas cada uno</p>
                         <div id="autoUnlockStatus" class="auto-unlock-status" style="display: none;">
-                            <p class="auto-unlock-text">🔓 Tienes suficientes monedas para desbloquear más episodios automáticamente</p>
+                            <p class="auto-unlock-text">Tienes suficientes monedas para desbloquear más episodios automáticamente</p>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="payment-modal-overlay" id="paymentModal">
+        <div class="payment-modal-container">
+            <div class="payment-header">
+                <h2>Método de Pago</h2>
+                <button class="payment-close" id="paymentClose">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="payment-content">
+                <div class="payment-options">
+                    <div class="payment-option" id="applePayOption">
+                        <div class="payment-option-icon">AP</div>
+                        <div class="payment-option-info">
+                            <h3>Apple Pay</h3>
+                            <p>Pago seguro con Touch ID o Face ID</p>
+                        </div>
+                    </div>
+
+                    <div class="payment-option" id="creditCardOption">
+                        <div class="payment-option-icon">CC</div>
+                        <div class="payment-option-info">
+                            <h3>Tarjeta de Crédito/Débito</h3>
+                            <p>Visa, Mastercard, American Express</p>
+                        </div>
+                    </div>
+
+                    <div class="payment-option disabled" id="paypalOption">
+                        <div class="payment-option-icon">PP</div>
+                        <div class="payment-option-info">
+                            <h3>PayPal</h3>
+                            <p>Servicio temporalmente no disponible</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-form" id="cardForm" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">Número de Tarjeta</label>
+                        <input type="text" class="form-input" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Vencimiento</label>
+                            <input type="text" class="form-input" id="cardExpiry" placeholder="MM/AA" maxlength="5">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">CVC</label>
+                            <input type="text" class="form-input" id="cardCvc" placeholder="123" maxlength="4">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Nombre en la Tarjeta</label>
+                        <input type="text" class="form-input" id="cardName" placeholder="Nombre completo">
+                    </div>
+
+                    <div class="secure-badge">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM15.1 8H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/>
+                        </svg>
+                        Pago 100% seguro y encriptado
+                    </div>
+
+                    <button class="process-payment-btn" id="processPaymentBtn" disabled>
+                        Procesar Pago
+                    </button>
                 </div>
             </div>
         </div>
