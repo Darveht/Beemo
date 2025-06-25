@@ -1934,7 +1934,8 @@ body {
 
 /* Ad Modal */
 .ad-modal-overlay {
-    position: fixed;    top: 0;
+    position: fixed;
+    top: 0;
     left: 0;
     right: 0;
     bottom: 0;
@@ -1958,7 +1959,7 @@ body {
     border: 2px solid #1d9bf0;
     border-radius: 16px;
     width: 90%;
-    max-width: 600px;
+    max-width: 700px;
     overflow: hidden;
 }
 
@@ -2031,6 +2032,64 @@ body {
     background: white;
     width: 0%;
     transition: width 0.1s linear;
+}
+
+/* Netflix Ad Styles */
+.netflix-ad-container {
+    position: relative;
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.netflix-ad-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        transparent 40%,
+        rgba(0, 0, 0, 0.7) 70%,
+        rgba(0, 0, 0, 0.9) 100%
+    );
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 2rem;
+}
+
+.netflix-logo {
+    align-self: flex-start;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+}
+
+.netflix-cta {
+    align-self: center;
+    text-align: center;
+    display: none;
+}
+
+.netflix-download-btn {
+    background: linear-gradient(135deg, #e50914, #b81d24);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 25px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);
+}
+
+.netflix-download-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(229, 9, 20, 0.6);
+    background: linear-gradient(135deg, #f40612, #e50914);
 }
 
 /* Payment Modal */
