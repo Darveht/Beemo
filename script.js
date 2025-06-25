@@ -618,11 +618,11 @@ function showTikTokPlayer(title, startEpisode = 1) {
     function getEpisodeVideoUrl(episodeNumber) {
         // URLs específicas para cada episodio de "La Niña de los Cuatro CEO"
         const episodeUrls = {
-            1: 'https://streamable.com/e/x0t3qj',
-            2: 'https://streamable.com/e/0klxmv',
-            3: 'https://streamable.com/e/0klxmv', // Usando episodio 2 como placeholder
-            4: 'https://streamable.com/e/0klxmv', // Usando episodio 2 como placeholder
-            5: 'https://streamable.com/e/0klxmv', // Usando episodio 2 como placeholder
+            1: 'https://www.dropbox.com/scl/fi/su7cuwd60sz89hsonies4/copy_7675023E-5F80-4FA6-9FC0-E017CD157EE5.mov?rlkey=56om33xqkm4j4rngju9jqvp5o&st=cte47tl3&raw=1',
+            2: 'https://www.dropbox.com/scl/fi/docmcwiuv2373hgfr660o/copy_8F810EF0-17AD-47D4-9B91-0B6B5899C202.mov?rlkey=me4ac8zdelnkr5x9qbsm8gd03&st=byqr7cc2&raw=1',
+            3: 'https://www.dropbox.com/scl/fi/docmcwiuv2373hgfr660o/copy_8F810EF0-17AD-47D4-9B91-0B6B5899C202.mov?rlkey=me4ac8zdelnkr5x9qbsm8gd03&st=byqr7cc2&raw=1',
+            4: 'https://www.dropbox.com/scl/fi/docmcwiuv2373hgfr660o/copy_8F810EF0-17AD-47D4-9B91-0B6B5899C202.mov?rlkey=me4ac8zdelnkr5x9qbsm8gd03&st=byqr7cc2&raw=1',
+            5: 'https://www.dropbox.com/scl/fi/docmcwiuv2373hgfr660o/copy_8F810EF0-17AD-47D4-9B91-0B6B5899C202.mov?rlkey=me4ac8zdelnkr5x9qbsm8gd03&st=byqr7cc2&raw=1',
         };
         
         return episodeUrls[episodeNumber] || null;
