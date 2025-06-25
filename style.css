@@ -916,18 +916,30 @@ body {
     right: 0;
     bottom: 0;
     background: #000000;
-    z-index: 9999;
+    z-index: 999999;
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
     width: 100vw;
     height: 100vh;
     overflow: hidden;
+    margin: 0;
+    padding: 0;
 }
 
 .tiktok-player.active {
     opacity: 1;
     visibility: visible;
+}
+
+/* Ocultar todo cuando el video está reproduciéndose */
+body.video-playing * {
+    display: none !important;
+}
+
+body.video-playing .tiktok-player,
+body.video-playing .tiktok-player * {
+    display: block !important;
 }
 
 /* Navegación tipo TikTok eliminada - solo avance automático */
