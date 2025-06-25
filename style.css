@@ -831,20 +831,21 @@ body {
     position: absolute;
     top: 1rem;
     right: 1rem;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.85);
     color: white;
-    border: none;
-    padding: 0.6rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.75rem;
     border-radius: 50%;
     cursor: pointer;
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
     opacity: 0;
     backdrop-filter: blur(10px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .content-card:hover .play-btn {
@@ -852,12 +853,38 @@ body {
 }
 
 .play-btn:hover {
-    background: #1d9bf0;
-    transform: scale(1.1);
+    background: rgba(29, 155, 240, 0.9);
+    border-color: #1d9bf0;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(29, 155, 240, 0.4);
 }
 
 .play-btn svg {
     margin-left: 2px;
+    width: 18px;
+    height: 18px;
+}
+
+/* Mobile specific play button improvements */
+@media (max-width: 768px) {
+    .play-btn {
+        opacity: 1;
+        background: rgba(29, 155, 240, 0.9);
+        border-color: rgba(29, 155, 240, 0.3);
+        width: 40px;
+        height: 40px;
+        padding: 0.6rem;
+    }
+    
+    .play-btn:active {
+        transform: scale(0.95);
+        background: rgba(29, 155, 240, 1);
+    }
+    
+    .play-btn svg {
+        width: 16px;
+        height: 16px;
+    }
 }
 
 /* Continue Watching */
