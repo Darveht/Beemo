@@ -1,3269 +1,2588 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+// Yahoo OAuth Configuration
+const YAHOO_CLIENT_ID = 'dj0yJmk9bDdrb2lTMFNWT0tDJmQ9WVdrOVNHaHlkMHhZUkV3bWNHbzlNQT09JnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PWU5';
+// Configuración para Netlify
+const YAHOO_REDIRECT_URI = 'https://beemotv.netlify.app';
+
+// Auth State Management
+let currentUser = null;
+let isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+
+// Initialize Auth on page load
+document.addEventListener('DOMContentLoaded', () => {
+    initializeAuth();
+
+    // Auth screen event listeners
+    setupAuthEventListeners();
+
+    // Check if user is already authenticated
+    if (isAuthenticated) {
+        showMainApp();
+    } else {
+        showWelcomeScreen();
+    }
+
+    // Check for OAuth callback
+    handleOAuthCallback();
+});
+
+function initializeAuth() {
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    const loginScreen = document.getElementById('loginScreen');
+    const registerScreen = document.getElementById('registerScreen');
+    const mainApp = document.getElementById('mainApp');
+
+    // Ensure all screens are properly positioned
+    if (isAuthenticated) {
+        welcomeScreen.style.display = 'none';
+        loginScreen.style.display = 'none';
+        registerScreen.style.display = 'none';
+        mainApp.style.display = 'block';
+        mainApp.classList.add('active');
+    }
 }
 
-/* Welcome/Auth Screens */
-.welcome-screen, .auth-screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: #000000;
-    z-index: 10000;
-    opacity: 1;
-    visibility: visible;
-    transition: all 0.3s ease;
+function setupAuthEventListeners() {
+    // Welcome screen buttons
+    const loginBtn = document.getElementById('loginBtn');
+    const registerBtn = document.getElementById('registerBtn');
+
+    // Back buttons
+    const loginBackBtn = document.getElementById('loginBackBtn');
+    const registerBackBtn = document.getElementById('registerBackBtn');
+
+    // Switch between login/register
+    const switchToRegister = document.getElementById('switchToRegister');
+    const switchToLogin = document.getElementById('switchToLogin');
+
+    // Yahoo auth buttons
+    const yahooLoginBtn = document.getElementById('yahooLoginBtn');
+    const yahooRegisterBtn = document.getElementById('yahooRegisterBtn');
+
+    // Enter app button
+    const enterAppBtn = document.getElementById('enterAppBtn');
+
+    if (loginBtn) loginBtn.addEventListener('click', showLoginScreen);
+    if (registerBtn) registerBtn.addEventListener('click', showRegisterScreen);
+    if (loginBackBtn) loginBackBtn.addEventListener('click', showWelcomeScreen);
+    if (registerBackBtn) registerBackBtn.addEventListener('click', showWelcomeScreen);
+    if (switchToRegister) switchToRegister.addEventListener('click', showRegisterScreen);
+    if (switchToLogin) switchToLogin.addEventListener('click', showLoginScreen);
+    if (yahooLoginBtn) yahooLoginBtn.addEventListener('click', () => startYahooAuth('login'));
+    if (yahooRegisterBtn) yahooRegisterBtn.addEventListener('click', () => startYahooAuth('register'));
+    if (enterAppBtn) enterAppBtn.addEventListener('click', enterMainApp);
 }
 
-.welcome-screen.hidden, .auth-screen.hidden {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
+function showWelcomeScreen() {
+    document.getElementById('welcomeScreen').style.display = 'block';
+    document.getElementById('loginScreen').classList.remove('active');
+    document.getElementById('registerScreen').classList.remove('active');
+
+    setTimeout(() => {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('registerScreen').style.display = 'none';
+    }, 300);
 }
 
-.auth-screen {
-    opacity: 0;
-    visibility: hidden;
-    transform: translateX(100%);
+function showLoginScreen() {
+    document.getElementById('loginScreen').style.display = 'block';
+    document.getElementById('welcomeScreen').style.display = 'none';
+    document.getElementById('registerScreen').classList.remove('active');
+
+    setTimeout(() => {
+        document.getElementById('loginScreen').classList.add('active');
+        document.getElementById('registerScreen').style.display = 'none';
+    }, 50);
 }
 
-.auth-screen.active {
-    opacity: 1;
-    visibility: visible;
-    transform: translateX(0);
+function showRegisterScreen() {
+    document.getElementById('registerScreen').style.display = 'block';
+    document.getElementById('welcomeScreen').style.display = 'none';
+    document.getElementById('loginScreen').classList.remove('active');
+
+    setTimeout(() => {
+        document.getElementById('registerScreen').classList.add('active');
+        document.getElementById('loginScreen').style.display = 'none';
+    }, 50);
 }
 
-/* Welcome Screen */
-.welcome-background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
+function startYahooAuth(type) {
+    // Store auth type for callback
+    localStorage.setItem('authType', type);
+
+    // Sistema de autenticación simulada (temporal mientras configuras Yahoo)
+    showAuthLoading('Conectando con Yahoo...');
+
+    // Simular proceso de autenticación real
+    setTimeout(() => {
+        // Simular respuesta exitosa de Yahoo
+        const mockUserData = {
+            id: 'yahoo_' + Math.random().toString(36).substring(7),
+            email: 'usuario@yahoo.com',
+            name: 'Usuario Beemo',
+            provider: 'yahoo',
+            authenticated_at: Date.now()
+        };
+
+        handleAuthSuccess(mockUserData);
+    }, 2500); // Tiempo realista de autenticación
+
+    return;
+
+    // Código real de Yahoo OAuth (comentado temporalmente)
+    /*
+    const yahooAuthUrl = `https://api.login.yahoo.com/oauth2/request_auth?` +
+        `client_id=${YAHOO_CLIENT_ID}&` +
+        `redirect_uri=${encodeURIComponent(YAHOO_REDIRECT_URI)}&` +
+        `response_type=code&` +
+        `scope=openid email profile&` +
+        `state=${generateRandomState()}`;
+
+    // Redirect to Yahoo OAuth
+    window.location.href = yahooAuthUrl;
+    */
 }
 
-.welcome-bg-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    filter: blur(8px);
-    transform: scale(1.1);
+function generateRandomState() {
+    const state = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    localStorage.setItem('oauthState', state);
+    return state;
 }
 
-.welcome-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        180deg,
-        rgba(0, 0, 0, 0.4) 0%,
-        rgba(0, 0, 0, 0.7) 50%,
-        rgba(0, 0, 0, 0.9) 100%
+function handleOAuthCallback() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const state = urlParams.get('state');
+    const error = urlParams.get('error');
+
+    if (error) {
+        console.error('OAuth error:', error);
+        showAuthError('Error al autenticar con Yahoo. Por favor intenta de nuevo.');
+        return;
+    }
+
+    if (code && state) {
+        const storedState = localStorage.getItem('oauthState');
+        if (state !== storedState) {
+            console.error('State mismatch');
+            showAuthError('Error de seguridad. Por favor intenta de nuevo.');
+            return;
+        }
+
+        // Exchange code for token (simulated)
+        exchangeCodeForToken(code);
+    }
+}
+
+async function exchangeCodeForToken(code) {
+    try {
+        // In a real implementation, this would be done on your backend
+        // For demo purposes, we'll simulate a successful auth
+
+        showAuthLoading('Completando autenticación...');
+
+        // Simulate API call delay
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Simulate successful auth
+        const mockUserData = {
+            id: 'yahoo_' + Math.random().toString(36).substring(7),
+            email: 'usuario@yahoo.com',
+            name: 'Usuario Beemo',
+            provider: 'yahoo'
+        };
+
+        handleAuthSuccess(mockUserData);
+
+    } catch (error) {
+        console.error('Token exchange error:', error);
+        showAuthError('Error al completar la autenticación. Por favor intenta de nuevo.');
+    }
+}
+
+function handleAuthSuccess(userData) {
+    currentUser = userData;
+    isAuthenticated = true;
+
+    // Store auth state
+    localStorage.setItem('isAuthenticated', 'true');
+    localStorage.setItem('currentUser', JSON.stringify(userData));
+    localStorage.setItem('authTimestamp', Date.now().toString());
+
+    // Clean up OAuth params from URL
+    const url = new URL(window.location);
+    url.searchParams.delete('code');
+    url.searchParams.delete('state');
+    window.history.replaceState({}, document.title, url.pathname);
+
+    // Clean up localStorage
+    localStorage.removeItem('oauthState');
+    localStorage.removeItem('authType');
+
+    // Show success modal
+    showAuthSuccessModal();
+}
+
+function showAuthSuccessModal() {
+    const modal = document.getElementById('authSuccessModal');
+    modal.classList.add('active');
+}
+
+function enterMainApp() {
+    const modal = document.getElementById('authSuccessModal');
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    const loginScreen = document.getElementById('loginScreen');
+    const registerScreen = document.getElementById('registerScreen');
+    const mainApp = document.getElementById('mainApp');
+
+    modal.classList.remove('active');
+
+    setTimeout(() => {
+        welcomeScreen.style.display = 'none';
+        loginScreen.style.display = 'none';
+        registerScreen.style.display = 'none';
+        mainApp.style.display = 'block';
+
+        setTimeout(() => {
+            mainApp.classList.add('active');
+        }, 50);
+    }, 300);
+}
+
+function showMainApp() {
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    const loginScreen = document.getElementById('loginScreen');
+    const registerScreen = document.getElementById('registerScreen');
+    const mainApp = document.getElementById('mainApp');
+
+    welcomeScreen.style.display = 'none';
+    loginScreen.style.display = 'none';
+    registerScreen.style.display = 'none';
+    mainApp.style.display = 'block';
+    mainApp.classList.add('active');
+}
+
+function showAuthLoading(message) {
+    showNotification(message, 'info');
+}
+
+function showAuthError(message) {
+    showNotification(message, 'error');
+
+    // Reset auth screens
+    setTimeout(() => {
+        const loginLoading = document.getElementById('loginLoading');
+        const registerLoading = document.getElementById('registerLoading');
+        const yahooLoginBtn = document.getElementById('yahooLoginBtn');
+        const yahooRegisterBtn = document.getElementById('yahooRegisterBtn');
+
+        if (loginLoading) loginLoading.style.display = 'none';
+        if (registerLoading) registerLoading.style.display = 'none';
+        if (yahooLoginBtn) yahooLoginBtn.style.display = 'flex';
+        if (yahooRegisterBtn) yahooRegisterBtn.style.display = 'flex';
+
+        showWelcomeScreen();
+    }, 3000);
+}
+
+// Logout function
+function logout() {
+    currentUser = null;
+    isAuthenticated = false;
+
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('authTimestamp');
+
+    // Reload page to show welcome screen
+    window.location.reload();
+}
+
+// Add logout button functionality to header (can be added later)
+function addLogoutToHeader() {
+    const navRight = document.querySelector('.nav-right');
+    if (navRight && isAuthenticated) {
+        const logoutBtn = document.createElement('button');
+        logoutBtn.className = 'logout-btn';
+        logoutBtn.innerHTML = `
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.59L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+            </svg>
+        `;
+        logoutBtn.onclick = logout;
+        navRight.appendChild(logoutBtn);
+    }
+}
+
+// Header scroll effect
+window.addEventListener('scroll', () => {
+    const header = document.querySelector('.header');
+    if (window.scrollY > 50) {
+        header.style.background = 'rgba(0, 0, 0, 0.95)';
+        header.style.borderBottomColor = '#1d9bf0';
+    } else {
+        header.style.background = 'rgba(0, 0, 0, 0.85)';
+        header.style.borderBottomColor = '#2f3336';
+    }
+});
+
+// Watch history management
+let watchHistory = JSON.parse(localStorage.getItem('watchHistory') || '{}');
+
+function addToWatchHistory(title, episode, progress) {
+    watchHistory[title] = {
+        episode: episode,
+        progress: progress,
+        timestamp: Date.now(),
+        thumbnail: getCurrentSeriesThumbnail(title)
+    };
+    localStorage.setItem('watchHistory', JSON.stringify(watchHistory));
+    updateContinueWatchingSection();
+}
+
+function getCurrentSeriesThumbnail(title) {
+    const thumbnails = {
+        'La Niña de los Cuatro CEO': 'https://www.dropbox.com/scl/fi/r24wdvq29de6w6djkaqsc/IMG_4044.png?rlkey=5e2lge2dv00n427p0i5jdqxgy&st=65b6ye7u&raw=1'
+    };
+    return thumbnails[title] || 'https://www.dropbox.com/scl/fi/r24wdvq29de6w6djkaqsc/IMG_4044.png?rlkey=5e2lge2dv00n427p0i5jdqxgy&st=65b6ye7u&raw=1';
+}
+
+function updateContinueWatchingSection() {
+    const continueSection = document.querySelector('.continue-section');
+    const continueCards = continueSection.parentElement;
+    
+    if (Object.keys(watchHistory).length === 0) {
+        continueCards.style.display = 'none';
+        return;
+    }
+    
+    continueCards.style.display = 'block';
+    
+    const sortedHistory = Object.entries(watchHistory)
+        .sort(([,a], [,b]) => b.timestamp - a.timestamp)
+        .slice(0, 3);
+    
+    continueSection.innerHTML = sortedHistory.map(([title, data]) => `
+        <div class="content-card continue-card" onclick="showTikTokPlayer('${title}', ${data.episode})">
+            <img src="${data.thumbnail}" alt="${title}">
+            <div class="progress-indicator">
+                <div class="progress-fill" style="width: ${data.progress}%"></div>
+            </div>
+            <div class="card-info">
+                <h3>${title}</h3>
+                <p>Episodio ${data.episode} de 45</p>
+            </div>
+            <button class="play-btn" onclick="event.stopPropagation(); showTikTokPlayer('${title}', ${data.episode})">▶</button>
+        </div>
+    `).join('');
+}
+
+// Función para obtener títulos de episodios
+function getEpisodeTitle(seriesTitle, episodeNumber) {
+    const episodeTitles = {
+        'La Niña de los Cuatro CEO': {
+            1: 'El Encuentro Destinado',
+            2: 'Primeras Impresiones',
+            3: 'La Propuesta Inesperada',
+            4: 'Secretos del Pasado',
+            5: 'Conflictos de Poder'
+        }
+    };
+    
+    return episodeTitles[seriesTitle]?.[episodeNumber] || 'Continuación de la Historia';
+}
+
+// TikTok Style Video Player con navegación por episodios
+function showTikTokPlayer(title, startEpisode = 1) {
+    // Prevent scroll issues
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    
+    // Buscar información de la serie
+    const seriesData = getAllSeries().find(series => series.title === title);
+    let currentEpisode = startEpisode;
+    let watchInterval;
+    let watchTime = 0;
+    let animationTriggered = false;
+
+    const player = document.createElement('div');
+    player.className = 'tiktok-player';
+    
+    // Crear contenedor del reproductor
+    player.innerHTML = `
+        <div class="video-container-tiktok">
+            <button class="close-player">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                </svg>
+            </button>
+            
+            <!-- Video o placeholder que cambiará dinámicamente -->
+            <div id="videoContent"></div>
+            
+            <div class="video-info-tiktok">
+                <h3 class="video-title-tiktok">${title}</h3>
+                <p class="video-description-tiktok" id="episodeDescription">Episodio ${currentEpisode} - "${getEpisodeTitle(title, currentEpisode)}"</p>
+                <div class="video-progress-tiktok">
+                    <div class="video-progress-fill" id="videoProgressBar"></div>
+                </div>
+            </div>
+            
+            <div class="video-controls-tiktok">
+                <button class="tiktok-btn like-btn" id="likeBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                </button>
+                <button class="tiktok-btn play-pause-btn" id="playPauseBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path id="playPauseIcon" d="M8 5v14l11-7z"/>
+                    </svg>
+                </button>
+                <button class="tiktok-btn mute-btn" id="muteBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path id="muteIcon" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                    </svg>
+                </button>
+                <button class="tiktok-btn episodes-btn" id="episodesBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/>
+                    </svg>
+                </button>
+            </div>
+            
+            
+            
+            <div class="play-control-overlay" id="playControlOverlay" style="display: none;">
+                <button class="video-play-btn" id="videoPlayBtn">
+                    <svg width="60" height="60" viewBox="0 0 24 24" fill="white">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                </button>
+                <p style="color: white; margin-top: 1rem; font-size: 1.1rem;">Toca para reproducir</p>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(player);
+    setTimeout(() => player.classList.add('active'), 100);
+
+    // Función para obtener URL del episodio
+    function getEpisodeVideoUrl(episodeNumber) {
+        // URLs específicas para cada episodio de "La Niña de los Cuatro CEO"
+        const episodeUrls = {
+            1: 'https://streamtape.com/v/aYYV2bMjLvuxjyy/copy_83C56A17-4254-477E-9770-8722C1307B84.mov',
+            2: 'https://streamtape.com/v/EPISODE2_URL/episode_2.mov', // Reemplazar con URL real del episodio 2
+            3: 'https://streamtape.com/v/EPISODE3_URL/episode_3.mov', // Reemplazar con URL real del episodio 3
+            4: 'https://streamtape.com/v/EPISODE4_URL/episode_4.mov', // Reemplazar con URL real del episodio 4
+            5: 'https://streamtape.com/v/EPISODE5_URL/episode_5.mov', // Reemplazar con URL real del episodio 5
+            // Agregar más episodios según sea necesario
+        };
+        
+        // Retornar URL específica del episodio o null si no existe
+        return episodeUrls[episodeNumber] || null;
+    }
+
+    // Función para extraer URL de video directo de Streamtape
+    async function getStreamtapeDirectUrl(streamtapeUrl) {
+        try {
+            showNotification('Cargando video...', 'info');
+            
+            // Extraer el ID del video de la URL de Streamtape
+            const videoId = streamtapeUrl.split('/v/')[1]?.split('/')[0];
+            if (!videoId) {
+                throw new Error('URL de Streamtape inválida');
+            }
+
+            // Intentar múltiples formatos de URL directo de Streamtape
+            const possibleUrls = [
+                `https://streamtape.com/get_video?id=${videoId}`,
+                `https://streamtape.com/e/${videoId}`,
+                streamtapeUrl, // URL original como fallback
+            ];
+
+            for (const url of possibleUrls) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'HEAD',
+                        mode: 'no-cors'
+                    });
+                    return url; // Si no hay error, usar esta URL
+                } catch (e) {
+                    continue; // Probar siguiente URL
+                }
+            }
+
+            return streamtapeUrl; // Fallback a URL original
+        } catch (error) {
+            console.log('Error obteniendo URL directa:', error);
+            return streamtapeUrl; // Fallback a URL original
+        }
+    }
+
+    // Función para cargar episodio
+    async function loadEpisode(episodeNumber) {
+        const videoContent = document.getElementById('videoContent');
+        const episodeDescription = document.getElementById('episodeDescription');
+        const progressBar = document.getElementById('videoProgressBar');
+        
+        // Actualizar información del episodio
+        episodeDescription.textContent = `Episodio ${episodeNumber} - "${getEpisodeTitle(title, episodeNumber)}"`;
+        progressBar.style.width = '0%';
+        
+        // Reset watch time and animation
+        watchTime = 0;
+        animationTriggered = false;
+        
+        // Cargar video o placeholder
+        const videoUrl = getEpisodeVideoUrl(episodeNumber);
+        
+        if (videoUrl) {
+            // Mostrar indicador de carga
+            videoContent.innerHTML = `
+                <div class="loading-video-container" style="width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center;">
+                    <div style="text-align: center; color: white;">
+                        <div class="loading-spinner" style="margin: 0 auto 1rem auto;"></div>
+                        <h3>Cargando Episodio ${episodeNumber}...</h3>
+                        <p>Conectando con Streamtape...</p>
+                    </div>
+                </div>
+            `;
+
+            try {
+                // Intentar cargar como iframe de Streamtape primero
+                const streamtapeId = videoUrl.split('/v/')[1]?.split('/')[0];
+                if (streamtapeId && videoUrl.includes('streamtape.com')) {
+                    videoContent.innerHTML = `
+                        <iframe 
+                            id="streamtapeIframe"
+                            src="https://streamtape.com/e/${streamtapeId}"
+                            width="100%" 
+                            height="100%" 
+                            frameborder="0" 
+                            scrolling="no" 
+                            allowfullscreen
+                            allow="autoplay; encrypted-media"
+                            style="border: none; background: #000;"
+                        ></iframe>
+                        <div class="iframe-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 1;">
+                            <div class="episode-info-overlay" style="position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 10px 15px; border-radius: 10px; color: white;">
+                                <h4 style="margin: 0; font-size: 1rem;">Episodio ${episodeNumber}</h4>
+                                <p style="margin: 5px 0 0 0; font-size: 0.8rem; opacity: 0.8;">${getEpisodeTitle(title, episodeNumber)}</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    setupIframePlayer();
+                } else {
+                    // Fallback a video element con URL optimizada
+                    const directUrl = await getStreamtapeDirectUrl(videoUrl);
+                    videoContent.innerHTML = `
+                        <video 
+                            id="mainVideo" 
+                            width="100%" 
+                            height="100%" 
+                            autoplay 
+                            muted="false"
+                            playsinline
+                            webkit-playsinline
+                            controls="false"
+                            preload="metadata"
+                            crossorigin="anonymous"
+                            style="object-fit: cover; background: #000;"
+                        >
+                            <source src="${directUrl}" type="video/mp4">
+                            <source src="${videoUrl}" type="video/mp4">
+                            Tu navegador no soporta el elemento de video.
+                        </video>
+                    `;
+                    
+                    setupVideoPlayer();
+                }
+            } catch (error) {
+                console.log('Error cargando video:', error);
+                showNotification('Error cargando video. Usando modo simulado.', 'warning');
+                loadSimulatedEpisode(episodeNumber);
+            }
+        } else {
+            loadSimulatedEpisode(episodeNumber);
+        }
+    }
+
+    // Función separada para episodios simulados
+    function loadSimulatedEpisode(episodeNumber) {
+        const videoContent = document.getElementById('videoContent');
+        videoContent.innerHTML = `
+            <div class="video-placeholder-tiktok" style="width: 100%; height: 100%; background: linear-gradient(135deg, #1d9bf0 0%, #1a8cd8 100%); display: flex; align-items: center; justify-content: center;">
+                <div style="text-align: center; color: white;">
+                    <h2>Episodio ${episodeNumber}</h2>
+                    <p>Reproduciendo en modo simulado</p>
+                    <p style="font-size: 0.9rem; opacity: 0.8; margin-top: 1rem;">La URL del video será cargada cuando esté disponible</p>
+                </div>
+            </div>
+        `;
+        
+        setupSimulatedPlayer();
+    }
+
+    // Función para configurar reproductor de iframe
+    function setupIframePlayer() {
+        const iframe = document.getElementById('streamtapeIframe');
+        const progressBar = document.getElementById('videoProgressBar');
+        
+        if (!iframe) return;
+
+        // Ocultar indicador de carga después de cargar iframe
+        setTimeout(() => {
+            showNotification('Video cargado exitosamente', 'success');
+        }, 2000);
+
+        // Simular progreso para iframe (ya que no podemos acceder al contenido del iframe)
+        let simulatedTime = 0;
+        const simulatedDuration = 60; // 1 minuto por episodio
+
+        const progressInterval = setInterval(() => {
+            simulatedTime += 1;
+            const progress = Math.min((simulatedTime / simulatedDuration) * 100, 100);
+            progressBar.style.width = `${progress}%`;
+
+            // Actualizar historial cada 5 segundos
+            if (simulatedTime % 5 === 0) {
+                addToWatchHistory(title, currentEpisode, progress);
+            }
+
+            // Activar animación 2 segundos antes del final
+            const timeLeft = simulatedDuration - simulatedTime;
+            if (timeLeft <= 2 && timeLeft > 1 && !animationTriggered) {
+                animationTriggered = true;
+                clearInterval(progressInterval);
+                
+                showChapterEndAnimation(() => {
+                    transitionToNextEpisode();
+                });
+            }
+
+            // Si llegamos al final
+            if (simulatedTime >= simulatedDuration) {
+                clearInterval(progressInterval);
+                if (!animationTriggered) {
+                    showChapterEndAnimation(() => {
+                        transitionToNextEpisode();
+                    });
+                }
+            }
+        }, 1000);
+
+        // Limpiar interval cuando se cierre el reproductor
+        const playerElement = iframe.closest('.tiktok-player');
+        if (playerElement) {
+            playerElement.addEventListener('remove', () => {
+                clearInterval(progressInterval);
+            });
+        }
+    }
+
+    // Función para configurar reproductor de video real
+    function setupVideoPlayer() {
+        const video = document.getElementById('mainVideo');
+        const progressBar = document.getElementById('videoProgressBar');
+        const playControl = document.getElementById('playControlOverlay');
+        const playBtn = document.getElementById('videoPlayBtn');
+
+        if (!video) return;
+
+        // Detectar si es iOS
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        
+        // Configurar video para iOS
+        if (isIOS) {
+            video.muted = true;
+            video.autoplay = false;
+            playControl.style.display = 'flex';
+        } else {
+            video.muted = false;
+            playControl.style.display = 'none';
+        }
+
+        // Función para iniciar reproducción
+        const startPlayback = async () => {
+            try {
+                video.muted = false;
+                video.volume = 1.0;
+                await video.play();
+                playControl.style.display = 'none';
+                setTimeout(() => {
+                    video.muted = false;
+                }, 100);
+            } catch (error) {
+                console.log('Error al reproducir video:', error);
+                try {
+                    video.muted = true;
+                    await video.play();
+                    playControl.style.display = 'none';
+                } catch (fallbackError) {
+                    console.log('Error en fallback:', fallbackError);
+                }
+            }
+        };
+
+        // Event listeners para reproducción
+        if (playBtn) {
+            playBtn.addEventListener('click', startPlayback);
+            playControl.addEventListener('click', startPlayback);
+        }
+
+        // Intentar reproducción automática
+        if (!isIOS) {
+            video.play().catch(() => {
+                playControl.style.display = 'flex';
+            });
+        }
+
+        // Actualizar barra de progreso
+        video.addEventListener('timeupdate', () => {
+            if (video.duration > 0) {
+                const progress = (video.currentTime / video.duration) * 100;
+                progressBar.style.width = `${progress}%`;
+                
+                // Actualizar historial de visualización
+                if (Math.floor(video.currentTime) % 5 === 0) {
+                    addToWatchHistory(title, currentEpisode, progress);
+                }
+                
+                // Activar animación 2 segundos antes del final
+                const timeLeft = video.duration - video.currentTime;
+                if (timeLeft <= 2 && timeLeft > 1.5 && !animationTriggered) {
+                    animationTriggered = true;
+                    video.pause();
+                    
+                    showChapterEndAnimation(() => {
+                        transitionToNextEpisode();
+                    });
+                }
+            }
+        });
+        
+        // Evento cuando termina el video
+        video.addEventListener('ended', () => {
+            if (!animationTriggered) {
+                showChapterEndAnimation(() => {
+                    transitionToNextEpisode();
+                });
+            }
+        });
+
+        // Bloquear controles nativos del video
+        video.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        });
+        
+        video.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            return false;
+        });
+    }
+
+    // Función para configurar reproductor simulado
+    function setupSimulatedPlayer() {
+        const progressBar = document.getElementById('videoProgressBar');
+        
+        // Limpiar interval anterior si existe
+        if (watchInterval) {
+            clearInterval(watchInterval);
+        }
+        
+        // Simular progreso del video
+        watchInterval = setInterval(() => {
+            watchTime += 1;
+            const progress = Math.min((watchTime / 60) * 100, 100); // 60 seconds = 100%
+            progressBar.style.width = `${progress}%`;
+            
+            // Update watch history every 5 seconds
+            if (watchTime % 5 === 0) {
+                addToWatchHistory(title, currentEpisode, progress);
+            }
+            
+            // Auto advance to next episode after 60 seconds
+            if (watchTime >= 60) {
+                showChapterEndAnimation(() => {
+                    transitionToNextEpisode();
+                });
+            }
+        }, 1000);
+    }
+
+    // Función para transición al siguiente episodio
+    function transitionToNextEpisode() {
+        const nextEpisode = currentEpisode + 1;
+        
+        if (nextEpisode <= 45) { // Máximo 45 episodios
+            if (nextEpisode <= 8 || unlockedEpisodes.includes(nextEpisode)) {
+                // Episodio disponible
+                currentEpisode = nextEpisode;
+                loadEpisode(currentEpisode);
+                showNotification(`Reproduciendo Episodio ${currentEpisode}`, 'success');
+            } else if (userCoins >= 30) {
+                // Auto-desbloquear con monedas
+                if (unlockEpisode(nextEpisode)) {
+                    currentEpisode = nextEpisode;
+                    loadEpisode(currentEpisode);
+                    showNotification(`Episodio ${currentEpisode} desbloqueado automáticamente`, 'success');
+                }
+            } else {
+                // Mostrar modal de suscripción
+                showSubscriptionModal(nextEpisode, title, player);
+            }
+        } else {
+            showNotification('Has llegado al final de la serie', 'info');
+        }
+    }
+
+    // Función de navegación eliminada - control automático por video
+
+    // Cargar episodio inicial
+    loadEpisode(currentEpisode);
+
+    // Navegación eliminada - solo se puede avanzar automáticamente al terminar episodio
+
+    // Navegación con gestos de swipe (opcional para el futuro)
+    let startY = 0;
+    let endY = 0;
+    
+    player.addEventListener('touchstart', (e) => {
+        startY = e.touches[0].clientY;
+    });
+    
+    player.addEventListener('touchend', (e) => {
+        endY = e.changedTouches[0].clientY;
+        const deltaY = startY - endY;
+        
+        // Swipe hacia arriba = siguiente episodio
+        if (deltaY > 50) {
+            transitionToNextEpisode();
+        }
+        // Swipe hacia abajo = episodio anterior
+        else if (deltaY < -50 && currentEpisode > 1) {
+            currentEpisode--;
+            loadEpisode(currentEpisode);
+            showNotification(`Episodio ${currentEpisode}`, 'info');
+        }
+    });
+
+    // Event listeners para botones de control
+    const closeBtn = player.querySelector('.close-player');
+    const likeBtn = player.querySelector('#likeBtn');
+    const playPauseBtn = player.querySelector('#playPauseBtn');
+    const muteBtn = player.querySelector('#muteBtn');
+    const episodesBtn = player.querySelector('#episodesBtn');
+
+    closeBtn.addEventListener('click', () => {
+        if (watchInterval) clearInterval(watchInterval);
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+        player.classList.remove('active');
+        setTimeout(() => {
+            if (document.body.contains(player)) {
+                document.body.removeChild(player);
+            }
+        }, 300);
+    });
+
+    likeBtn.addEventListener('click', () => {
+        likeBtn.classList.toggle('liked');
+        showNotification(likeBtn.classList.contains('liked') ? 'Agregado a favoritos' : 'Removido de favoritos');
+    });
+
+    let isPlaying = true;
+    playPauseBtn.addEventListener('click', () => {
+        const video = document.getElementById('mainVideo');
+        const playPauseIcon = document.getElementById('playPauseIcon');
+        
+        if (video) {
+            if (video.paused) {
+                video.play();
+                isPlaying = true;
+                playPauseIcon.setAttribute('d', 'M6 19h4V5H6v14zm8-14v14h4V5h-4z');
+            } else {
+                video.pause();
+                isPlaying = false;
+                playPauseIcon.setAttribute('d', 'M8 5v14l11-7z');
+            }
+        } else {
+            // Para reproductor simulado
+            isPlaying = !isPlaying;
+            if (isPlaying) {
+                setupSimulatedPlayer();
+                playPauseIcon.setAttribute('d', 'M6 19h4V5H6v14zm8-14v14h4V5h-4z');
+            } else {
+                if (watchInterval) clearInterval(watchInterval);
+                playPauseIcon.setAttribute('d', 'M8 5v14l11-7z');
+            }
+        }
+    });
+
+    let isMuted = false;
+    muteBtn.addEventListener('click', () => {
+        const video = document.getElementById('mainVideo');
+        const muteIcon = document.getElementById('muteIcon');
+        
+        if (video) {
+            isMuted = !video.muted;
+            video.muted = isMuted;
+            
+            muteIcon.setAttribute('d', isMuted ? 
+                'M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z' :
+                'M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z'
+            );
+        } else {
+            isMuted = !isMuted;
+            muteIcon.setAttribute('d', isMuted ?
+                'M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z' :
+                'M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z'
+            );
+        }
+    });
+
+    episodesBtn.addEventListener('click', () => {
+        showEpisodesModal(title, currentEpisode);
+    });
+}
+
+function showEpisodesModal(seriesTitle, currentEpisodeNum = 1) {
+    const modal = document.createElement('div');
+    modal.className = 'episodes-modal';
+    modal.innerHTML = `
+        <div class="episodes-header">
+            <h3 class="episodes-title">${seriesTitle} - Episodios</h3>
+            <button class="episodes-close">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                </svg>
+            </button>
+        </div>
+        <div class="episodes-list">
+            ${generateEpisodesList(currentEpisodeNum)}
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    setTimeout(() => modal.classList.add('active'), 100);
+
+    const closeBtn = modal.querySelector('.episodes-close');
+    closeBtn.addEventListener('click', () => {
+        modal.classList.remove('active');
+        setTimeout(() => document.body.removeChild(modal), 300);
+    });
+
+    // Episode selection with monetization
+    const episodeItems = modal.querySelectorAll('.episode-item');
+    episodeItems.forEach((item, index) => {
+        item.addEventListener('click', () => {
+            const episodeNum = index + 1;
+            if (handleEpisodeClick(episodeNum)) {
+                episodeItems.forEach(ep => ep.classList.remove('current'));
+                item.classList.add('current');
+                modal.classList.remove('active');
+                setTimeout(() => {
+                    if (document.body.contains(modal)) {
+                        document.body.removeChild(modal);
+                    }
+                }, 300);
+                
+                // Cerrar reproductor actual y abrir nuevo episodio
+                const currentPlayer = document.querySelector('.tiktok-player');
+                if (currentPlayer) {
+                    currentPlayer.classList.remove('active');
+                    setTimeout(() => {
+                        if (document.body.contains(currentPlayer)) {
+                            document.body.removeChild(currentPlayer);
+                        }
+                        showTikTokPlayer(seriesTitle, episodeNum);
+                    }, 300);
+                }
+            }
+        });
+    });
+}
+
+function generateEpisodesList(currentEpisode = 1) {
+    let episodes = '';
+    for (let i = 1; i <= 45; i++) {
+        const isLocked = i > 8 && !unlockedEpisodes.includes(i);
+        const canUnlock = isLocked && userCoins >= 30;
+        const isCurrent = i === currentEpisode;
+        const lockIcon = isLocked ? `
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="lock-icon">
+                <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM15.1 8H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/>
+            </svg>
+        ` : '';
+
+        episodes += `
+            <div class="episode-item ${isCurrent ? 'current' : ''} ${isLocked ? 'locked' : ''} ${canUnlock ? 'can-unlock' : ''}" data-episode="${i}">
+                <div class="episode-number">
+                    ${i} 
+                    ${lockIcon}
+                    ${canUnlock ? '<span class="auto-unlock-indicator">Auto-desbloquear</span>' : ''}
+                </div>
+                <div class="episode-info">
+                    <h4>Episodio ${i}</h4>
+                    <p>1 min • ${Math.floor(Math.random() * 2) + 8}.${Math.floor(Math.random() * 9)}</p>
+                    ${isLocked && !canUnlock ? '<p class="unlock-cost">30 monedas</p>' : ''}
+                    ${canUnlock ? '<p class="unlock-ready">¡Listo para desbloquear!</p>' : ''}
+                </div>
+            </div>
+        `;
+    }
+    return episodes;
+}
+
+// Auto-unlock detection
+function updateAutoUnlockStatus() {
+    const autoUnlockStatus = document.getElementById('autoUnlockStatus');
+    const lockedEpisodes = [];
+
+    for (let i = 9; i <= 45; i++) {
+        if (!unlockedEpisodes.includes(i)) {
+            lockedEpisodes.push(i);
+        }
+    }
+
+    const canAutoUnlock = lockedEpisodes.length > 0 && userCoins >= 30;
+
+    if (canAutoUnlock && autoUnlockStatus) {
+        autoUnlockStatus.style.display = 'block';
+    } else if (autoUnlockStatus) {
+        autoUnlockStatus.style.display = 'none';
+    }
+}
+
+// Modern notification system
+function showNotification(message, type = 'success') {
+    const container = document.getElementById('notificationContainer');
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+
+    const icons = {
+        success: '✓',
+        info: 'i',
+        warning: '!',
+        error: '×'
+    };
+
+    notification.innerHTML = `
+        <span class="notification-icon">${icons[type] || icons.success}</span>
+        <span>${message}</span>
+    `;
+
+    container.appendChild(notification);
+
+    setTimeout(() => {
+        if (container.contains(notification)) {
+            container.removeChild(notification);
+        }
+    }, 3000);
+}
+
+// Search modal functionality
+function showSearchModal() {
+    const modal = document.getElementById('searchModal');
+    const input = document.getElementById('searchInput');
+
+    modal.classList.add('active');
+    setTimeout(() => input.focus(), 100);
+}
+
+function hideSearchModal() {
+    const modal = document.getElementById('searchModal');
+    modal.classList.remove('active');
+    document.getElementById('searchInput').value = '';
+    document.getElementById('searchResults').style.display = 'none';
+}
+
+// Stripe Integration
+const stripe = Stripe('pk_test_51RF622RCIbJ5KY2omXVZiiIrOdzRWt7oPCxx6klyoMVfudhBZwdOoaDvLRpDslpTlsfw792JwuKowkFh6s1QFbf500EruqKvnl');
+
+// Expanded search functionality
+function showExpandedSearch() {
+    const modal = document.getElementById('expandedSearchModal');
+    const input = document.getElementById('expandedSearchInput');
+
+    modal.classList.add('active');
+    setTimeout(() => input.focus(), 100);
+
+    // Load all series initially
+    displayExpandedSearchResults(getAllSeries());
+}
+
+function hideExpandedSearch() {
+    const modal = document.getElementById('expandedSearchModal');
+    modal.classList.remove('active');
+    document.getElementById('expandedSearchInput').value = '';
+}
+
+function getAllSeries() {
+    return [
+        { 
+            title: 'La Niña de los Cuatro CEO', 
+            rating: '9.5', 
+            episodes: '45 eps', 
+            year: '2024', 
+            genre: 'Romance Empresarial', 
+            thumbnail: 'https://www.dropbox.com/scl/fi/r24wdvq29de6w6djkaqsc/IMG_4044.png?rlkey=5e2lge2dv00n427p0i5jdqxgy&st=65b6ye7u&raw=1',
+            description: 'Una joven prodigio se convierte en la protegida de cuatro poderosos CEOs, navegando el mundo empresarial mientras descubre el amor.',
+            hasMultipleEpisodes: true
+        }
+    ];
+}
+
+function displayExpandedSearchResults(results) {
+    const resultsContainer = document.getElementById('expandedSearchResults');
+
+    resultsContainer.innerHTML = results.map(result => `
+        <div class="expanded-result-card" onclick="selectExpandedSearchResult('${result.title}')">
+            <img src="${result.thumbnail}" alt="${result.title}" class="expanded-result-image">
+            <div class="expanded-result-info">
+                <div class="expanded-result-genre">${result.genre}</div>
+                <h3 class="expanded-result-title">${result.title}</h3>
+                <div class="expanded-result-rating">
+                    <span class="star">★</span>
+                    <span>${result.rating}</span>
+                    <span>•</span>
+                    <span>${result.episodes}</span>
+                    <span>•</span>
+                    <span>${result.year}</span>
+                </div>
+                <p class="expanded-result-description">${result.description}</p>
+                <button class="expanded-result-play">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    Ver Ahora
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function selectExpandedSearchResult(title) {
+    hideExpandedSearch();
+    showTikTokPlayer(title);
+}
+
+function performExpandedSearch(query) {
+    console.log('Searching for:', query);
+
+    const allSeries = getAllSeries();
+    const filteredResults = allSeries.filter(result => 
+        result.title.toLowerCase().includes(query.toLowerCase()) ||
+        result.genre.toLowerCase().includes(query.toLowerCase()) ||
+        result.description.toLowerCase().includes(query.toLowerCase())
     );
+
+    displayExpandedSearchResults(filteredResults);
 }
 
-.welcome-content {
-    position: relative;
-    z-index: 2;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 2rem;
-    text-align: center;
-}
+function filterExpandedResults(category) {
+    const allSeries = getAllSeries();
+    let filteredResults = allSeries;
 
-.welcome-logo h1 {
-    font-size: 4rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, #1d9bf0, #ffd700);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 2rem;
-    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-.welcome-message {
-    margin-bottom: 3rem;
-}
-
-.welcome-message h2 {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #e7e9ea;
-    margin-bottom: 1rem;
-    line-height: 1.3;
-}
-
-.welcome-message p {
-    font-size: 1.1rem;
-    color: #71767b;
-    font-weight: 500;
-}
-
-.welcome-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    width: 100%;
-    max-width: 320px;
-    margin-bottom: 3rem;
-}
-
-.welcome-btn {
-    padding: 1rem 2rem;
-    border: none;
-    border-radius: 25px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    min-height: 56px;
-}
-
-.welcome-btn-primary {
-    background: linear-gradient(135deg, #1d9bf0, #1a8cd8);
-    color: white;
-    box-shadow: 0 4px 12px rgba(29, 155, 240, 0.3);
-}
-
-.welcome-btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(29, 155, 240, 0.4);
-}
-
-.welcome-btn-secondary {
-    background: transparent;
-    color: #e7e9ea;
-    border: 2px solid #536471;
-}
-
-.welcome-btn-secondary:hover {
-    background: rgba(231, 233, 234, 0.1);
-    border-color: #71767b;
-}
-
-.welcome-footer p {
-    color: #71767b;
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-
-/* Auth Screens */
-.auth-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.5rem 2rem;
-    border-bottom: 1px solid #2f3336;
-    position: relative;
-    z-index: 3;
-}
-
-.auth-back {
-    background: #16181c;
-    border: 1px solid #2f3336;
-    color: #e7e9ea;
-    cursor: pointer;
-    padding: 0.75rem;
-    border-radius: 50%;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-}
-
-.auth-back:hover {
-    background: #1d9bf0;
-    border-color: #1d9bf0;
-}
-
-.auth-header h2 {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: #e7e9ea;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-.auth-content {
-    padding: 2rem;
-    height: calc(100vh - 90px);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-}
-
-.auth-logo {
-    margin-bottom: 3rem;
-}
-
-.auth-logo h1 {
-    font-size: 3rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, #1d9bf0, #ffd700);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 0.5rem;
-}
-
-.auth-logo p {
-    font-size: 1.1rem;
-    color: #71767b;
-    font-weight: 500;
-}
-
-.auth-methods {
-    width: 100%;
-    max-width: 400px;
-    margin-bottom: 2rem;
-}
-
-.auth-method-btn {
-    width: 100%;
-    background: #16181c;
-    border: 2px solid #2f3336;
-    border-radius: 20px;
-    padding: 1.5rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-.auth-method-btn:hover {
-    border-color: #1d9bf0;
-    background: rgba(29, 155, 240, 0.05);
-    transform: translateY(-2px);
-}
-
-.auth-method-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 1.2rem;
-    flex-shrink: 0;
-}
-
-.yahoo-icon {
-    background: linear-gradient(135deg, #7B68EE, #9370DB);
-    color: white;
-}
-
-.auth-method-info {
-    text-align: left;
-    flex: 1;
-}
-
-.auth-method-info h3 {
-    color: #e7e9ea;
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-}
-
-.auth-method-info p {
-    color: #71767b;
-    font-size: 0.9rem;
-    margin: 0;
-}
-
-.auth-benefits {
-    background: #16181c;
-    border: 1px solid #2f3336;
-    border-radius: 16px;
-    padding: 1.5rem;
-    margin-top: 1rem;
-}
-
-.auth-benefits h3 {
-    color: #e7e9ea;
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    text-align: center;
-}
-
-.benefit-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
-    color: #71767b;
-}
-
-.benefit-item:last-child {
-    margin-bottom: 0;
-}
-
-.benefit-item svg {
-    color: #22c55e;
-    flex-shrink: 0;
-}
-
-.auth-loading {
-    text-align: center;
-    padding: 2rem;
-}
-
-.loading-spinner-auth {
-    width: 40px;
-    height: 40px;
-    border: 4px solid rgba(29, 155, 240, 0.3);
-    border-top: 4px solid #1d9bf0;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 1rem;
-}
-
-.auth-loading p {
-    color: #71767b;
-    font-size: 1rem;
-}
-
-.auth-footer {
-    margin-top: auto;
-    padding-top: 2rem;
-}
-
-.auth-footer p {
-    color: #71767b;
-    font-size: 0.9rem;
-}
-
-.auth-link {
-    background: none;
-    border: none;
-    color: #1d9bf0;
-    cursor: pointer;
-    font-weight: 600;
-    text-decoration: underline;
-    padding: 0;
-    font-size: inherit;
-}
-
-.auth-link:hover {
-    color: #1a8cd8;
-}
-
-/* Auth Success Modal */
-.auth-success-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.95);
-    backdrop-filter: blur(10px);
-    z-index: 10001;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-}
-
-.auth-success-modal.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-.auth-success-content {
-    background: #16181c;
-    border: 2px solid #1d9bf0;
-    border-radius: 20px;
-    padding: 3rem 2rem;
-    text-align: center;
-    max-width: 400px;
-    width: 90%;
-    animation: bounceIn 0.5s ease;
-}
-
-.auth-success-icon {
-    width: 80px;
-    height: 80px;
-    background: linear-gradient(135deg, #22c55e, #16a34a);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1.5rem;
-    color: white;
-}
-
-.auth-success-content h2 {
-    color: #e7e9ea;
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-}
-
-.auth-success-content p {
-    color: #71767b;
-    margin-bottom: 2rem;
-    font-size: 1rem;
-}
-
-.auth-success-btn {
-    background: linear-gradient(135deg, #1d9bf0, #1a8cd8);
-    color: white;
-    border: none;
-    padding: 1rem 2rem;
-    border-radius: 25px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    width: 100%;
-}
-
-.auth-success-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(29, 155, 240, 0.3);
-}
-
-@keyframes bounceIn {
-    0% {
-        opacity: 0;
-        transform: scale(0.3);
+    if (category !== 'todos') {
+        filteredResults = allSeries.filter(result => 
+            result.genre.toLowerCase().includes(category.toLowerCase())
+        );
     }
-    50% {
-        transform: scale(1.05);
-    }
-    70% {
-        transform: scale(0.9);
-    }
-    100% {
-        opacity: 1;
-        transform: scale(1);
+
+    displayExpandedSearchResults(filteredResults);
+}
+
+// Global payment variables
+let currentPurchaseAmount = 0;
+let currentPurchaseCoins = 0;
+
+// Show payment modal
+function showPaymentModal(amount, coins) {
+    currentPurchaseAmount = amount;
+    currentPurchaseCoins = coins;
+
+    const modal = document.getElementById('paymentModal');
+    modal.classList.add('active');
+
+    // Reset form
+    const cardForm = document.getElementById('cardForm');
+    cardForm.style.display = 'none';
+
+    // Reset payment options
+    document.querySelectorAll('.payment-option').forEach(option => {
+        option.style.background = '#16181c';
+    });
+}
+
+function hidePaymentModal() {
+    const modal = document.getElementById('paymentModal');
+    modal.classList.remove('active');
+}
+
+// Apple Pay implementation
+function processApplePay() {
+    if (window.ApplePaySession && ApplePaySession.canMakePayments()) {
+        const request = {
+            countryCode: 'US',
+            currencyCode: 'USD',
+            supportedNetworks: ['visa', 'masterCard', 'amex'],
+            merchantCapabilities: ['supports3DS'],
+            total: {
+                label: `${currentPurchaseCoins} Monedas Beemo`,
+                amount: (currentPurchaseAmount / 100).toFixed(2)
+            }
+        };
+
+        const session = new ApplePaySession(3, request);
+
+        session.onvalidatemerchant = async (event) => {
+            // In a real app, you would validate with your server
+            showNotification('Autenticando con Apple Pay...', 'info');
+        };
+
+        session.onpaymentauthorized = async (event) => {
+            // Process payment
+            const payment = event.payment;
+
+            try {
+                // Simulate payment processing
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                session.completePayment(ApplePaySession.STATUS_SUCCESS);
+                addCoins(currentPurchaseCoins);
+                hidePaymentModal();
+                showNotification(`¡Compra exitosa! ${currentPurchaseCoins} monedas agregadas`, 'success');
+            } catch (error) {
+                session.completePayment(ApplePaySession.STATUS_FAILURE);
+                showNotification('Error en el pago', 'error');
+            }
+        };
+
+        session.begin();
+    } else {
+        showNotification('Apple Pay no está disponible en este dispositivo', 'warning');
     }
 }
 
-/* Main App Hidden Initially */
-.main-app {
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-}
+// Credit card processing with Stripe
+async function processCreditCard() {
+    const cardNumber = document.getElementById('cardNumber').value;
+    const cardExpiry = document.getElementById('cardExpiry').value;
+    const cardCvc = document.getElementById('cardCvc').value;
+    const cardName = document.getElementById('cardName').value;
 
-.main-app.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #000000;
-    color: #ffffff;
-    line-height: 1.6;
-    overflow-x: hidden;
-    min-height: 100vh;
-}
-
-/* Header - Twitter Style */
-.header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid #2f3336;
-    transition: all 0.3s ease;
-}
-
-.nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.nav-left {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-}
-
-.nav-menu {
-    display: flex;
-    list-style: none;
-    gap: 2rem;
-}
-
-.nav-link {
-    color: #e7e9ea;
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 0.95rem;
-    transition: all 0.2s ease;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-}
-
-.nav-link:hover,
-.nav-link.active {
-    color: #ffffff;
-    background: rgba(29, 155, 240, 0.1);
-}
-
-.nav-right {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex: 1;
-    justify-content: flex-end;
-}
-
-.search-bar-container {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    background: #16181c;
-    border: 1px solid #2f3336;
-    border-radius: 25px;
-    padding: 0.6rem 1rem;
-    flex: 1;
-    max-width: 400px;
-    transition: border-color 0.2s ease;
-}
-
-.search-bar-container:focus-within {
-    border-color: #1d9bf0;
-}
-
-.search-icon-bar {
-    color: #71767b;
-    flex-shrink: 0;
-}
-
-.search-bar-input {
-    flex: 1;
-    background: none;
-    border: none;
-    color: #e7e9ea;
-    font-size: 0.95rem;
-    outline: none;
-    font-family: inherit;
-}
-
-.search-bar-input::placeholder {
-    color: #71767b;
-}
-
-.rewards-btn {
-    background: linear-gradient(135deg, #ffd700, #ffb347);
-    border: none;
-    color: #000;
-    cursor: pointer;
-    padding: 0.6rem 1rem;
-    border-radius: 20px;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-weight: 600;
-    font-size: 0.9rem;
-}
-
-.rewards-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
-}
-
-.coin-count {
-    background: rgba(0, 0, 0, 0.2);
-    padding: 0.2rem 0.5rem;
-    border-radius: 10px;
-    color: #000;
-    font-weight: 700;
-}
-
-/* Hero Section - Twitter Style */
-.hero {
-    margin-top: 80px;
-    padding: 2rem;
-    max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
-    border-bottom: 1px solid #2f3336;
-}
-
-.hero-content {
-    max-width: 600px;
-}
-
-.hero-title {
-    font-size: 2.5rem;
-    font-weight: 800;
-    margin-bottom: 1rem;
-    line-height: 1.2;
-    color: #e7e9ea;
-}
-
-.hero-description {
-    font-size: 1.1rem;
-    margin-bottom: 1.5rem;
-    color: #71767b;
-    line-height: 1.5;
-}
-
-.hero-buttons {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-.btn {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 20px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.btn-primary {
-    background: #1d9bf0;
-    color: white;
-}
-
-.btn-primary:hover {
-    background: #1a8cd8;
-}
-
-.btn-secondary {
-    background: transparent;
-    color: #e7e9ea;
-    border: 1px solid #536471;
-}
-
-.btn-secondary:hover {
-    background: rgba(231, 233, 234, 0.1);
-}
-
-.hero-info {
-    display: flex;
-    gap: 2rem;
-    color: #71767b;
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-
-.rating {
-    color: #1d9bf0;
-    font-weight: 600;
-}
-
-.rating::before {
-    content: "★ ";
-    color: #ffd700;
-}
-
-/* Categories - Small Twitter-style carousel */
-.categories-section {
-    padding: 1rem 2rem 0;
-    max-width: 1200px;
-    margin: 0 auto;
-    border-bottom: 1px solid #2f3336;
-}
-
-.categories-carousel {
-    display: flex;
-    gap: 0.5rem;
-    overflow-x: auto;
-    padding-bottom: 1rem;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
-
-.categories-carousel::-webkit-scrollbar {
-    display: none;
-}
-
-.category-chip {
-    background: transparent;
-    border: 1px solid #536471;
-    color: #e7e9ea;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-    min-width: fit-content;
-}
-
-.category-chip:hover,
-.category-chip.active {
-    background: #1d9bf0;
-    border-color: #1d9bf0;
-    color: white;
-}
-
-/* Content Feed - Horizontal carousel style */
-.content-feed {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-}
-
-.content-section {
-    margin-bottom: 3rem;
-    opacity: 1;
-    visibility: visible;
-}
-
-@keyframes fadeIn {
-    from { 
-        opacity: 0; 
-        transform: translateY(30px); 
+    if (!cardNumber || !cardExpiry || !cardCvc || !cardName) {
+        showNotification('Por favor completa todos los campos', 'warning');
+        return;
     }
-    to { 
-        opacity: 1; 
-        transform: translateY(0); 
+
+    try {
+        showNotification('Procesando pago con Stripe...', 'info');
+        document.getElementById('processPaymentBtn').disabled = true;
+        document.getElementById('processPaymentBtn').innerHTML = `
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div class="loading-spinner"></div>
+                Procesando...
+            </div>
+        `;
+
+        // Create payment intent on your server
+        const response = await fetch('https://api.stripe.com/v1/payment_intents', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer sk_test_51RF622RCIbJ5KY2oXhGpadJFs8tpUIXVad4c6rL2HBq1YuWnkiKR3x4THEdrhDe9Lda8LMsMkPADUDhHDqBeA52z00heZI3BbD',
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                amount: currentPurchaseAmount,
+                currency: 'usd',
+                description: `${currentPurchaseCoins} Monedas Beemo`,
+                'payment_method_types[]': 'card'
+            })
+        });
+
+        const paymentIntent = await response.json();
+
+        if (paymentIntent.error) {
+            throw new Error(paymentIntent.error.message);
+        }
+
+        // Create payment method with card details
+        const { error: pmError, paymentMethod } = await stripe.createPaymentMethod({
+            type: 'card',
+            card: {
+                number: cardNumber.replace(/\s/g, ''),
+                exp_month: parseInt(cardExpiry.split('/')[0]),
+                exp_year: parseInt('20' + cardExpiry.split('/')[1]),
+                cvc: cardCvc,
+            },
+            billing_details: {
+                name: cardName,
+            },
+        });
+
+        if (pmError) {
+            throw pmError;
+        }
+
+        // Confirm payment
+        const { error: confirmError, paymentIntent: confirmedPayment } = await stripe.confirmCardPayment(
+            paymentIntent.client_secret,
+            {
+                payment_method: paymentMethod.id
+            }
+        );
+
+        if (confirmError) {
+            throw confirmError;
+        }
+
+        if (confirmedPayment.status === 'succeeded') {
+            addCoins(currentPurchaseCoins);
+            hidePaymentModal();
+            showNotification(`¡Pago exitoso! ${currentPurchaseCoins} monedas agregadas`, 'success');
+
+            // Log successful payment
+            console.log('Payment successful:', confirmedPayment.id);
+        }
+
+    } catch (error) {
+        console.error('Payment error:', error);
+        showNotification(`Error en el pago: ${error.message}`, 'error');
+    } finally {
+        document.getElementById('processPaymentBtn').disabled = false;
+        document.getElementById('processPaymentBtn').innerHTML = 'Procesar Pago';
     }
 }
 
-.section-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-    color: #e7e9ea;
+// PayPal processing
+function processPayPal() {
+    showNotification('PayPal está temporalmente fuera de servicio. Intenta con otro método de pago.', 'warning');
 }
 
-.content-grid {
-    display: flex;
-    gap: 1rem;
-    overflow-x: auto;
-    padding-bottom: 1rem;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+// Purchase coins function
+function purchaseCoins(amount, coins) {
+    showPaymentModal(amount, coins);
 }
 
-.content-grid::-webkit-scrollbar {
-    display: none;
-}
+// Check for successful payment
+function checkPaymentSuccess() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const payment = urlParams.get('payment');
+    const coins = urlParams.get('coins');
 
-.content-card {
-    background: #16181c;
-    border-radius: 8px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: 1px solid #2f3336;
-    position: relative;
-    width: 180px;
-    height: 260px;
-    opacity: 1;
-    visibility: visible;
-    justify-self: start;
-    flex-shrink: 0;
-}
+    if (payment === 'success' && coins) {
+        addCoins(parseInt(coins));
+        showNotification(`¡Compra exitosa! ${coins} monedas agregadas a tu cuenta`, 'success');
 
-.content-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-    border-color: #1d9bf0;
-}
-
-.content-card img {
-    width: 100%;
-    height: 180px;
-    object-fit: cover;
-}
-
-.card-info {
-    padding: 0.75rem;
-    height: 80px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.card-info h3 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: #e7e9ea;
-    line-height: 1.3;
-}
-
-.card-info p {
-    color: #71767b;
-    font-size: 0.9rem;
-}
-
-.play-btn {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: rgba(0, 0, 0, 0.85);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 0.75rem;
-    border-radius: 50%;
-    cursor: pointer;
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    opacity: 0;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-.content-card:hover .play-btn {
-    opacity: 1;
-}
-
-.play-btn:hover {
-    background: rgba(29, 155, 240, 0.9);
-    border-color: #1d9bf0;
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(29, 155, 240, 0.4);
-}
-
-.play-btn svg {
-    margin-left: 2px;
-    width: 18px;
-    height: 18px;
-}
-
-/* Mobile specific play button improvements */
-@media (max-width: 768px) {
-    .play-btn {
-        opacity: 1;
-        background: rgba(29, 155, 240, 0.9);
-        border-color: rgba(29, 155, 240, 0.3);
-        width: 40px;
-        height: 40px;
-        padding: 0.6rem;
-    }
-    
-    .play-btn:active {
-        transform: scale(0.95);
-        background: rgba(29, 155, 240, 1);
-    }
-    
-    .play-btn svg {
-        width: 16px;
-        height: 16px;
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
     }
 }
 
-/* Continue Watching */
-.continue-card {
-    position: relative;
-}
-
-.progress-indicator {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.2);
-    z-index: 2;
-}
-
-.progress-fill {
-    height: 100%;
-    background: #1d9bf0;
-    transition: width 0.3s ease;
-}
-
-/* TikTok Style Video Player */
-.tiktok-player {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: #000000;
-    z-index: 9999;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-}
-
-.tiktok-player.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-/* Navegación tipo TikTok */
-.tiktok-navigation {
-    position: absolute;
-    left: 50%;
-    bottom: 8rem;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    z-index: 15;
-}
-
-.nav-btn {
-    background: rgba(0, 0, 0, 0.7);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    padding: 0.75rem 1.5rem;
-    border-radius: 25px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-    font-weight: 600;
-    backdrop-filter: blur(10px);
-    min-width: 120px;
-    justify-content: center;
-}
-
-.nav-btn:hover {
-    background: rgba(29, 155, 240, 0.8);
-    border-color: #1d9bf0;
-    transform: scale(1.05);
-}
-
-.nav-btn:active {
-    transform: scale(0.95);
-}
-
-.prev-btn svg {
-    transform: rotate(180deg);
-}
-
-/* Responsive para navegación TikTok */
-@media (max-width: 768px) {
-    .tiktok-navigation {
-        bottom: 6rem;
-        left: 1rem;
-        right: 1rem;
-        transform: none;
-        flex-direction: row;
-        justify-content: space-between;
-    }
-    
-    .nav-btn {
-        flex: 1;
-        max-width: 140px;
-        padding: 0.6rem 1rem;
-        font-size: 0.8rem;
-    }
-    
-    .nav-btn span {
-        display: none;
-    }
-    
-    .nav-btn {
-        min-width: auto;
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        padding: 0;
-    }
-}
-
-.video-container-tiktok {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: #1a1a1a;
-    border-radius: 0;
-    overflow: hidden;
-    z-index: 10001;
-}
-
-.video-placeholder-tiktok {
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #1d9bf0 0%, #1a8cd8 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-}
-
-.video-controls-tiktok {
-    position: absolute;
-    right: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    z-index: 10;
-}
-
-.tiktok-btn {
-    background: rgba(0, 0, 0, 0.6);
-    border: none;
-    color: white;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    backdrop-filter: blur(10px);
-}
-
-.tiktok-btn:hover {
-    background: rgba(29, 155, 240, 0.8);
-    transform: scale(1.1);
-}
-
-.like-btn.liked {
-    color: #ff2d55;
-    background: rgba(255, 45, 85, 0.2);
-}
-
-.video-info-tiktok {
-    position: absolute;
-    bottom: 1rem;
-    left: 1rem;
-    right: 5rem;
-    color: white;
-    z-index: 10;
-}
-
-.video-title-tiktok {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-.video-description-tiktok {
-    font-size: 0.9rem;
-    opacity: 0.9;
-    margin-bottom: 1rem;
-}
-
-.video-progress-tiktok {
-    height: 3px;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 2px;
-    overflow: hidden;
-}
-
-.video-progress-fill {
-    height: 100%;
-    background: white;
-    width: 25%;
-    transition: width 0.3s ease;
-}
-
-.close-player {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    background: rgba(0, 0, 0, 0.8);
-    border: none;
-    color: white;
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 10;
-    backdrop-filter: blur(10px);
-    transition: all 0.2s ease;
-}
-
-.close-player:hover {
-    background: rgba(29, 155, 240, 0.8);
-    transform: scale(1.05);
-}
-
-.episodes-modal {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: #16181c;
-    border-radius: 20px 20px 0 0;
-    max-height: 50vh;
-    transform: translateY(100%);
-    transition: transform 0.3s ease;
-    z-index: 10000;
-    border: 1px solid #2f3336;
-}
-
-.episodes-modal.active {
-    transform: translateY(0);
-}
-
-.episodes-header {
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid #2f3336;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.episodes-title {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: #e7e9ea;
-}
-
-.episodes-close {
-    background: rgba(29, 155, 240, 0.1);
-    border: 1px solid #1d9bf0;
-    color: #1d9bf0;
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-}
-
-.episodes-close:hover {
-    background: #1d9bf0;
-    color: white;
-}
-
-.episodes-list {
-    max-height: 35vh;
-    overflow-y: auto;
-    padding: 1rem;
-}
-
-.episode-item {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.75rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.2s ease;
-    margin-bottom: 0.5rem;
-}
-
-.episode-item:hover {
-    background: rgba(29, 155, 240, 0.1);
-}
-
-.episode-item.current {
-    background: rgba(29, 155, 240, 0.2);
-    border: 1px solid #1d9bf0;
-}
-
-.episode-number {
-    background: #2f3336;
-    color: #e7e9ea;
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 0.9rem;
-}
-
-.episode-info h4 {
-    color: #e7e9ea;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-}
-
-.episode-info p {
-    color: #71767b;
-    font-size: 0.85rem;
-}
-
-.unlock-cost {
-    color: #ffd700 !important;
-    font-weight: 600 !important;
-    font-size: 0.8rem !important;
-}
-
-.lock-icon {
-    color: #71767b;
-    margin-left: 0.5rem;
-    width: 14px;
-    height: 14px;
-}
-
-.episode-item.can-unlock .lock-icon {
-    color: #1d9bf0;
-}
-
-.auto-unlock-indicator {
-    display: block;
-    font-size: 0.7rem;
-    color: #1d9bf0;
-    font-weight: 600;
-    margin-top: 0.2rem;
-}
-
-.unlock-ready {
-    color: #1d9bf0 !important;
-    font-weight: 600 !important;
-    font-size: 0.8rem !important;
-}
-
-.episode-item.can-unlock {
-    border-left: 3px solid #1d9bf0;
-}
-
-.episode-item.can-unlock .episode-number {
-    background: linear-gradient(135deg, #1d9bf0, #1a8cd8);
-    color: white;
-}
-
-/* Search Modal - Twitter Style */
-.search-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.65);
-    backdrop-filter: blur(20px);
-    z-index: 9999;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding-top: 5vh;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-}
-
-.search-modal-overlay.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-.search-modal-container {
-    background: #000000;
-    border: 1px solid #2f3336;
-    border-radius: 16px;
-    width: 90%;
-    max-width: 600px;
-    max-height: 80vh;
-    overflow: hidden;
-    animation: slideDown 0.3s ease;
-}
-
-.search-header {
-    display: flex;
-    align-items: center;
-    padding: 1rem;
-    border-bottom: 1px solid #2f3336;
-    gap: 1rem;
-}
-
-.search-input-container {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    background: #16181c;
-    border: 1px solid #2f3336;
-    border-radius: 20px;
-    padding: 0.75rem 1rem;
-    transition: border-color 0.2s ease;
-}
-
-.search-input-container:focus-within {
-    border-color: #1d9bf0;
-}
-
-.search-icon {
-    color: #71767b;
-    flex-shrink: 0;
-}
-
-.search-input {
-    flex: 1;
-    background: none;
-    border: none;
-    color: #e7e9ea;
-    font-size: 1.1rem;
-    outline: none;
-    font-family: inherit;
-}
-
-.search-input::placeholder {
-    color: #71767b;
-}
-
-.search-close {
-    background: none;
-    border: none;
-    color: #71767b;
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 50%;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.search-close:hover {
-    color: #e7e9ea;
-    background: rgba(231, 233, 234, 0.1);
-}
-
-.search-content {
-    padding: 1.5rem;
-    max-height: 60vh;
-    overflow-y: auto;
-}
-
-.search-suggestions h3,
-.search-results h3 {
-    color: #e7e9ea;
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-}
-
-.suggestion-item {
-    color: #71767b;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin-bottom: 0.25rem;
-    font-weight: 500;
-}
-
-.suggestion-item:hover {
-    background: rgba(29, 155, 240, 0.1);
-    color: #1d9bf0;
-}
-
-.results-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.result-item {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.75rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: 1px solid transparent;
-}
-
-.result-item:hover {
-    background: rgba(29, 155, 240, 0.05);
-    border-color: #2f3336;
-}
-
-.result-image {
-    width: 60px;
-    height: 80px;
-    border-radius: 8px;
-    object-fit: cover;
-    background: #2f3336;
-    flex-shrink: 0;
-}
-
-.result-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.result-info h4 {
-    color: #e7e9ea;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-    font-size: 1rem;
-}
-
-.result-genre {
-    color: #1d9bf0;
-    font-size: 0.8rem;
-    font-weight: 500;
-    margin-bottom: 0.25rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.result-details {
-    color: #71767b;
-    font-size: 0.85rem;
-}
-
-/* Notification System */
-.notification-container {
-    position: fixed;
-    top: 100px;
-    right: 1rem;
-    z-index: 9998;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.notification {
-    background: #1d9bf0;
-    color: white;
-    padding: 1rem 1.5rem;
-    border-radius: 12px;
-    font-weight: 600;
-    box-shadow: 0 4px 12px rgba(29, 155, 240, 0.3);
-    transform: translateX(100%);
-    animation: slideInNotification 0.4s ease forwards, slideOutNotification 0.4s ease 2.6s forwards;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    min-width: 280px;
-}
-
-.notification-icon {
-    font-size: 1.2rem;
-}
-
-@keyframes slideInNotification {
-    to { transform: translateX(0); }
-}
-
-@keyframes slideOutNotification {
-    to { transform: translateX(100%); }
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Expanded Search Modal */
-.expanded-search-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: #000000;
-    z-index: 9999;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-}
-
-.expanded-search-modal-overlay.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-.expanded-search-container {
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    background: #000000;
-}
-
-.expanded-search-header {
-    display: flex;
-    align-items: center;
-    padding: 1.5rem 2rem;
-    border-bottom: 1px solid #2f3336;
-    gap: 1rem;
-}
-
-.expanded-search-input-container {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    background: #16181c;
-    border: 2px solid #2f3336;
-    border-radius: 25px;
-    padding: 1rem 1.5rem;
-    transition: border-color 0.2s ease;
-}
-
-.expanded-search-input-container:focus-within {
-    border-color: #1d9bf0;
-}
-
-.expanded-search-input {
-    flex: 1;
-    background: none;
-    border: none;
-    color: #e7e9ea;
-    font-size: 1.2rem;
-    outline: none;
-    font-family: inherit;
-    font-weight: 500;
-}
-
-.expanded-search-input::placeholder {
-    color: #71767b;
-}
-
-.expanded-search-close {
-    background: #16181c;
-    border: 1px solid #2f3336;
-    color: #e7e9ea;
-    cursor: pointer;
-    padding: 1rem;
-    border-radius: 12px;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.expanded-search-close:hover {
-    background: #1d9bf0;
-    border-color: #1d9bf0;
-}
-
-.expanded-search-categories {
-    display: flex;
-    gap: 1rem;
-    padding: 1rem 2rem;
-    border-bottom: 1px solid #2f3336;
-    overflow-x: auto;
-}
-
-.expanded-category-chip {
-    background: #16181c;
-    border: 1px solid #2f3336;
-    color: #e7e9ea;
-    padding: 0.75rem 1.5rem;
-    border-radius: 25px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-    min-width: fit-content;
-}
-
-.expanded-category-chip:hover,
-.expanded-category-chip.active {
-    background: #1d9bf0;
-    border-color: #1d9bf0;
-    color: white;
-}
-
-.expanded-search-results {
-    flex: 1;
-    padding: 2rem;
-    overflow-y: auto;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
-    gap: 1rem;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.expanded-result-card {
-    display: flex;
-    background: #16181c;
-    border: 1px solid #2f3336;
-    border-radius: 16px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    height: 200px;
-    width: 100%;
-    max-width: 600px;
-}
-
-.expanded-result-card:hover {
-    border-color: #1d9bf0;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(29, 155, 240, 0.2);
-}
-
-.expanded-result-image {
-    width: 120px;
-    height: 160px;
-    object-fit: cover;
-    flex-shrink: 0;
-    background: #2f3336;
-}
-
-.expanded-result-info {
-    padding: 1.5rem;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.expanded-result-genre {
-    color: #1d9bf0;
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 0.5rem;
-}
-
-.expanded-result-title {
-    color: #e7e9ea;
-    font-size: 1.3rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    line-height: 1.3;
-}
-
-.expanded-result-rating {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: #71767b;
-    font-size: 0.9rem;
-    margin-bottom: 1rem;
-}
-
-.star {
-    color: #ffd700;
-}
-
-.expanded-result-description {
-    color: #71767b;
-    font-size: 0.95rem;
-    line-height: 1.5;
-    margin-bottom: 1.5rem;
-    flex: 1;
-}
-
-.expanded-result-play {
-    background: #1d9bf0;
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 20px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    align-self: flex-start;
-}
-
-.expanded-result-play:hover {
-    background: #1a8cd8;
-    transform: scale(1.05);
-}
-
-/* Monetization Modal - Fullscreen App */
-.monetization-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: #000000;
-    z-index: 9999;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-}
-
-.monetization-modal-overlay.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-.monetization-modal-container-fullscreen {
-    background: #000000;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
-
-.monetization-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.5rem;
-    border-bottom: 1px solid #2f3336;
-    background: linear-gradient(135deg, #ffd700, #ffb347);
-    color: #000;
-}
-
-.monetization-header h2 {
-    font-size: 1.4rem;
-    font-weight: 700;
-    margin: 0;
-}
-
-.monetization-close {
-    background: rgba(0, 0, 0, 0.2);
-    border: none;
-    color: #000;
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 50%;
-    transition: all 0.2s ease;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.monetization-close:hover {
-    background: rgba(0, 0, 0, 0.4);
-}
-
-.monetization-content {
-    padding: 2rem;
-    flex: 1;
-    overflow-y: auto;
-    max-width: 1200px;
-    margin: 0 auto;
-    width: 100%;
-}
-
-.coin-balance {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    background: linear-gradient(135deg, #1d9bf0, #1a8cd8);
-    padding: 2rem;
-    border-radius: 20px;
-    margin-bottom: 2rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.coin-icon {
-    width: 60px;
-    height: 60px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    font-weight: bold;
-    color: white;
-}
-
-.balance-info h3 {
-    color: white;
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-}
-
-.balance-info p {
-    color: rgba(255, 255, 255, 0.9);
-    margin: 0;
-    font-size: 1rem;
-}
-
-.earn-methods h3,
-.unlock-episodes h3 {
-    color: #e7e9ea;
-    font-size: 1.3rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-}
-
-.earn-option {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    background: #16181c;
-    padding: 1.5rem;
-    border-radius: 16px;
-    margin-bottom: 1rem;
-    border: 1px solid #2f3336;
-    transition: all 0.2s ease;
-}
-
-.earn-option:hover {
-    border-color: #1d9bf0;
-    transform: translateY(-2px);
-}
-
-.earn-icon {
-    width: 48px;
-    height: 48px;
-    background: #1d9bf0;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: bold;
-    flex-shrink: 0;
-}
-
-.earn-info {
-    flex: 1;
-}
-
-.earn-info h4 {
-    color: #e7e9ea;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-}
-
-.earn-info p {
-    color: #71767b;
-    font-size: 0.9rem;
-    margin: 0;
-}
-
-.earn-btn {
-    background: #1d9bf0;
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 20px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.2s ease;
-}
-
-.earn-btn:hover {
-    background: #1a8cd8;
-    transform: scale(1.05);
-}
-
-.unlock-episodes {
-    background: #16181c;
-    padding: 1rem;
-    border-radius: 12px;
-    border: 1px solid #2f3336;
-    margin-top: 1rem;
-}
-
-.unlock-episodes p {
-    color: #71767b;
-    margin: 0.5rem 0;
-}
-
-.monetization-sections {
-    display: grid;
-    grid-template-columns: 1fr 1.5fr;
-    gap: 3rem;
-    margin-bottom: 2rem;
-    width: 100%;
-}
-
-.purchase-methods h3 {
-    color: #e7e9ea;
-    font-size: 1.2rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-.purchase-subtitle {
-    color: #71767b;
-    font-size: 0.9rem;
-    margin-bottom: 1.5rem;
-}
-
-.purchase-options {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1.5rem;
-}
-
-.purchase-option {
-    background: linear-gradient(135deg, #16181c, #1a1d23);
-    border: 2px solid #2f3336;
-    border-radius: 20px;
-    padding: 2rem 1.5rem;
-    text-align: center;
-    position: relative;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-
-.purchase-option:hover {
-    border-color: #1d9bf0;
-    transform: translateY(-4px);
-    box-shadow: 0 8px 30px rgba(29, 155, 240, 0.2);
-}
-
-.purchase-option.popular {
-    border-color: #ffd700;
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 179, 71, 0.15));
-    box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2);
-}
-
-.purchase-option.premium {
-    border-color: #9333ea;
-    background: linear-gradient(135deg, rgba(147, 51, 234, 0.15), rgba(168, 85, 247, 0.15));
-    box-shadow: 0 4px 20px rgba(147, 51, 234, 0.2);
-}
-
-.popular-badge, .premium-badge {
-    position: absolute;
-    top: -8px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #ffd700;
-    color: #000;
-    padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-}
-
-.premium-badge {
-    background: #9333ea;
-    color: white;
-}
-
-.purchase-coins {
-    font-size: 2rem;
-    font-weight: 800;
-    color: #e7e9ea;
-    margin-bottom: 0.5rem;
-}
-
-.purchase-coins::after {
-    content: " monedas";
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: #71767b;
-}
-
-.purchase-price {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: #1d9bf0;
-    margin-bottom: 0.5rem;
-}
-
-.purchase-savings {
-    font-size: 0.8rem;
-    color: #22c55e;
-    font-weight: 600;
-    margin-bottom: 1rem;
-}
-
-.purchase-btn {
-    background: linear-gradient(135deg, #1d9bf0, #1a8cd8);
-    color: white;
-    border: none;
-    padding: 0.75rem 1.25rem;
-    border-radius: 20px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
-    width: 100%;
-}
-
-.purchase-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(29, 155, 240, 0.4);
-}
-
-.auto-unlock-status {
-    background: linear-gradient(135deg, #22c55e, #16a34a);
-    padding: 1rem;
-    border-radius: 12px;
-    margin-top: 1rem;
-}
-
-.auto-unlock-text {
-    color: white;
-    font-weight: 600;
-    margin: 0;
-    text-align: center;
-}
-
-/* Ad Modal - Pantalla Completa */
-.ad-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: #000000;
-    z-index: 99999;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-}
-
-.ad-modal-overlay.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-.ad-modal-container {
-    background: #000000;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-    position: relative;
-}
-
-.ad-header {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem;
-    background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
-    color: white;
-    z-index: 10;
-}
-
-.ad-timer {
-    font-weight: 600;
-    font-size: 1.1rem;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-}
-
-.ad-close {
-    background: rgba(0, 0, 0, 0.8);
-    border: 2px solid #1d9bf0;
-    color: #1d9bf0;
-    cursor: pointer;
-    padding: 0.75rem;
-    border-radius: 12px;
-    transition: all 0.2s ease;
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(10px);
-}
-
-.ad-close:hover {
-    background: #1d9bf0;
-    color: white;
-    transform: scale(1.05);
-}
-
-.ad-content {
-    width: 100%;
-    height: 100%;
-    padding: 0;
-    text-align: center;
-    position: relative;
-}
-
-.ad-placeholder {
-    background: linear-gradient(135deg, #1d9bf0, #1a8cd8);
-    padding: 3rem 2rem;
-    border-radius: 12px;
-    color: white;
-}
-
-.ad-placeholder h2 {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-}
-
-.ad-placeholder p {
-    font-size: 1.1rem;
-    margin-bottom: 2rem;
-    opacity: 0.9;
-}
-
-.ad-progress {
-    width: 100%;
-    height: 6px;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 3px;
-    overflow: hidden;
-}
-
-.ad-progress-fill {
-    height: 100%;
-    background: white;
-    width: 0%;
-    transition: width 0.1s linear;
-}
-
-/* Netflix Ad Fullscreen Styles */
-.netflix-ad-container-fullscreen {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-    background: #000;
-    overflow: hidden;
-}
-
-.play-control-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 15;
-    cursor: pointer;
-}
-
-.video-play-btn {
-    background: rgba(229, 9, 20, 0.9);
-    border: 3px solid white;
-    border-radius: 50%;
-    width: 100px;
-    height: 100px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
-}
-
-.video-play-btn:hover {
-    transform: scale(1.1);
-    background: rgba(229, 9, 20, 1);
-    box-shadow: 0 12px 40px rgba(229, 9, 20, 0.4);
-}
-
-.video-play-btn svg {
-    margin-left: 8px;
-}
-
-.netflix-ad-overlay-fullscreen {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-        transparent 20%,
-        rgba(0, 0, 0, 0.3) 50%,
-        rgba(0, 0, 0, 0.8) 80%,
-        rgba(0, 0, 0, 0.95) 100%
+// Enhanced search functionality with real-time results
+function performSearch(query) {
+    console.log('Searching for:', query);
+
+    const allSeries = [
+        { title: 'Amor en la Dinastía Tang', rating: '8.9', episodes: '30 eps', year: '2024', genre: 'Romance Histórico', thumbnail: 'https://via.placeholder.com/280x400/1a1a1a/fff?text=Drama+1' },
+        { title: 'El Príncipe Perdido', rating: '9.1', episodes: '25 eps', year: '2024', genre: 'Artes Marciales', thumbnail: 'https://via.placeholder.com/280x400/1a1a1a/fff?text=Drama+2' },
+        { title: 'Guerreros del Jade', rating: '8.7', episodes: '40 eps', year: '2024', genre: 'Artes Marciales', thumbnail: 'https://via.placeholder.com/280x400/1a1a1a/fff?text=Drama+3' },
+        { title: 'La Médica Imperial', rating: '9.3', episodes: '35 eps', year: '2024', genre: 'Drama Imperial', thumbnail: 'https://via.placeholder.com/280x400/1a1a1a/fff?text=Drama+4' },
+        { title: 'Secretos de la Corte', rating: '8.8', episodes: '28 eps', year: '2024', genre: 'Drama Imperial', thumbnail: 'https://via.placeholder.com/280x400/1a1a1a/fff?text=Drama+5' },
+        { title: 'El Jardín Secreto', rating: '8.6', episodes: '22 eps', year: '2024', genre: 'Romance', thumbnail: 'https://via.placeholder.com/280x400/1a1a1a/fff?text=Drama+6' },
+        { title: 'Destino de Espadas', rating: '9.0', episodes: '38 eps', year: '2024', genre: 'Artes Marciales', thumbnail: 'https://via.placeholder.com/280x400/2a2a2a/fff?text=Nuevo+1' },
+        { title: 'Luna de Primavera', rating: '8.9', episodes: '32 eps', year: '2024', genre: 'Romance', thumbnail: 'https://via.placeholder.com/280x400/2a2a2a/fff?text=Nuevo+2' },
+        { title: 'El Último General', rating: '8.5', episodes: '26 eps', year: '2024', genre: 'Artes Marciales', thumbnail: 'https://via.placeholder.com/280x400/2a2a2a/fff?text=Nuevo+3' },
+        { title: 'Corazón de Bambú', rating: '9.2', episodes: '20 eps', year: '2024', genre: 'Romance', thumbnail: 'https://via.placeholder.com/280x400/2a2a2a/fff?text=Nuevo+4' },
+        { title: 'El Emperador Eterno', rating: '9.2', episodes: '45 eps', year: '2024', genre: 'Fantasía Antigua', thumbnail: 'https://via.placeholder.com/280x400/3a3a3a/fff?text=Continuar+1' },
+        { title: 'Romance Eterno', rating: '8.9', episodes: '45 eps', year: '2024', genre: 'Romance Histórico', thumbnail: 'https://via.placeholder.com/280x400/1a1a1a/fff?text=Romance+1' },
+        { title: 'Corazón de Jade', rating: '8.7', episodes: '35 eps', year: '2024', genre: 'Romance', thumbnail: 'https://via.placeholder.com/280x400/1a1a1a/fff?text=Romance+2' },
+        { title: 'El Jardín del Emperador', rating: '9.0', episodes: '25 eps', year: '2024', genre: 'Drama Imperial', thumbnail: 'https://via.placeholder.com/280x400/1a1a1a/fff?text=Imperial+1' }
+    ];
+
+    const filteredResults = allSeries.filter(result => 
+        result.title.toLowerCase().includes(query.toLowerCase()) ||
+        result.genre.toLowerCase().includes(query.toLowerCase())
     );
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 2rem;
-    z-index: 5;
+
+    displaySearchResults(filteredResults);
 }
 
-.netflix-logo-fullscreen {
-    align-self: flex-start;
-    background: rgba(0, 0, 0, 0.8);
-    padding: 1rem 1.5rem;
-    border-radius: 12px;
-    backdrop-filter: blur(10px);
-    border: 2px solid rgba(229, 9, 20, 0.3);
-}
+function displaySearchResults(results) {
+    const resultsContainer = document.getElementById('searchResults');
+    const resultsList = document.getElementById('resultsList');
 
-.netflix-cta-fullscreen {
-    align-self: center;
-    text-align: center;
-    display: none;
-    background: rgba(0, 0, 0, 0.9);
-    padding: 2rem;
-    border-radius: 20px;
-    backdrop-filter: blur(20px);
-    border: 2px solid rgba(229, 9, 20, 0.3);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    transform: translateY(100px);
-    opacity: 0;
-    transition: all 0.6s ease;
-}
-
-.netflix-cta-fullscreen.show {
-    transform: translateY(0);
-    opacity: 1;
-}
-
-.netflix-download-btn-fullscreen {
-    background: linear-gradient(135deg, #e50914, #b81d24);
-    color: white;
-    border: none;
-    padding: 1.5rem 3rem;
-    border-radius: 30px;
-    font-size: 1.3rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 6px 20px rgba(229, 9, 20, 0.4);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    position: relative;
-    overflow: hidden;
-}
-
-.netflix-download-btn-fullscreen:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(229, 9, 20, 0.6);
-    background: linear-gradient(135deg, #f40612, #e50914);
-}
-
-.netflix-download-btn-fullscreen:active {
-    transform: translateY(-1px);
-}
-
-.ad-timer-overlay {
-    position: absolute;
-    top: 50%;
-    right: 2rem;
-    transform: translateY(-50%);
-    background: rgba(0, 0, 0, 0.8);
-    color: #1d9bf0;
-    padding: 1rem;
-    border-radius: 50%;
-    font-size: 1.5rem;
-    font-weight: 700;
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(10px);
-    border: 2px solid #1d9bf0;
-    z-index: 10;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(29, 155, 240, 0.7); }
-    70% { box-shadow: 0 0 0 10px rgba(29, 155, 240, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(29, 155, 240, 0); }
-}
-
-@keyframes slideUpFromBottom {
-    from {
-        transform: translateY(100px);
-        opacity: 0;
+    if (results.length === 0) {
+        resultsContainer.style.display = 'none';
+        return;
     }
-    to {
-        transform: translateY(0);
-        opacity: 1;
+
+    resultsList.innerHTML = results.map(result => `
+        <div class="result-item" onclick="selectSearchResult('${result.title}')">
+            <img src="${result.thumbnail}" alt="${result.title}" class="result-image">
+            <div class="result-info">
+                <h4>${result.title}</h4>
+                <p class="result-genre">${result.genre}</p>
+                <p class="result-details">⭐ ${result.rating} • ${result.episodes} • ${result.year}</p>
+            </div>
+        </div>
+    `).join('');
+
+    resultsContainer.style.display = 'block';
+}
+
+function selectSearchResult(title) {
+    hideSearchModal();
+    showTikTokPlayer(title);
+}
+
+// Category filtering
+document.addEventListener('DOMContentLoaded', () => {
+    const categoryChips = document.querySelectorAll('.category-chip');
+    const contentCards = document.querySelectorAll('.content-card');
+
+    // Category chip interactions
+    categoryChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+            // Remove active class from all chips
+            categoryChips.forEach(c => c.classList.remove('active'));
+            // Add active class to clicked chip
+            chip.classList.add('active');
+
+            const category = chip.dataset.category;
+            filterContent(category);
+
+            // Smooth scroll to content
+            document.querySelector('.content-feed').scrollIntoView({ 
+                behavior: 'smooth' 
+            });
+        });
+    });
+
+    // Content card interactions
+    contentCards.forEach(card => {
+        card.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('play-btn')) {
+                const title = card.querySelector('h3').textContent;
+                showTikTokPlayer(title);
+            }
+        });
+    });
+
+    // Play button functionality
+    const playButtons = document.querySelectorAll('.play-btn');
+    playButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const title = btn.closest('.content-card').querySelector('h3').textContent;
+            showTikTokPlayer(title);
+        });
+    });
+
+    // Hero play button
+    const heroPlayBtn = document.querySelector('.btn-primary');
+    if (heroPlayBtn) {
+        heroPlayBtn.addEventListener('click', () => {
+            showTikTokPlayer('La Niña de los Cuatro CEO');
+        });
     }
-}
 
-/* Bloquear controles de video nativos */
-video::-webkit-media-controls {
-    display: none !important;
-}
-
-video::-webkit-media-controls-enclosure {
-    display: none !important;
-}
-
-video::-webkit-media-controls-panel {
-    display: none !important;
-}
-
-video::-webkit-media-controls-play-button {
-    display: none !important;
-}
-
-video::-webkit-media-controls-start-playback-button {
-    display: none !important;
-}
-
-video::-moz-media-controls {
-    display: none !important;
-}
-
-video::-ms-media-controls {
-    display: none !important;
-}
-
-/* Video Ocean Effect Overlay */
-.video-ocean-effect {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 1000;
-    opacity: 0;
-    transition: opacity 1s ease;
-    pointer-events: none;
-}
-
-.video-ocean-effect.active {
-    opacity: 1;
-}
-
-.ocean-wave-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    overflow: hidden;
-}
-
-.wave {
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 300%;
-    height: 100%;
-    background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(29, 155, 240, 0.3) 25%,
-        rgba(29, 155, 240, 0.6) 50%,
-        rgba(29, 155, 240, 0.3) 75%,
-        transparent 100%
-    );
-    animation: oceanWave 3s ease-in-out;
-}
-
-.wave-2 {
-    background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(0, 212, 255, 0.2) 25%,
-        rgba(0, 212, 255, 0.5) 50%,
-        rgba(0, 212, 255, 0.2) 75%,
-        transparent 100%
-    );
-    animation-delay: 0.5s;
-}
-
-.wave-3 {
-    background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(59, 130, 246, 0.2) 25%,
-        rgba(59, 130, 246, 0.4) 50%,
-        rgba(59, 130, 246, 0.2) 75%,
-        transparent 100%
-    );
-    animation-delay: 1s;
-}
-
-.wave-4 {
-    background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(147, 197, 253, 0.1) 25%,
-        rgba(147, 197, 253, 0.3) 50%,
-        rgba(147, 197, 253, 0.1) 75%,
-        transparent 100%
-    );
-    animation-delay: 1.5s;
-}
-
-.video-freeze-effect {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-        45deg,
-        transparent 0%,
-        rgba(29, 155, 240, 0.1) 25%,
-        rgba(29, 155, 240, 0.2) 50%,
-        rgba(29, 155, 240, 0.1) 75%,
-        transparent 100%
-    );
-    border: 3px solid transparent;
-    border-image: linear-gradient(
-        45deg,
-        #1d9bf0,
-        #00d4ff,
-        #3b82f6,
-        #1d9bf0
-    ) 1;
-    animation: freezeGlow 2s ease-in-out infinite;
-}
-
-@keyframes oceanWave {
-    0% {
-        left: -100%;
-        opacity: 0;
+    // My List button
+    const myListBtn = document.querySelector('.btn-secondary');
+    if (myListBtn) {
+        myListBtn.addEventListener('click', () => {
+            showNotification('Agregado a Mi Lista', 'success');
+        });
     }
-    20% {
-        opacity: 1;
+
+    // Search functionality - Show expanded search
+    const searchBarInput = document.getElementById('searchBarInput');
+    const expandedSearchModal = document.getElementById('expandedSearchModal');
+    const expandedSearchClose = document.getElementById('expandedSearchClose');
+    const expandedSearchInput = document.getElementById('expandedSearchInput');
+
+    if (searchBarInput) {
+        searchBarInput.addEventListener('click', showExpandedSearch);
+        searchBarInput.addEventListener('focus', showExpandedSearch);
     }
-    80% {
-        opacity: 1;
+
+    if (expandedSearchClose) {
+        expandedSearchClose.addEventListener('click', hideExpandedSearch);
     }
-    100% {
-        left: 100%;
-        opacity: 0;
+
+    if (expandedSearchModal) {
+        expandedSearchModal.addEventListener('click', (e) => {
+            if (e.target === expandedSearchModal) {
+                hideExpandedSearch();
+            }
+        });
+
+        // ESC key to close
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && expandedSearchModal.classList.contains('active')) {
+                hideExpandedSearch();
+            }
+        });
     }
-}
 
-@keyframes freezeGlow {
-    0%, 100% {
-        box-shadow: 
-            inset 0 0 20px rgba(29, 155, 240, 0.3),
-            0 0 20px rgba(29, 155, 240, 0.3);
+    if (expandedSearchInput) {
+        expandedSearchInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            if (query.length > 0) {
+                performExpandedSearch(query);
+            } else {
+                displayExpandedSearchResults(getAllSeries());
+            }
+        });
     }
-    50% {
-        box-shadow: 
-            inset 0 0 40px rgba(29, 155, 240, 0.6),
-            0 0 40px rgba(29, 155, 240, 0.6);
+
+    // Expanded search category filters
+    const expandedCategoryChips = document.querySelectorAll('.expanded-category-chip');
+    expandedCategoryChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+            expandedCategoryChips.forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+
+            const category = chip.dataset.category;
+            filterExpandedResults(category);
+        });
+    });
+
+    // Suggestion clicks
+    const suggestions = document.querySelectorAll('.suggestion-item');
+    suggestions.forEach(suggestion => {
+        suggestion.addEventListener('click', () => {
+            const query = suggestion.textContent;
+            searchInput.value = query;
+            performSearch(query);
+        });
+    });
+});
+
+// Content filtering
+function filterContent(category) {
+    const sections = document.querySelectorAll('.content-section');
+
+    if (category === 'todos') {
+        sections.forEach(section => {
+            section.style.display = 'block';
+        });
+    } else {
+        sections.forEach(section => {
+            section.style.opacity = '0.6';
+        });
+
+        setTimeout(() => {
+            sections.forEach(section => {
+                section.style.opacity = '1';
+            });
+        }, 300);
     }
+
+    showNotification(`Mostrando: ${getCategoryName(category)}`, 'info');
 }
 
-/* Simple Chapter Loading Animation */
-.chapter-loading-animation {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.9);
-    z-index: 99999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.5s ease;
+function getCategoryName(category) {
+    const names = {
+        'todos': 'Todos los Dramas',
+        'nuevos': 'Nuevos Estrenos',
+        'populares': 'Más Populares',
+        'romance': 'Romance',
+        'accion': 'Acción',
+        'comedia': 'Comedia',
+        'fantasia': 'Fantasía'
+    };
+    return names[category] || 'Todos los Dramas';
 }
 
-.chapter-loading-animation.active {
-    opacity: 1;
+// Modern video player
+function showVideoPlayer(title) {
+    const modal = document.createElement('div');
+    modal.className = 'video-modal';
+    modal.innerHTML = `
+        <div class="video-container">
+            <div class="video-header">
+                <h2>${title}</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="video-content">
+                <div class="video-placeholder">
+                    <div class="play-icon">▶</div>
+                    <div class="video-info">
+                        <h3>Episodio 1 - "El Despertar"</h3>
+                        <p>⏱️ 1 minuto • 🎭 Drama • ⭐ 9.2</p>
+                    </div>
+                </div>
+                <div class="video-controls">
+                    <button class="control-btn">⏮</button>
+                    <button class="control-btn">⏸</button>
+                    <button class="control-btn">⏭</button>
+                    <div class="progress-bar">
+                        <div class="progress" style="width: 25%"></div>
+                    </div>
+                    <span class="time">0:15 / 1:00</span>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const style = document.createElement('style');
+    style.textContent = `
+        .video-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .video-container {
+            background: #16181c;
+            border-radius: 16px;
+            overflow: hidden;
+            max-width: 90vw;
+            max-height: 90vh;
+            width: 800px;
+            border: 1px solid #2f3336;
+        }
+
+        .video-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: #000000;
+            border-bottom: 1px solid #2f3336;
+        }
+
+        .video-header h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #e7e9ea;
+        }
+
+        .close-btn {
+            background: none;
+            border: 1px solid #536471;
+            color: #e7e9ea;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+        }
+
+        .video-placeholder {
+            aspect-ratio: 16/9;
+            background: linear-gradient(135deg, #1d9bf0 0%, #1a8cd8 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .play-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .play-icon:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .video-info h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .video-info p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .video-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            background: #000000;
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            color: #e7e9ea;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .control-btn:hover {
+            background: rgba(29, 155, 240, 0.1);
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 4px;
+            background: #2f3336;
+            border-radius: 2px;
+            margin: 0 1rem;
+            cursor: pointer;
+        }
+
+        .progress {
+            height: 100%;
+            background: #1d9bf0;
+            border-radius: 2px;
+        }
+
+        .time {
+            color: #71767b;
+            font-size: 0.85rem;
+            min-width: 80px;
+        }
+    `;
+
+    document.head.appendChild(style);
+    document.body.appendChild(modal);
+
+    const closeBtn = modal.querySelector('.close-btn');
+    closeBtn.addEventListener('click', () => {
+        document.body.removeChild(modal);
+        document.head.removeChild(style);
+    });
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            document.body.removeChild(modal);
+            document.head.removeChild(style);
+        }
+    });
 }
 
-.chapter-loading-animation.fade-out {
-    opacity: 0;
-    transition: opacity 0.5s ease;
-}
 
-.loading-container {
-    text-align: center;
-}
 
-.loading-dots {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: center;
-    align-items: center;
-}
+// Smooth scrolling for categories
+document.addEventListener('DOMContentLoaded', () => {
+    const carousel = document.querySelector('.categories-carousel');
+    if (carousel) {
+        let isScrolling = false;
 
-.loading-dot {
-    width: 12px;
-    height: 12px;
-    background: #1d9bf0;
-    border-radius: 50%;
-    animation: loadingDotPulse 1.4s ease-in-out infinite both;
-    box-shadow: 0 0 15px rgba(29, 155, 240, 0.5);
-}
+        carousel.addEventListener('wheel', (e) => {
+            if (!isScrolling) {
+                e.preventDefault();
+                isScrolling = true;
 
-.loading-dot:nth-child(1) {
-    animation-delay: -0.32s;
-}
+                const scrollAmount = e.deltaY > 0 ? 200 : -200;
+                carousel.scrollBy({
+                    left: scrollAmount,
+                    behavior: 'smooth'
+                });
 
-.loading-dot:nth-child(2) {
-    animation-delay: -0.16s;
-}
-
-.loading-dot:nth-child(3) {
-    animation-delay: 0s;
-}
-
-@keyframes loadingDotPulse {
-    0%, 80%, 100% {
-        transform: scale(0.8);
-        opacity: 0.5;
+                setTimeout(() => {
+                    isScrolling = false;
+                }, 300);
+            }
+        });
     }
-    40% {
-        transform: scale(1.2);
-        opacity: 1;
+});
+
+// Monetization System
+let userCoins = parseInt(localStorage.getItem('userCoins') || '0');
+let unlockedEpisodes = JSON.parse(localStorage.getItem('unlockedEpisodes') || '[1,2,3,4,5,6,7,8]');
+
+function updateCoinDisplay() {
+    document.getElementById('coinCount').textContent = userCoins;
+    document.getElementById('modalCoinCount').textContent = `${userCoins} Monedas`;
+    localStorage.setItem('userCoins', userCoins.toString());
+    updateAutoUnlockStatus();
+}
+
+function addCoins(amount) {
+    userCoins += amount;
+    updateCoinDisplay();
+    showNotification(`+${amount} monedas ganadas!`, 'success');
+}
+
+function unlockEpisode(episodeNum) {
+    if (userCoins >= 30 && !unlockedEpisodes.includes(episodeNum)) {
+        userCoins -= 30;
+        unlockedEpisodes.push(episodeNum);
+        localStorage.setItem('unlockedEpisodes', JSON.stringify(unlockedEpisodes));
+        updateCoinDisplay();
+        showNotification(`Episodio ${episodeNum} desbloqueado!`, 'success');
+        return true;
     }
+    return false;
 }
 
-/* Subscription Modal */
-.subscription-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.9);
-    backdrop-filter: blur(10px);
-    z-index: 10000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
+function showMonetizationModal() {
+    const modal = document.getElementById('monetizationModal');
+    modal.classList.add('active');
+    updateCoinDisplay();
 }
 
-.subscription-modal-overlay.active {
-    opacity: 1;
-    visibility: visible;
+function hideMonetizationModal() {
+    const modal = document.getElementById('monetizationModal');
+    modal.classList.remove('active');
 }
 
-.subscription-modal-container {
-    background: #16181c;
-    border: 2px solid #2f3336;
-    border-radius: 20px;
-    max-width: 500px;
-    width: 90%;
-    max-height: 80vh;
-    overflow: hidden;
-    animation: slideUp 0.3s ease;
-}
+function showAdModal() {
+    const modal = document.getElementById('adModal');
+    const timer = document.getElementById('adTimer');
+    const closeBtn = document.getElementById('adClose');
+    const progress = document.getElementById('adProgress');
 
-.subscription-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.5rem;
-    border-bottom: 1px solid #2f3336;
-    background: linear-gradient(135deg, #1d9bf0, #1a8cd8);
-}
-
-.subscription-header h2 {
-    color: white;
-    font-size: 1.4rem;
-    font-weight: 700;
-    margin: 0;
-}
-
-.subscription-close {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    color: white;
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-}
-
-.subscription-close:hover {
-    background: rgba(255, 255, 255, 0.3);
-}
-
-.subscription-content {
-    padding: 2rem;
-    text-align: center;
-}
-
-.episode-info {
-    margin-bottom: 2rem;
-}
-
-.episode-info h3 {
-    color: #e7e9ea;
-    font-size: 1.3rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-}
-
-.episode-info p {
-    color: #71767b;
-    font-size: 1rem;
-}
-
-.subscription-message {
-    margin-bottom: 2rem;
-}
-
-.lock-icon-large {
-    color: #71767b;
-    margin-bottom: 1rem;
-}
-
-.subscription-message h4 {
-    color: #e7e9ea;
-    font-size: 1.2rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-}
-
-.subscription-message p {
-    color: #71767b;
-    margin-bottom: 1.5rem;
-}
-
-.cost-info {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    background: rgba(29, 155, 240, 0.1);
-    padding: 1rem;
-    border-radius: 12px;
-    border: 1px solid rgba(29, 155, 240, 0.2);
-}
-
-.cost-amount {
-    color: #1d9bf0;
-    font-size: 1.3rem;
-    font-weight: 700;
-}
-
-.cost-description {
-    color: #71767b;
-    font-size: 0.9rem;
-}
-
-.subscription-options {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-.subscription-btn {
-    padding: 1rem 1.5rem;
-    border: none;
-    border-radius: 20px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-}
-
-.subscription-btn.primary {
-    background: linear-gradient(135deg, #1d9bf0, #1a8cd8);
-    color: white;
-}
-
-.subscription-btn.primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(29, 155, 240, 0.3);
-}
-
-.subscription-btn.secondary {
-    background: transparent;
-    color: #e7e9ea;
-    border: 2px solid #2f3336;
-}
-
-.subscription-btn.secondary:hover {
-    background: rgba(29, 155, 240, 0.1);
-    border-color: #1d9bf0;
-}
-
-.current-balance {
-    background: #000000;
-    padding: 1rem;
-    border-radius: 12px;
-    border: 1px solid #2f3336;
-}
-
-.current-balance p {
-    color: #71767b;
-    margin: 0;
-    font-size: 0.9rem;
-}
-
-.balance-count {
-    color: #ffd700;
-    font-weight: 700;
-}
-
-/* Responsive para modal de suscripción */
-@media (max-width: 768px) {
-    .subscription-modal-container {
-        width: 95%;
-        max-width: none;
-    }
+    // Bloquear scroll del body y hacer pantalla completa
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.height = '100%';
     
-    .subscription-content {
-        padding: 1.5rem;
-    }
+    modal.classList.add('active');
+    closeBtn.style.display = 'none';
+
+    // Update ad content with Netflix video
+    const adContent = modal.querySelector('.ad-content');
+    adContent.innerHTML = `
+        <div class="netflix-ad-container-fullscreen">
+            <video 
+                id="netflixAdVideo" 
+                width="100%" 
+                height="100%" 
+                autoplay 
+                muted="false"
+                playsinline
+                webkit-playsinline
+                controls="false"
+                preload="metadata"
+                style="object-fit: cover; background: #000;"
+            >
+                <source src="https://www.dropbox.com/scl/fi/oa2blfwyvg84csw5w13ky/copy_0B8A47E6-5756-4AA7-A69F-FF4E6C6A3194.mov?rlkey=pxs3j8ujtrnyhpf9u7qn6iyl1&st=uy6kb9o7&raw=1" type="video/mp4">
+                Tu navegador no soporta el elemento de video.
+            </video>
+            <div class="netflix-ad-overlay-fullscreen">
+                <div class="netflix-logo-fullscreen">
+                    <h2 style="color: #e50914; font-weight: 800; font-size: 2.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">NETFLIX</h2>
+                </div>
+                <div class="netflix-cta-fullscreen">
+                    <h3 style="color: white; margin-bottom: 1.5rem; font-size: 1.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">¿Te gustó lo que viste?</h3>
+                    <button class="netflix-download-btn-fullscreen" id="netflixDownloadBtn">
+                        📱 Descargar Netflix Ahora
+                    </button>
+                </div>
+            </div>
+            <div class="ad-timer-overlay">
+                <span id="adTimerDisplay">30</span>
+            </div>
+            <div class="play-control-overlay" id="playControlOverlay">
+                <button class="video-play-btn" id="videoPlayBtn">
+                    <svg width="60" height="60" viewBox="0 0 24 24" fill="white">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                </button>
+                <p style="color: white; margin-top: 1rem; font-size: 1.1rem;">Toca para reproducir el anuncio</p>
+            </div>
+        </div>
+    `;
+
+    const video = document.getElementById('netflixAdVideo');
+    const downloadBtn = document.getElementById('netflixDownloadBtn');
+    const timerDisplay = document.getElementById('adTimerDisplay');
+    const playControl = document.getElementById('playControlOverlay');
+    const playBtn = document.getElementById('videoPlayBtn');
+
+    // Detectar si es iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     
-    .subscription-header {
-        padding: 1rem;
+    // Configurar video para iOS
+    if (isIOS) {
+        video.muted = true; // Inicialmente muted para iOS
+        video.autoplay = false;
+        playControl.style.display = 'flex';
+    } else {
+        video.muted = false; // Android y desktop con sonido
+        playControl.style.display = 'none';
     }
+
+    // Prevenir controles nativos del video
+    video.setAttribute('disablePictureInPicture', '');
+    video.setAttribute('controlsList', 'nodownload nofullscreen noremoteplaybook');
     
-    .subscription-header h2 {
-        font-size: 1.2rem;
-    }
-}
+    // Función para iniciar reproducción
+    const startPlayback = async () => {
+        try {
+            // Habilitar sonido después del primer toque del usuario
+            video.muted = false;
+            video.volume = 1.0;
+            
+            await video.play();
+            playControl.style.display = 'none';
+            
+            // Pequeño delay para asegurar que el sonido funcione
+            setTimeout(() => {
+                video.muted = false;
+            }, 100);
+            
+        } catch (error) {
+            console.log('Error al reproducir video:', error);
+            // Fallback: intentar con muted si falla
+            try {
+                video.muted = true;
+                await video.play();
+                playControl.style.display = 'none';
+            } catch (fallbackError) {
+                console.log('Error en fallback:', fallbackError);
+            }
+        }
+    };
 
-/* Responsive para móviles */
-@media (max-width: 768px) {
-    .netflix-logo-fullscreen {
-        padding: 0.75rem 1rem;
-    }
+    // Event listeners para reproducción
+    playBtn.addEventListener('click', startPlayback);
+    playControl.addEventListener('click', startPlayback);
     
-    .netflix-logo-fullscreen h2 {
-        font-size: 2rem !important;
+    // Intentar reproducción automática para dispositivos que lo permiten
+    if (!isIOS) {
+        video.play().catch(() => {
+            // Si falla la reproducción automática, mostrar control
+            playControl.style.display = 'flex';
+        });
     }
+
+    // Bloquear eventos de click en el video
+    video.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    });
     
-    .netflix-cta-fullscreen {
-        padding: 1.5rem;
-        margin: 0 1rem;
-    }
+    video.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        return false;
+    });
+
+    // Listener para cuando el video está listo
+    video.addEventListener('loadedmetadata', () => {
+        if (isIOS) {
+            // Para iOS, asegurar que está configurado correctamente
+            video.muted = true;
+        }
+    });
+
+    // Netflix download button functionality
+    downloadBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Detectar dispositivo y redireccionar
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+        const isAndroid = /android/i.test(userAgent);
+        
+        try {
+            if (isIOS) {
+                // Intentar abrir la app de Netflix primero, luego App Store
+                const netflixAppURL = 'netflix://';
+                const appStoreURL = 'https://apps.apple.com/app/netflix/id363590051';
+                
+                // Crear iframe oculto para intentar abrir la app
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = netflixAppURL;
+                document.body.appendChild(iframe);
+                
+                // Si no se abre la app, redirigir a App Store
+                setTimeout(() => {
+                    document.body.removeChild(iframe);
+                    window.open(appStoreURL, '_blank');
+                }, 1000);
+                
+            } else if (isAndroid) {
+                // Intentar abrir la app de Netflix primero, luego Play Store
+                const netflixAppURL = 'intent://www.netflix.com/#Intent;package=com.netflix.mediaclient;scheme=https;end';
+                const playStoreURL = 'https://play.google.com/store/apps/details?id=com.netflix.mediaclient';
+                
+                try {
+                    window.location.href = netflixAppURL;
+                } catch (e) {
+                    window.open(playStoreURL, '_blank');
+                }
+                
+                // Fallback a Play Store después de 1 segundo
+                setTimeout(() => {
+                    window.open(playStoreURL, '_blank');
+                }, 1000);
+                
+            } else {
+                // Desktop - abrir sitio web de Netflix
+                window.open('https://www.netflix.com', '_blank');
+            }
+            
+            showNotification('¡Redirigiendo a Netflix! 🎬', 'success');
+            
+        } catch (error) {
+            console.error('Error al redireccionar:', error);
+            // Fallback general
+            window.open('https://www.netflix.com', '_blank');
+        }
+    });
+
+    let timeLeft = 30;
+    const interval = setInterval(() => {
+        timeLeft--;
+        timer.textContent = timeLeft;
+        timerDisplay.textContent = timeLeft;
+        progress.style.width = `${((30 - timeLeft) / 30) * 100}%`;
+
+        if (timeLeft <= 0) {
+            clearInterval(interval);
+            closeBtn.style.display = 'flex';
+            addCoins(20);
+            
+            // Show interactive Netflix CTA
+            const netflixCta = modal.querySelector('.netflix-cta-fullscreen');
+            if (netflixCta) {
+                netflixCta.style.display = 'block';
+                netflixCta.style.animation = 'slideUpFromBottom 0.6s ease';
+            }
+            
+            setTimeout(() => {
+                modal.classList.remove('active');
+                timer.textContent = '30';
+                progress.style.width = '0%';
+                
+                // Restaurar scroll del body
+                document.body.style.overflow = '';
+                document.body.style.position = '';
+                document.body.style.width = '';
+                document.body.style.height = '';
+                
+                // Reset ad content for next time
+                adContent.innerHTML = `
+                    <div class="ad-placeholder">
+                        <h2>🎬 Anuncio Publicitario</h2>
+                        <p>Este es un anuncio simulado de 30 segundos</p>
+                        <div class="ad-progress">
+                            <div class="ad-progress-fill" id="adProgress"></div>
+                        </div>
+                    </div>
+                `;
+            }, 5000);
+        }
+    }, 1000);
     
-    .netflix-cta-fullscreen h3 {
-        font-size: 1.2rem !important;
+    // Manejar cierre del modal
+    const originalCloseHandler = closeBtn.onclick;
+    closeBtn.onclick = () => {
+        // Restaurar scroll del body
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+        document.body.style.height = '';
+        
+        if (originalCloseHandler) {
+            originalCloseHandler();
+        }
+    };
+}
+
+function shareWithFriends() {
+    const shareData = {
+        title: 'Beemo - Dramas Chinos',
+        text: '¡Descubre increíbles dramas chinos en Beemo!',
+        url: window.location.href + '?ref=' + generateShareCode()
+    };
+
+    if (navigator.share) {
+        navigator.share(shareData);
+    } else {
+        navigator.clipboard.writeText(shareData.url);
+        showNotification('Enlace copiado al portapapeles', 'success');
     }
+}
+
+function generateShareCode() {
+    return Math.random().toString(36).substring(2, 15);
+}
+
+function checkReferral() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const ref = urlParams.get('ref');
+
+    if (ref && !localStorage.getItem('referralUsed_' + ref)) {
+        localStorage.setItem('referralUsed_' + ref, 'true');
+        addCoins(50);
+        showNotification('¡Bienvenido! Has ganado 50 monedas por venir de un amigo', 'success');
+    }
+}
+
+// Episode click handler with auto-unlock and monetization
+function handleEpisodeClick(episodeNum) {
+    if (episodeNum <= 8 || unlockedEpisodes.includes(episodeNum)) {
+        showNotification(`Reproduciendo Episodio ${episodeNum}`, 'success');
+        return true;
+    } else {
+        // Auto-unlock if user has enough coins
+        if (userCoins >= 30) {
+            if (unlockEpisode(episodeNum)) {
+                showNotification(`Episodio ${episodeNum} desbloqueado automáticamente y reproduciéndose`, 'success');
+                return true;
+            }
+        } else {
+            showNotification('No tienes suficientes monedas. Gana más monedas o compra con dinero real.', 'warning');
+            return false;
+        }
+    }
+}
+
+// Chapter End Animation with Ocean Wave Effect and Elegant Explosion
+function showChapterEndAnimation(callback) {
+    // Crear overlay con efecto de onda oceánica
+    const videoOverlay = document.createElement('div');
+    videoOverlay.className = 'video-ocean-effect';
+    videoOverlay.innerHTML = `
+        <div class="ocean-wave-container">
+            <div class="wave wave-1"></div>
+            <div class="wave wave-2"></div>
+            <div class="wave wave-3"></div>
+            <div class="wave wave-4"></div>
+        </div>
+        <div class="video-freeze-effect"></div>
+    `;
+
+    // Agregar overlay al video actual
+    const videoContainer = document.querySelector('.video-container-tiktok, .video-placeholder-tiktok');
+    if (videoContainer) {
+        videoContainer.appendChild(videoOverlay);
+    }
+
+    // Activar efecto de congelamiento con ondas
+    setTimeout(() => {
+        videoOverlay.classList.add('active');
+        
+        // Crear animación principal después del efecto de onda
+        setTimeout(() => {
+            showMainChapterAnimation(callback);
+        }, 2000);
+    }, 100);
+}
+
+function showMainChapterAnimation(callback) {
+    const animationOverlay = document.createElement('div');
+    animationOverlay.className = 'chapter-loading-animation';
+    animationOverlay.innerHTML = `
+        <div class="loading-container">
+            <div class="loading-dots">
+                <div class="loading-dot"></div>
+                <div class="loading-dot"></div>
+                <div class="loading-dot"></div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(animationOverlay);
+
+    // Reproducir sonido con iframe de YouTube
+    const youtubeFrame = document.createElement('iframe');
+    youtubeFrame.style.display = 'none';
+    youtubeFrame.src = 'https://www.youtube.com/embed/dz6Lp_PyX_Q?autoplay=1&start=0&end=4&controls=0&modestbranding=1&rel=0&showinfo=0&mute=0';
+    youtubeFrame.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+    document.body.appendChild(youtubeFrame);
+
+    // Activar animación
+    setTimeout(() => {
+        animationOverlay.classList.add('active');
+    }, 100);
+
+    // Remover después de 3 segundos
+    setTimeout(() => {
+        animationOverlay.classList.add('fade-out');
+        
+        // Limpiar overlay del video también
+        const videoOverlay = document.querySelector('.video-ocean-effect');
+        if (videoOverlay) {
+            videoOverlay.remove();
+        }
+        
+        setTimeout(() => {
+            if (document.body.contains(animationOverlay)) {
+                document.body.removeChild(animationOverlay);
+            }
+            if (document.body.contains(youtubeFrame)) {
+                document.body.removeChild(youtubeFrame);
+            }
+            if (callback) callback();
+        }, 500);
+    }, 3000);
+}
+
+// Función para manejar transición entre episodios (legacy - mantenida para compatibilidad)
+function handleEpisodeTransition(nextEpisode, seriesTitle, playerElement) {
+    // Esta función ahora es manejada directamente en showTikTokPlayer
+    // Mantenida para compatibilidad con código existente
+    console.log(`Transición legacy a episodio ${nextEpisode}`);
+}
+
+// Función para mostrar modal de suscripción
+function showSubscriptionModal(episodeNumber, seriesTitle, playerElement) {
+    const subscriptionModal = document.createElement('div');
+    subscriptionModal.className = 'subscription-modal-overlay';
+    subscriptionModal.innerHTML = `
+        <div class="subscription-modal-container">
+            <div class="subscription-header">
+                <h2>Episodio Premium</h2>
+                <button class="subscription-close" id="subscriptionClose">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="subscription-content">
+                <div class="episode-info">
+                    <h3>${seriesTitle}</h3>
+                    <p>Episodio ${episodeNumber} - "${getEpisodeTitle(seriesTitle, episodeNumber)}"</p>
+                </div>
+                <div class="subscription-message">
+                    <div class="lock-icon-large">
+                        <svg width="60" height="60" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM15.1 8H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/>
+                        </svg>
+                    </div>
+                    <h4>Episodio Premium Bloqueado</h4>
+                    <p>Los episodios a partir del 8 requieren monedas para desbloquearse</p>
+                    <div class="cost-info">
+                        <span class="cost-amount">30 monedas</span>
+                        <span class="cost-description">por episodio</span>
+                    </div>
+                </div>
+                <div class="subscription-options">
+                    <button class="subscription-btn primary" id="earnCoinsBtn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        Ganar Monedas Gratis
+                    </button>
+                    <button class="subscription-btn secondary" id="buyCoinsBtn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
+                        </svg>
+                        Comprar Monedas
+                    </button>
+                </div>
+                <div class="current-balance">
+                    <p>Monedas actuales: <span class="balance-count">${userCoins}</span></p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(subscriptionModal);
+    setTimeout(() => subscriptionModal.classList.add('active'), 100);
+
+    // Event listeners
+    const closeBtn = subscriptionModal.querySelector('#subscriptionClose');
+    const earnCoinsBtn = subscriptionModal.querySelector('#earnCoinsBtn');
+    const buyCoinsBtn = subscriptionModal.querySelector('#buyCoinsBtn');
+
+    closeBtn.addEventListener('click', () => {
+        subscriptionModal.classList.remove('active');
+        setTimeout(() => document.body.removeChild(subscriptionModal), 300);
+    });
+
+    earnCoinsBtn.addEventListener('click', () => {
+        subscriptionModal.classList.remove('active');
+        setTimeout(() => document.body.removeChild(subscriptionModal), 300);
+        showMonetizationModal();
+    });
+
+    buyCoinsBtn.addEventListener('click', () => {
+        subscriptionModal.classList.remove('active');
+        setTimeout(() => document.body.removeChild(subscriptionModal), 300);
+        showMonetizationModal();
+    });
+
+    // Click outside to close
+    subscriptionModal.addEventListener('click', (e) => {
+        if (e.target === subscriptionModal) {
+            subscriptionModal.classList.remove('active');
+            setTimeout(() => document.body.removeChild(subscriptionModal), 300);
+        }
+    });
+}
+
+// Enhanced search functionality
+function performSearchBar(query) {
+    if (query.length > 2) {
+        performSearch(query);
+        document.getElementById('searchModal').classList.add('active');
+    }
+}
+
+// Content sections visible immediately
+document.addEventListener('DOMContentLoaded', () => {
+    const contentSections = document.querySelectorAll('.content-section');
+    contentSections.forEach(section => {
+        section.style.opacity = '1';
+        section.style.visibility = 'visible';
+    });
+
+    // Initialize monetization
+    updateCoinDisplay();
+    checkReferral();
     
-    .netflix-download-btn-fullscreen {
-        padding: 1.25rem 2rem;
-        font-size: 1.1rem;
+    // Initialize continue watching section
+    updateContinueWatchingSection();
+
+    // Monetization event listeners
+    const rewardsBtn = document.getElementById('rewardsBtn');
+    const monetizationClose = document.getElementById('monetizationClose');
+    const monetizationModal = document.getElementById('monetizationModal');
+    const watchAdBtn = document.getElementById('watchAdBtn');
+    const shareBtn = document.getElementById('shareBtn');
+    const adClose = document.getElementById('adClose');
+    const searchBarInput = document.getElementById('searchBarInput');
+
+    if (rewardsBtn) {
+        rewardsBtn.addEventListener('click', showMonetizationModal);
     }
-    
-    .ad-timer-overlay {
-        right: 1rem;
-        width: 50px;
-        height: 50px;
-        font-size: 1.2rem;
+
+    if (monetizationClose) {
+        monetizationClose.addEventListener('click', hideMonetizationModal);
     }
-}
 
-/* Netflix Ad Styles */
-.netflix-ad-container {
-    position: relative;
-    background: #000;
-    border-radius: 12px;
-    overflow: hidden;
-}
-
-.netflix-ad-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-        transparent 40%,
-        rgba(0, 0, 0, 0.7) 70%,
-        rgba(0, 0, 0, 0.9) 100%
-    );
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 2rem;
-}
-
-.netflix-logo {
-    align-self: flex-start;
-    background: rgba(0, 0, 0, 0.8);
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    backdrop-filter: blur(10px);
-}
-
-.netflix-cta {
-    align-self: center;
-    text-align: center;
-    display: none;
-}
-
-.netflix-download-btn {
-    background: linear-gradient(135deg, #e50914, #b81d24);
-    color: white;
-    border: none;
-    padding: 1rem 2rem;
-    border-radius: 25px;
-    font-size: 1.1rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);
-}
-
-.netflix-download-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(229, 9, 20, 0.6);
-    background: linear-gradient(135deg, #f40612, #e50914);
-}
-
-/* Payment Modal */
-.payment-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: #000000;
-    z-index: 10001;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-}
-
-.payment-modal-overlay.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-.payment-modal-container {
-    background: #000000;
-    width: 100vw;
-    height: 100vh;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-}
-
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(50px);
+    if (monetizationModal) {
+        monetizationModal.addEventListener('click', (e) => {
+            if (e.target === monetizationModal) {
+                hideMonetizationModal();
+            }
+        });
     }
-    to {
-        opacity: 1;
-        transform: translateY(0);
+
+    if (watchAdBtn) {
+        watchAdBtn.addEventListener('click', showAdModal);
     }
-}
 
-.payment-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 2rem;
-    border-bottom: 1px solid #2f3336;
-    background: linear-gradient(135deg, #1d9bf0, #1a8cd8);
-    flex-shrink: 0;
-}
-
-.payment-header h2 {
-    color: white;
-    font-size: 1.6rem;
-    font-weight: 700;
-    margin: 0;
-}
-
-.payment-close {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    color: white;
-    cursor: pointer;
-    padding: 0.75rem;
-    border-radius: 50%;
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-}
-
-.payment-close:hover {
-    background: rgba(255, 255, 255, 0.3);
-}
-
-.payment-content {
-    padding: 2rem;
-    flex: 1;
-    overflow-y: auto;
-    max-width: 600px;
-    margin: 0 auto;
-    width: 100%;
-}
-
-.payment-options {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.payment-option {
-    background: #16181c;
-    border: 2px solid #2f3336;
-    border-radius: 16px;
-    padding: 1.5rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.payment-option:hover {
-    border-color: #1d9bf0;
-    background: rgba(29, 155, 240, 0.05);
-}
-
-.payment-option.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.payment-option-icon {
-    width: 48px;
-    height: 48px;
-    background: #1d9bf0;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: bold;
-    flex-shrink: 0;
-}
-
-.payment-option-info h3 {
-    color: #e7e9ea;
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-}
-
-.payment-option-info p {
-    color: #71767b;
-    font-size: 0.9rem;
-    margin: 0;
-}
-
-.loading-spinner {
-    width: 16px;
-    height: 16px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top: 2px solid #ffffff;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    display: inline-block;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Mejorar responsividad móvil para pagos */
-@media (max-width: 768px) {
-    .payment-content {
-        padding: 1rem;
+    if (shareBtn) {
+        shareBtn.addEventListener('click', shareWithFriends);
     }
-    
-    .payment-header {
-        padding: 1.5rem 1rem;
+
+    if (adClose) {
+        adClose.addEventListener('click', () => {
+            document.getElementById('adModal').classList.remove('active');
+        });
     }
-    
-    .payment-header h2 {
-        font-size: 1.3rem;
+
+    // Purchase button event listeners
+    const purchaseButtons = document.querySelectorAll('.purchase-btn');
+    purchaseButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const amount = parseInt(btn.dataset.amount);
+            const coins = parseInt(btn.dataset.coins);
+            purchaseCoins(amount, coins);
+        });
+    });
+
+    // Payment modal event listeners
+    const paymentClose = document.getElementById('paymentClose');
+    const paymentModal = document.getElementById('paymentModal');
+    const applePayOption = document.getElementById('applePayOption');
+    const creditCardOption = document.getElementById('creditCardOption');
+    const paypalOption = document.getElementById('paypalOption');
+    const cardForm = document.getElementById('cardForm');
+    const processPaymentBtn = document.getElementById('processPaymentBtn');
+
+    if (paymentClose) {
+        paymentClose.addEventListener('click', hidePaymentModal);
     }
-    
-    .card-form {
-        padding: 1.5rem;
+
+    if (paymentModal) {
+        paymentModal.addEventListener('click', (e) => {
+            if (e.target === paymentModal) {
+                hidePaymentModal();
+            }
+        });
     }
-    
-    .form-input {
-        padding: 1rem;
-        font-size: 16px; /* Prevent zoom on iOS */
+
+    if (applePayOption) {
+        applePayOption.addEventListener('click', () => {
+            document.querySelectorAll('.payment-option').forEach(option => {
+                option.style.background = '#16181c';
+            });
+            applePayOption.style.background = 'rgba(29, 155, 240, 0.1)';
+            cardForm.style.display = 'none';
+
+            setTimeout(() => {
+                processApplePay();
+            }, 500);
+        });
     }
-    
-    .payment-option {
-        padding: 1rem;
+
+    if (creditCardOption) {
+        creditCardOption.addEventListener('click', () => {
+            document.querySelectorAll('.payment-option').forEach(option => {
+                option.style.background = '#16181c';
+            });
+            creditCardOption.style.background = 'rgba(29, 155, 240, 0.1)';
+            cardForm.style.display = 'block';
+        });
+    }
+
+    if (paypalOption) {
+        paypalOption.addEventListener('click', () => {
+            if (!paypalOption.classList.contains('disabled')) {
+                processPayPal();
+            }
+        });
+    }
+
+    if (processPaymentBtn) {
+        processPaymentBtn.addEventListener('click', processCreditCard);
+    }
+
+    // Card input formatting with better mobile support
+    const cardNumberInput = document.getElementById('cardNumber');
+    const cardExpiryInput = document.getElementById('cardExpiry');
+    const cardCvcInput = document.getElementById('cardCvc');
+
+    if (cardNumberInput) {
+        cardNumberInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
+            let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+            if (formattedValue.length <= 19) { // Max length with spaces
+                e.target.value = formattedValue;
+            }
+            validateCardForm();
+        });
+
+        // Prevent non-numeric input
+        cardNumberInput.addEventListener('keypress', (e) => {
+            if (!/[0-9\s]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
+                e.preventDefault();
+            }
+        });
+    }
+
+    if (cardExpiryInput) {
+        cardExpiryInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.substring(0,2) + '/' + value.substring(2,4);
+            }
+            e.target.value = value;
+            validateCardForm();
+        });
+
+        cardExpiryInput.addEventListener('keypress', (e) => {
+            if (!/[0-9/]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
+                e.preventDefault();
+            }
+        });
+    }
+
+    if (cardCvcInput) {
+        cardCvcInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            e.target.value = value.substring(0, 4); // Max 4 digits
+            validateCardForm();
+        });
+
+        cardCvcInput.addEventListener('keypress', (e) => {
+            if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
+                e.preventDefault();
+            }
+        });
+    }
+
+    const cardNameInput = document.getElementById('cardName');
+    if (cardNameInput) {
+        cardNameInput.addEventListener('input', validateCardForm);
+    }
+
+    // Check for payment success on page load
+    checkPaymentSuccess();
+
+    // Initialize expanded search with all series
+    displayExpandedSearchResults(getAllSeries());
+});
+
+// Card form validation
+function validateCardForm() {
+    const cardNumber = document.getElementById('cardNumber').value;
+    const cardExpiry = document.getElementById('cardExpiry').value;
+    const cardCvc = document.getElementById('cardCvc').value;
+    const cardName = document.getElementById('cardName').value;
+    const processBtn = document.getElementById('processPaymentBtn');
+
+    const isValid = cardNumber.replace(/\s/g, '').length >= 16 &&
+                   cardExpiry.length === 5 &&
+                   cardCvc.length >= 3 &&
+                   cardName.trim().length > 0;
+
+    if (processBtn) {
+        processBtn.disabled = !isValid;
+        processBtn.style.opacity = isValid ? '1' : '0.5';
     }
 }
 
-/* Credit Card Form */
-.card-form {
-    background: #16181c;
-    padding: 2rem;
-    border-radius: 16px;
-    margin-top: 1rem;
-    touch-action: manipulation;
-    overflow: visible;
-}
-
-.form-group {
-    margin-bottom: 1.5rem;
-}
-
-.form-label {
-    display: block;
-    color: #e7e9ea;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    font-size: 1rem;
-}
-
-.form-input {
-    width: 100%;
-    background: #000000;
-    border: 2px solid #2f3336;
-    border-radius: 12px;
-    padding: 1.2rem;
-    color: #e7e9ea;
-    font-size: 1.1rem;
-    transition: border-color 0.2s ease;
-    touch-action: manipulation;
-    -webkit-appearance: none;
-    appearance: none;
-}
-
-.form-input:focus {
-    outline: none;
-    border-color: #1d9bf0;
-    box-shadow: 0 0 0 3px rgba(29, 155, 240, 0.1);
-}
-
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-}
-
-.secure-badge {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: #22c55e;
-    font-size: 0.85rem;
-    margin-top: 1rem;
-}
-
-.process-payment-btn {
-    width: 100%;
-    background: linear-gradient(135deg, #1d9bf0, #1a8cd8);
-    color: white;
-    border: none;
-    padding: 1rem 2rem;
-    border-radius: 16px;
-    font-size: 1.1rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin-top: 1.5rem;
-}
-
-.process-payment-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(29, 155, 240, 0.3);
-}
-
-.process-payment-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-}
-
-/* Logout Button */
-.logout-btn {
-    background: #16181c;
-    border: 1px solid #2f3336;
-    color: #e7e9ea;
-    cursor: pointer;
-    padding: 0.6rem;
-    border-radius: 20px;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.logout-btn:hover {
-    background: #ef4444;
-    border-color: #ef4444;
-    color: white;
-}
-
-/* Mobile Responsive for Auth Screens */
-@media (max-width: 768px) {
-    .welcome-logo h1 {
-        font-size: 3rem;
-    }
-    
-    .welcome-message h2 {
-        font-size: 1.5rem;
-    }
-    
-    .auth-content {
-        padding: 1.5rem;
-    }
-    
-    .auth-logo h1 {
-        font-size: 2.5rem;
-    }
-    
-    .auth-method-btn {
-        padding: 1.25rem;
-    }
-    
-    .auth-success-content {
-        padding: 2rem 1.5rem;
-    }
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .nav {
-        padding: 1rem;
+// Add CSS animation for fade out
+const additionalStyles = document.createElement('style');
+additionalStyles.textContent = `
+    @keyframes fadeOut {
+        from { opacity: 1; transform: scale(1); }
+        to { opacity: 0; transform: scale(0.95); }
     }
 
-    .nav-menu {
-        display: none;
+    .episode-item.locked {
+        opacity: 0.6;
+        background: #2f3336;
     }
 
-    .hero {
-        padding: 1rem;
-        text-align: center;
+    .episode-item.locked:hover {
+        background: rgba(29, 155, 240, 0.1);
     }
 
-    .hero-title {
-        font-size: 2rem;
+    .unlock-cost {
+        color: #ffd700 !important;
+        font-weight: 600 !important;
+        font-size: 0.8rem !important;
     }
-
-    .content-feed {
-        padding: 1rem;
-    }
-
-    .content-grid {
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    }
-
-    .content-card {
-        width: 180px;
-        height: 300px;
-    }
-
-    .content-card img {
-        height: 220px;
-    }
-
-    .categories-section {
-        padding: 1rem;
-    }
-
-    .video-container-tiktok {
-        width: 100vw;
-        height: 100vh;
-    }
-
-    .expanded-search-results {
-        grid-template-columns: 1fr;
-    }
-
-    .monetization-sections {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-    }
-
-    .purchase-options {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 480px) {
-    .content-grid {
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    }
-
-    .content-card {
-        width: 160px;
-        height: 280px;
-    }
-
-    .content-card img {
-        height: 200px;
-    }
-
-    .video-container-tiktok {
-        width: 100vw;
-        height: 100vh;
-    }
-
-    .monetization-sections {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-
-    .purchase-options {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.75rem;
-    }
-
-    .expanded-search-header {
-        padding: 1rem;
-    }
-
-    .expanded-search-categories {
-        padding: 0.75rem 1rem;
-        gap: 0.5rem;
-    }
-
-    .expanded-search-results {
-        padding: 1rem;
-        grid-template-columns: 1fr;
-    }
-
-    .expanded-result-card {
-        flex-direction: column;
-        height: auto;
-        max-width: none;
-    }
-
-    .expanded-result-image {
-        width: 100%;
-        height: 200px;
-    }
-
-    .monetization-content {
-        padding: 1rem;
-    }
-}
+`;
+document.head.appendChild(additionalStyles);
