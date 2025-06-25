@@ -1512,10 +1512,11 @@ function showAdModal() {
                 width="100%" 
                 height="100%" 
                 autoplay 
-                muted
+                muted="false"
                 playsinline
                 webkit-playsinline
                 controls="false"
+                preload="metadata"
                 style="object-fit: cover; background: #000;"
             >
                 <source src="https://www.dropbox.com/scl/fi/oa2blfwyvg84csw5w13ky/copy_0B8A47E6-5756-4AA7-A69F-FF4E6C6A3194.mov?rlkey=pxs3j8ujtrnyhpf9u7qn6iyl1&st=uy6kb9o7&raw=1" type="video/mp4">
@@ -1535,17 +1536,80 @@ function showAdModal() {
             <div class="ad-timer-overlay">
                 <span id="adTimerDisplay">30</span>
             </div>
+            <div class="play-control-overlay" id="playControlOverlay">
+                <button class="video-play-btn" id="videoPlayBtn">
+                    <svg width="60" height="60" viewBox="0 0 24 24" fill="white">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                </button>
+                <p style="color: white; margin-top: 1rem; font-size: 1.1rem;">Toca para reproducir el anuncio</p>
+            </div>
         </div>
     `;
 
     const video = document.getElementById('netflixAdVideo');
     const downloadBtn = document.getElementById('netflixDownloadBtn');
     const timerDisplay = document.getElementById('adTimerDisplay');
+    const playControl = document.getElementById('playControlOverlay');
+    const playBtn = document.getElementById('videoPlayBtn');
+
+    // Detectar si es iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    
+    // Configurar video para iOS
+    if (isIOS) {
+        video.muted = true; // Inicialmente muted para iOS
+        video.autoplay = false;
+        playControl.style.display = 'flex';
+    } else {
+        video.muted = false; // Android y desktop con sonido
+        playControl.style.display = 'none';
+    }
 
     // Prevenir controles nativos del video
     video.setAttribute('disablePictureInPicture', '');
-    video.setAttribute('controlsList', 'nodownload nofullscreen noremoteplayback');
+    video.setAttribute('controlsList', 'nodownload nofullscreen noremoteplaybook');
     
+    // Función para iniciar reproducción
+    const startPlayback = async () => {
+        try {
+            // Habilitar sonido después del primer toque del usuario
+            video.muted = false;
+            video.volume = 1.0;
+            
+            await video.play();
+            playControl.style.display = 'none';
+            
+            // Pequeño delay para asegurar que el sonido funcione
+            setTimeout(() => {
+                video.muted = false;
+            }, 100);
+            
+        } catch (error) {
+            console.log('Error al reproducir video:', error);
+            // Fallback: intentar con muted si falla
+            try {
+                video.muted = true;
+                await video.play();
+                playControl.style.display = 'none';
+            } catch (fallbackError) {
+                console.log('Error en fallback:', fallbackError);
+            }
+        }
+    };
+
+    // Event listeners para reproducción
+    playBtn.addEventListener('click', startPlayback);
+    playControl.addEventListener('click', startPlayback);
+    
+    // Intentar reproducción automática para dispositivos que lo permiten
+    if (!isIOS) {
+        video.play().catch(() => {
+            // Si falla la reproducción automática, mostrar control
+            playControl.style.display = 'flex';
+        });
+    }
+
     // Bloquear eventos de click en el video
     video.addEventListener('click', (e) => {
         e.preventDefault();
@@ -1556,6 +1620,14 @@ function showAdModal() {
     video.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         return false;
+    });
+
+    // Listener para cuando el video está listo
+    video.addEventListener('loadedmetadata', () => {
+        if (isIOS) {
+            // Para iOS, asegurar que está configurado correctamente
+            video.muted = true;
+        }
     });
 
     // Netflix download button functionality
