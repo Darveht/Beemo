@@ -349,18 +349,18 @@ function getCurrentSeriesThumbnail(title) {
 function updateContinueWatchingSection() {
     const continueSection = document.querySelector('.continue-section');
     const continueCards = continueSection.parentElement;
-    
+
     if (Object.keys(watchHistory).length === 0) {
         continueCards.style.display = 'none';
         return;
     }
-    
+
     continueCards.style.display = 'block';
-    
+
     const sortedHistory = Object.entries(watchHistory)
         .sort(([,a], [,b]) => b.timestamp - a.timestamp)
         .slice(0, 3);
-    
+
     continueSection.innerHTML = sortedHistory.map(([title, data]) => `
         <div class="content-card continue-card" onclick="showTikTokPlayer('${title}', ${data.episode})">
             <img src="${data.thumbnail}" alt="${title}">
@@ -387,7 +387,7 @@ function getEpisodeTitle(seriesTitle, episodeNumber) {
             5: 'Conflictos de Poder'
         }
     };
-    
+
     return episodeTitles[seriesTitle]?.[episodeNumber] || 'Continuación de la Historia';
 }
 
@@ -397,7 +397,7 @@ function showTikTokPlayer(title, startEpisode = 1) {
     document.body.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
-    
+
     // Buscar información de la serie
     const seriesData = getAllSeries().find(series => series.title === title);
     let currentEpisode = startEpisode;
@@ -407,7 +407,7 @@ function showTikTokPlayer(title, startEpisode = 1) {
 
     const player = document.createElement('div');
     player.className = 'tiktok-player';
-    
+
     // Crear contenedor del reproductor
     player.innerHTML = `
         <div class="video-container-tiktok">
@@ -416,10 +416,10 @@ function showTikTokPlayer(title, startEpisode = 1) {
                     <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
                 </svg>
             </button>
-            
+
             <!-- Video o placeholder que cambiará dinámicamente -->
             <div id="videoContent"></div>
-            
+
             <div class="video-info-tiktok">
                 <h3 class="video-title-tiktok">${title}</h3>
                 <p class="video-description-tiktok" id="episodeDescription">Episodio ${currentEpisode} - "${getEpisodeTitle(title, currentEpisode)}"</p>
@@ -427,7 +427,7 @@ function showTikTokPlayer(title, startEpisode = 1) {
                     <div class="video-progress-fill" id="videoProgressBar"></div>
                 </div>
             </div>
-            
+
             <div class="video-controls-tiktok">
                 <button class="tiktok-btn like-btn" id="likeBtn">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -450,9 +450,9 @@ function showTikTokPlayer(title, startEpisode = 1) {
                     </svg>
                 </button>
             </div>
-            
-            
-            
+
+
+
             <div class="play-control-overlay" id="playControlOverlay" style="display: none;">
                 <button class="video-play-btn" id="videoPlayBtn">
                     <svg width="60" height="60" viewBox="0 0 24 24" fill="white">
@@ -477,7 +477,7 @@ function showTikTokPlayer(title, startEpisode = 1) {
             4: 'https://streamable.com/e/0klxmv', // Usando episodio 2 como placeholder
             5: 'https://streamable.com/e/0klxmv', // Usando episodio 2 como placeholder
         };
-        
+
         return episodeUrls[episodeNumber] || null;
     }
 
@@ -485,7 +485,7 @@ function showTikTokPlayer(title, startEpisode = 1) {
     async function createStreamablePlayer(streamableUrl) {
         try {
             showNotification('Cargando video...', 'info');
-            
+
             // Crear iframe de Streamable como fondo del reproductor
             const iframe = document.createElement('iframe');
             iframe.id = 'streamablePlayer';
@@ -508,34 +508,34 @@ function showTikTokPlayer(title, startEpisode = 1) {
             iframe.setAttribute('mozallowfullscreen', '');
             iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media');
             iframe.setAttribute('loading', 'eager');
-            
+
             // Insertar el iframe en el contenedor del video
             const videoContent = document.getElementById('videoContent');
             if (videoContent) {
                 videoContent.innerHTML = '';
                 videoContent.appendChild(iframe);
             }
-            
+
             // Manejar carga del iframe
             iframe.onload = () => {
                 showNotification('Video cargado correctamente', 'success');
             };
-            
+
             // Manejar error de carga
             iframe.onerror = () => {
                 showNotification('Error cargando video, usando modo simulado', 'warning');
                 loadSimulatedEpisode(currentEpisode);
             };
-            
+
             // Timeout de seguridad
             setTimeout(() => {
                 showNotification('Video listo para reproducir', 'info');
             }, 3000);
-            
+
             // Retornar contenedor
             const container = document.createElement('div');
             container.appendChild(iframe);
-            
+
             return container;
         } catch (error) {
             console.log('Error creando reproductor:', error);
@@ -549,18 +549,18 @@ function showTikTokPlayer(title, startEpisode = 1) {
         const videoContent = document.getElementById('videoContent');
         const episodeDescription = document.getElementById('episodeDescription');
         const progressBar = document.getElementById('videoProgressBar');
-        
+
         // Actualizar información del episodio
         episodeDescription.textContent = `Episodio ${episodeNumber} - "${getEpisodeTitle(title, episodeNumber)}"`;
         progressBar.style.width = '0%';
-        
+
         // Reset watch time and animation
         watchTime = 0;
         animationTriggered = false;
-        
+
         // Cargar video
         const videoUrl = getEpisodeVideoUrl(episodeNumber);
-        
+
         if (videoUrl) {
             // Mostrar indicador de carga
             videoContent.innerHTML = `
@@ -584,41 +584,41 @@ function showTikTokPlayer(title, startEpisode = 1) {
                         </div>
                     </div>
                 `;
-                
+
                 // Crear reproductor completamente inmersivo
                 const playerContainer = await createStreamablePlayer(videoUrl);
-                
+
                 if (playerContainer) {
                     showNotification(`Episodio ${episodeNumber} cargado correctamente`, 'success');
-                    
+
                     // Configurar seguimiento básico del progreso
                     let currentTime = 0;
                     const duration = 60; // 1 minuto por episodio
                     const progressBar = document.getElementById('videoProgressBar');
-                    
+
                     const progressInterval = setInterval(() => {
                         currentTime += 1;
                         const progress = (currentTime / duration) * 100;
                         if (progressBar) {
                             progressBar.style.width = `${Math.min(progress, 100)}%`;
                         }
-                        
+
                         // Actualizar historial cada 10 segundos
                         if (currentTime % 10 === 0) {
                             addToWatchHistory(title, episodeNumber, progress);
                         }
-                        
+
                         // Auto-avanzar después de 1 minuto
                         if (currentTime >= duration) {
                             clearInterval(progressInterval);
                             transitionToNextEpisode();
                         }
                     }, 1000);
-                    
+
                 } else {
                     throw new Error('No se pudo crear el reproductor');
                 }
-                
+
             } catch (error) {
                 console.log('Error cargando video:', error);
                 showNotification('Error de carga, usando modo simulado', 'warning');
@@ -641,32 +641,32 @@ function showTikTokPlayer(title, startEpisode = 1) {
                 </div>
             </div>
         `;
-        
+
         setupSimulatedPlayer();
     }
 
     // Función para configurar reproductor Streamtape
     function setupStreamtapePlayer(iframe, episodeNumber) {
         const progressBar = document.getElementById('videoProgressBar');
-        
+
         // Simular progreso automático (ya que no podemos acceder al iframe de Streamtape)
         let currentTime = 0;
         const duration = 60; // 1 minuto por episodio
-        
+
         const progressInterval = setInterval(() => {
             currentTime += 1;
             const progress = (currentTime / duration) * 100;
             progressBar.style.width = `${Math.min(progress, 100)}%`;
-            
+
             // Actualizar historial cada 5 segundos
             if (currentTime % 5 === 0) {
                 addToWatchHistory(title, episodeNumber, progress);
             }
-            
+
             // Mostrar animación 3 segundos antes del final
             if (currentTime >= duration - 3 && !animationTriggered) {
                 animationTriggered = true;
-                
+
                 setTimeout(() => {
                     clearInterval(progressInterval);
                     showChapterEndAnimation(() => {
@@ -675,10 +675,10 @@ function showTikTokPlayer(title, startEpisode = 1) {
                 }, 3000);
             }
         }, 1000);
-        
+
         // Guardar interval para limpieza
         iframe.progressInterval = progressInterval;
-        
+
         // Cleanup cuando se cierre
         iframe.addEventListener('remove', () => {
             if (progressInterval) {
@@ -736,15 +736,15 @@ function showTikTokPlayer(title, startEpisode = 1) {
                 video.currentTime = 0;
                 video.volume = 1.0;
                 video.muted = false;
-                
+
                 await video.play();
                 showNotification('Reproduciendo en pantalla completa', 'success');
-                
+
                 // Ocultar cursor después de 3 segundos
                 setTimeout(() => {
                     video.style.cursor = 'none';
                 }, 3000);
-                
+
             } catch (error) {
                 console.log('Intentando reproducción alternativa:', error);
                 try {
@@ -777,24 +777,24 @@ function showTikTokPlayer(title, startEpisode = 1) {
             if (video.duration > 0) {
                 const progress = (video.currentTime / video.duration) * 100;
                 progressBar.style.width = `${progress}%`;
-                
+
                 // Actualizar historial de visualización cada 5 segundos
                 if (Math.floor(video.currentTime) % 5 === 0) {
                     addToWatchHistory(title, currentEpisode, progress);
                 }
-                
+
                 // Activar animación 3 segundos antes del final
                 const timeLeft = video.duration - video.currentTime;
                 if (timeLeft <= 3 && timeLeft > 2 && !animationTriggered) {
                     animationTriggered = true;
-                    
+
                     showChapterEndAnimation(() => {
                         transitionToNextEpisode();
                     });
                 }
             }
         });
-        
+
         // Evento cuando termina el video
         video.addEventListener('ended', () => {
             if (!animationTriggered) {
@@ -817,6 +817,7 @@ function showTikTokPlayer(title, startEpisode = 1) {
             setupSimulatedPlayer();
         });
 
+        //```python
         // Bloquear anuncios en pantalla
         const blockAds = () => {
             const adSelectors = [
@@ -827,7 +828,7 @@ function showTikTokPlayer(title, startEpisode = 1) {
                 '.popup',
                 '.overlay'
             ];
-            
+
             adSelectors.forEach(selector => {
                 const ads = document.querySelectorAll(selector);
                 ads.forEach(ad => {
@@ -862,7 +863,7 @@ function showTikTokPlayer(title, startEpisode = 1) {
 
         // Detectar si es iOS
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        
+
         // Configurar video para iOS
         if (isIOS) {
             video.muted = true;
@@ -913,25 +914,25 @@ function showTikTokPlayer(title, startEpisode = 1) {
             if (video.duration > 0) {
                 const progress = (video.currentTime / video.duration) * 100;
                 progressBar.style.width = `${progress}%`;
-                
+
                 // Actualizar historial de visualización
                 if (Math.floor(video.currentTime) % 5 === 0) {
                     addToWatchHistory(title, currentEpisode, progress);
                 }
-                
+
                 // Activar animación 2 segundos antes del final
                 const timeLeft = video.duration - video.currentTime;
                 if (timeLeft <= 2 && timeLeft > 1.5 && !animationTriggered) {
                     animationTriggered = true;
                     video.pause();
-                    
+
                     showChapterEndAnimation(() => {
                         transitionToNextEpisode();
                     });
                 }
             }
         });
-        
+
         // Evento cuando termina el video
         video.addEventListener('ended', () => {
             if (!animationTriggered) {
@@ -947,7 +948,7 @@ function showTikTokPlayer(title, startEpisode = 1) {
             e.stopPropagation();
             return false;
         });
-        
+
         video.addEventListener('contextmenu', (e) => {
             e.preventDefault();
             return false;
@@ -957,23 +958,23 @@ function showTikTokPlayer(title, startEpisode = 1) {
     // Función para configurar reproductor simulado
     function setupSimulatedPlayer() {
         const progressBar = document.getElementById('videoProgressBar');
-        
+
         // Limpiar interval anterior si existe
         if (watchInterval) {
             clearInterval(watchInterval);
         }
-        
+
         // Simular progreso del video
         watchInterval = setInterval(() => {
             watchTime += 1;
             const progress = Math.min((watchTime / 60) * 100, 100); // 60 seconds = 100%
             progressBar.style.width = `${progress}%`;
-            
+
             // Update watch history every 5 seconds
             if (watchTime % 5 === 0) {
                 addToWatchHistory(title, currentEpisode, progress);
             }
-            
+
             // Auto advance to next episode after 60 seconds
             if (watchTime >= 60) {
                 showChapterEndAnimation(() => {
@@ -986,19 +987,17 @@ function showTikTokPlayer(title, startEpisode = 1) {
     // Función para transición al siguiente episodio
     function transitionToNextEpisode() {
         const nextEpisode = currentEpisode + 1;
-        
+
         if (nextEpisode <= 45) { // Máximo 45 episodios
             if (nextEpisode <= 8 || unlockedEpisodes.includes(nextEpisode)) {
                 // Episodio disponible
                 currentEpisode = nextEpisode;
                 loadEpisode(currentEpisode);
-                showNotification(`Reproduciendo Episodio ${currentEpisode}`, 'success');
             } else if (userCoins >= 30) {
                 // Auto-desbloquear con monedas
                 if (unlockEpisode(nextEpisode)) {
                     currentEpisode = nextEpisode;
                     loadEpisode(currentEpisode);
-                    showNotification(`Episodio ${currentEpisode} desbloqueado automáticamente`, 'success');
                 }
             } else {
                 // Mostrar modal de suscripción
@@ -1019,15 +1018,15 @@ function showTikTokPlayer(title, startEpisode = 1) {
     // Navegación con gestos de swipe (opcional para el futuro)
     let startY = 0;
     let endY = 0;
-    
+
     player.addEventListener('touchstart', (e) => {
         startY = e.touches[0].clientY;
     });
-    
+
     player.addEventListener('touchend', (e) => {
         endY = e.changedTouches[0].clientY;
         const deltaY = startY - endY;
-        
+
         // Swipe hacia arriba = siguiente episodio
         if (deltaY > 50) {
             transitionToNextEpisode();
@@ -1050,18 +1049,18 @@ function showTikTokPlayer(title, startEpisode = 1) {
     closeBtn.addEventListener('click', () => {
         // Limpiar todos los intervals y recursos
         if (watchInterval) clearInterval(watchInterval);
-        
+
         // Limpiar iframe y sus intervals
         const iframe = document.getElementById('streamtapePlayer');
         if (iframe && iframe.progressInterval) {
             clearInterval(iframe.progressInterval);
         }
-        
+
         // Restaurar estilos del body
         document.body.style.overflow = '';
         document.body.style.position = '';
         document.body.style.width = '';
-        
+
         // Cerrar reproductor
         player.classList.remove('active');
         setTimeout(() => {
@@ -1069,7 +1068,7 @@ function showTikTokPlayer(title, startEpisode = 1) {
                 document.body.removeChild(player);
             }
         }, 300);
-        
+
         showNotification('Reproductor cerrado', 'info');
     });
 
@@ -1082,7 +1081,7 @@ function showTikTokPlayer(title, startEpisode = 1) {
     playPauseBtn.addEventListener('click', () => {
         const video = document.getElementById('mainVideo');
         const playPauseIcon = document.getElementById('playPauseIcon');
-        
+
         if (video) {
             if (video.paused) {
                 video.play();
@@ -1110,11 +1109,11 @@ function showTikTokPlayer(title, startEpisode = 1) {
     muteBtn.addEventListener('click', () => {
         const video = document.getElementById('mainVideo');
         const muteIcon = document.getElementById('muteIcon');
-        
+
         if (video) {
             isMuted = !video.muted;
             video.muted = isMuted;
-            
+
             muteIcon.setAttribute('d', isMuted ? 
                 'M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z' :
                 'M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z'
@@ -1173,7 +1172,7 @@ function showEpisodesModal(seriesTitle, currentEpisodeNum = 1) {
                         document.body.removeChild(modal);
                     }
                 }, 300);
-                
+
                 // Cerrar reproductor actual y abrir nuevo episodio
                 const currentPlayer = document.querySelector('.tiktok-player');
                 if (currentPlayer) {
@@ -1580,7 +1579,7 @@ function performSearch(query) {
         { title: 'Secretos de la Corte', rating: '8.8', episodes: '28 eps', year: '2024', genre: 'Drama Imperial', thumbnail: 'https://via.placeholder.com/280x400/1a1a1a/fff?text=Drama+5' },
         { title: 'El Jardín Secreto', rating: '8.6', episodes: '22 eps', year: '2024', genre: 'Romance', thumbnail: 'https://via.placeholder.com/280x400/1a1a1a/fff?text=Drama+6' },
         { title: 'Destino de Espadas', rating: '9.0', episodes: '38 eps', year: '2024', genre: 'Artes Marciales', thumbnail: 'https://via.placeholder.com/280x400/2a2a2a/fff?text=Nuevo+1' },
-        { title: 'Luna de Primavera', rating: '8.9', episodes: '32 eps', year: '2024', genre: 'Romance', thumbnail: 'https://via.placeholder.com/280x400/2a2a2a/fff?text=Nuevo+2' },
+        { title: 'Luna de Primavera', rating: '8.9', episodes: '30 eps', year: '2024', genre: 'Romance', thumbnail: 'https://via.placeholder.com/280x400/2a2a2a/fff?text=Nuevo+2' },
         { title: 'El Último General', rating: '8.5', episodes: '26 eps', year: '2024', genre: 'Artes Marciales', thumbnail: 'https://via.placeholder.com/280x400/2a2a2a/fff?text=Nuevo+3' },
         { title: 'Corazón de Bambú', rating: '9.2', episodes: '20 eps', year: '2024', genre: 'Romance', thumbnail: 'https://via.placeholder.com/280x400/2a2a2a/fff?text=Nuevo+4' },
         { title: 'El Emperador Eterno', rating: '9.2', episodes: '45 eps', year: '2024', genre: 'Fantasía Antigua', thumbnail: 'https://via.placeholder.com/280x400/3a3a3a/fff?text=Continuar+1' },
@@ -2058,7 +2057,7 @@ function showAdModal() {
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
     document.body.style.height = '100%';
-    
+
     modal.classList.add('active');
     closeBtn.style.display = 'none';
 
@@ -2114,7 +2113,7 @@ function showAdModal() {
 
     // Detectar si es iOS
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    
+
     // Configurar video para iOS
     if (isIOS) {
         video.muted = true; // Inicialmente muted para iOS
@@ -2128,22 +2127,22 @@ function showAdModal() {
     // Prevenir controles nativos del video
     video.setAttribute('disablePictureInPicture', '');
     video.setAttribute('controlsList', 'nodownload nofullscreen noremoteplaybook');
-    
+
     // Función para iniciar reproducción
     const startPlayback = async () => {
         try {
             // Habilitar sonido después del primer toque del usuario
             video.muted = false;
             video.volume = 1.0;
-            
+
             await video.play();
             playControl.style.display = 'none';
-            
+
             // Pequeño delay para asegurar que el sonido funcione
             setTimeout(() => {
                 video.muted = false;
             }, 100);
-            
+
         } catch (error) {
             console.log('Error al reproducir video:', error);
             // Fallback: intentar con muted si falla
@@ -2160,7 +2159,7 @@ function showAdModal() {
     // Event listeners para reproducción
     playBtn.addEventListener('click', startPlayback);
     playControl.addEventListener('click', startPlayback);
-    
+
     // Intentar reproducción automática para dispositivos que lo permiten
     if (!isIOS) {
         video.play().catch(() => {
@@ -2175,7 +2174,7 @@ function showAdModal() {
         e.stopPropagation();
         return false;
     });
-    
+
     video.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         return false;
@@ -2193,53 +2192,53 @@ function showAdModal() {
     downloadBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        
+
         // Detectar dispositivo y redireccionar
         const userAgent = navigator.userAgent || navigator.vendor || window.opera;
         const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
         const isAndroid = /android/i.test(userAgent);
-        
+
         try {
             if (isIOS) {
                 // Intentar abrir la app de Netflix primero, luego App Store
                 const netflixAppURL = 'netflix://';
                 const appStoreURL = 'https://apps.apple.com/app/netflix/id363590051';
-                
+
                 // Crear iframe oculto para intentar abrir la app
                 const iframe = document.createElement('iframe');
                 iframe.style.display = 'none';
                 iframe.src = netflixAppURL;
                 document.body.appendChild(iframe);
-                
+
                 // Si no se abre la app, redirigir a App Store
                 setTimeout(() => {
                     document.body.removeChild(iframe);
                     window.open(appStoreURL, '_blank');
                 }, 1000);
-                
+
             } else if (isAndroid) {
                 // Intentar abrir la app de Netflix primero, luego Play Store
                 const netflixAppURL = 'intent://www.netflix.com/#Intent;package=com.netflix.mediaclient;scheme=https;end';
                 const playStoreURL = 'https://play.google.com/store/apps/details?id=com.netflix.mediaclient';
-                
+
                 try {
                     window.location.href = netflixAppURL;
                 } catch (e) {
                     window.open(playStoreURL, '_blank');
                 }
-                
+
                 // Fallback a Play Store después de 1 segundo
                 setTimeout(() => {
                     window.open(playStoreURL, '_blank');
                 }, 1000);
-                
+
             } else {
                 // Desktop - abrir sitio web de Netflix
                 window.open('https://www.netflix.com', '_blank');
             }
-            
+
             showNotification('¡Redirigiendo a Netflix! 🎬', 'success');
-            
+
         } catch (error) {
             console.error('Error al redireccionar:', error);
             // Fallback general
@@ -2258,25 +2257,25 @@ function showAdModal() {
             clearInterval(interval);
             closeBtn.style.display = 'flex';
             addCoins(20);
-            
+
             // Show interactive Netflix CTA
             const netflixCta = modal.querySelector('.netflix-cta-fullscreen');
             if (netflixCta) {
                 netflixCta.style.display = 'block';
                 netflixCta.style.animation = 'slideUpFromBottom 0.6s ease';
             }
-            
+
             setTimeout(() => {
                 modal.classList.remove('active');
                 timer.textContent = '30';
                 progress.style.width = '0%';
-                
+
                 // Restaurar scroll del body
                 document.body.style.overflow = '';
                 document.body.style.position = '';
                 document.body.style.width = '';
                 document.body.style.height = '';
-                
+
                 // Reset ad content for next time
                 adContent.innerHTML = `
                     <div class="ad-placeholder">
@@ -2290,7 +2289,7 @@ function showAdModal() {
             }, 5000);
         }
     }, 1000);
-    
+
     // Manejar cierre del modal
     const originalCloseHandler = closeBtn.onclick;
     closeBtn.onclick = () => {
@@ -2299,7 +2298,7 @@ function showAdModal() {
         document.body.style.position = '';
         document.body.style.width = '';
         document.body.style.height = '';
-        
+
         if (originalCloseHandler) {
             originalCloseHandler();
         }
@@ -2339,13 +2338,11 @@ function checkReferral() {
 // Episode click handler with auto-unlock and monetization
 function handleEpisodeClick(episodeNum) {
     if (episodeNum <= 8 || unlockedEpisodes.includes(episodeNum)) {
-        showNotification(`Reproduciendo Episodio ${episodeNum}`, 'success');
         return true;
     } else {
         // Auto-unlock if user has enough coins
         if (userCoins >= 30) {
             if (unlockEpisode(episodeNum)) {
-                showNotification(`Episodio ${episodeNum} desbloqueado automáticamente y reproduciéndose`, 'success');
                 return true;
             }
         } else {
@@ -2379,7 +2376,7 @@ function showChapterEndAnimation(callback) {
     // Activar efecto de congelamiento con ondas
     setTimeout(() => {
         videoOverlay.classList.add('active');
-        
+
         // Crear animación principal después del efecto de onda
         setTimeout(() => {
             showMainChapterAnimation(callback);
@@ -2417,13 +2414,13 @@ function showMainChapterAnimation(callback) {
     // Remover después de 3 segundos
     setTimeout(() => {
         animationOverlay.classList.add('fade-out');
-        
+
         // Limpiar overlay del video también
         const videoOverlay = document.querySelector('.video-ocean-effect');
         if (videoOverlay) {
             videoOverlay.remove();
         }
-        
+
         setTimeout(() => {
             if (document.body.contains(animationOverlay)) {
                 document.body.removeChild(animationOverlay);
@@ -2549,7 +2546,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize monetization
     updateCoinDisplay();
     checkReferral();
-    
+
     // Initialize continue watching section
     updateContinueWatchingSection();
 
@@ -2768,3 +2765,23 @@ additionalStyles.textContent = `
     }
 `;
 document.head.appendChild(additionalStyles);
+/* Monetization Modal - Fullscreen App */
+.monetization-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #000000;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    display: none;
+}
+
+.monetization-modal-overlay.active {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+}
