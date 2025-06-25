@@ -511,12 +511,12 @@ function showTikTokPlayer(title, startEpisode = 1) {
             
             document.body.appendChild(loadingContainer);
             
-            // Ocultar completamente todos los elementos de la página
+            // Configurar body para video de fondo
             document.body.style.overflow = 'hidden';
             document.body.style.margin = '0';
             document.body.style.padding = '0';
             
-            // Crear iframe de Streamable completamente inmersivo
+            // Crear iframe de Streamable como fondo
             const iframe = document.createElement('iframe');
             iframe.id = 'streamablePlayer';
             iframe.src = streamableUrl;
@@ -527,12 +527,13 @@ function showTikTokPlayer(title, startEpisode = 1) {
                 position: fixed !important;
                 top: 0 !important;
                 left: 0 !important;
-                z-index: 999999 !important;
+                z-index: -1 !important;
                 background: #000 !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 opacity: 0 !important;
                 transition: opacity 0.5s ease !important;
+                pointer-events: none !important;
             `;
             iframe.setAttribute('allowfullscreen', '');
             iframe.setAttribute('webkitallowfullscreen', '');
