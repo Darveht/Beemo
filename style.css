@@ -875,12 +875,12 @@ body {
         height: 40px;
         padding: 0.6rem;
     }
-    
+
     .play-btn:active {
         transform: scale(0.95);
         background: rgba(29, 155, 240, 1);
     }
-    
+
     .play-btn svg {
         width: 16px;
         height: 16px;
@@ -1084,39 +1084,13 @@ body.video-playing .tiktok-player * {
     left: 1rem;
     right: 5rem;
     color: white;
-    z-index: 100;
+    z-index: 1000;
     pointer-events: auto;
     background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(10px);
     padding: 1rem;
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.video-title-tiktok {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-.video-description-tiktok {
-    font-size: 0.9rem;
-    opacity: 0.9;
-    margin-bottom: 1rem;
-}
-
-.video-progress-tiktok {
-    height: 3px;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 2px;
-    overflow: hidden;
-}
-
-.video-progress-fill {
-    height: 100%;
-    background: white;
-    width: 25%;
-    transition: width 0.3s ease;
 }
 
 .close-player {
@@ -1133,15 +1107,10 @@ body.video-playing .tiktok-player * {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 100;
+    z-index: 1000;
     backdrop-filter: blur(10px);
     transition: all 0.2s ease;
     pointer-events: auto;
-}
-
-.close-player:hover {
-    background: rgba(29, 155, 240, 0.8);
-    transform: scale(1.05);
 }
 
 .episodes-modal {
@@ -2130,6 +2099,7 @@ body.video-playing .tiktok-player * {
 
 .ad-content {
     width: 100%;
+```text
     height: 100%;
     padding: 0;
     text-align: center;
@@ -2790,15 +2760,15 @@ video::-ms-media-controls {
         width: 95%;
         max-width: none;
     }
-    
+
     .subscription-content {
         padding: 1.5rem;
     }
-    
+
     .subscription-header {
         padding: 1rem;
     }
-    
+
     .subscription-header h2 {
         font-size: 1.2rem;
     }
@@ -2809,25 +2779,25 @@ video::-ms-media-controls {
     .netflix-logo-fullscreen {
         padding: 0.75rem 1rem;
     }
-    
+
     .netflix-logo-fullscreen h2 {
         font-size: 2rem !important;
     }
-    
+
     .netflix-cta-fullscreen {
         padding: 1.5rem;
         margin: 0 1rem;
     }
-    
+
     .netflix-cta-fullscreen h3 {
         font-size: 1.2rem !important;
     }
-    
+
     .netflix-download-btn-fullscreen {
         padding: 1.25rem 2rem;
         font-size: 1.1rem;
     }
-    
+
     .ad-timer-overlay {
         right: 1rem;
         width: 50px;
@@ -3052,24 +3022,24 @@ video::-ms-media-controls {
     .payment-content {
         padding: 1rem;
     }
-    
+
     .payment-header {
         padding: 1.5rem 1rem;
     }
-    
+
     .payment-header h2 {
         font-size: 1.3rem;
     }
-    
+
     .card-form {
         padding: 1.5rem;
     }
-    
+
     .form-input {
         padding: 1rem;
         font-size: 16px; /* Prevent zoom on iOS */
     }
-    
+
     .payment-option {
         padding: 1rem;
     }
@@ -3154,8 +3124,7 @@ video::-ms-media-controls {
 .process-payment-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    transform: none;
-}
+    transform: none;}
 
 /* Logout Button */
 .logout-btn {
@@ -3182,23 +3151,23 @@ video::-ms-media-controls {
     .welcome-logo h1 {
         font-size: 3rem;
     }
-    
+
     .welcome-message h2 {
         font-size: 1.5rem;
     }
-    
+
     .auth-content {
         padding: 1.5rem;
     }
-    
+
     .auth-logo h1 {
         font-size: 2.5rem;
     }
-    
+
     .auth-method-btn {
         padding: 1.25rem;
     }
-    
+
     .auth-success-content {
         padding: 2rem 1.5rem;
     }
