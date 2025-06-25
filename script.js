@@ -143,7 +143,7 @@ function generateEpisodesList() {
         const isLocked = i > 8 && !unlockedEpisodes.includes(i);
         const canUnlock = isLocked && userCoins >= 30;
         const lockIcon = isLocked ? `
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="lock-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="lock-icon">
                 <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM15.1 8H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/>
             </svg>
         ` : '';
@@ -165,6 +165,26 @@ function generateEpisodesList() {
         `;
     }
     return episodes;
+}
+
+// Auto-unlock detection
+function updateAutoUnlockStatus() {
+    const autoUnlockStatus = document.getElementById('autoUnlockStatus');
+    const lockedEpisodes = [];
+    
+    for (let i = 9; i <= 45; i++) {
+        if (!unlockedEpisodes.includes(i)) {
+            lockedEpisodes.push(i);
+        }
+    }
+    
+    const canAutoUnlock = lockedEpisodes.length > 0 && userCoins >= 30;
+    
+    if (canAutoUnlock && autoUnlockStatus) {
+        autoUnlockStatus.style.display = 'block';
+    } else if (autoUnlockStatus) {
+        autoUnlockStatus.style.display = 'none';
+    }
 }
 
 // Modern notification system
@@ -898,6 +918,7 @@ function updateCoinDisplay() {
     document.getElementById('coinCount').textContent = userCoins;
     document.getElementById('modalCoinCount').textContent = `${userCoins} Monedas`;
     localStorage.setItem('userCoins', userCoins.toString());
+    updateAutoUnlockStatus();
 }
 
 function addCoins(amount) {
@@ -987,17 +1008,20 @@ function checkReferral() {
     }
 }
 
-// Episode click handler with monetization
+// Episode click handler with auto-unlock and monetization
 function handleEpisodeClick(episodeNum) {
     if (episodeNum <= 8 || unlockedEpisodes.includes(episodeNum)) {
         showNotification(`Reproduciendo Episodio ${episodeNum}`, 'success');
         return true;
     } else {
-        if (unlockEpisode(episodeNum)) {
-            showNotification(`Episodio ${episodeNum} desbloqueado y reproduciéndose`, 'success');
-            return true;
+        // Auto-unlock if user has enough coins
+        if (userCoins >= 30) {
+            if (unlockEpisode(episodeNum)) {
+                showNotification(`Episodio ${episodeNum} desbloqueado automáticamente y reproduciéndose`, 'success');
+                return true;
+            }
         } else {
-            showNotification('No tienes suficientes monedas. Ve anuncios para ganar más.', 'warning');
+            showNotification('No tienes suficientes monedas. Gana más monedas o compra con dinero real.', 'warning');
             return false;
         }
     }
@@ -1074,6 +1098,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Check for payment success on page load
     checkPaymentSuccess();
+    
+    // Initialize expanded search with all series
+    displayExpandedSearchResults(getAllSeries());
 });
 
 // Add CSS animation for fade out
