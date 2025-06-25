@@ -424,36 +424,177 @@ function filterExpandedResults(category) {
     displayExpandedSearchResults(filteredResults);
 }
 
-// Purchase coins with Stripe
-async function purchaseCoins(amount, coins) {
-    try {
-        showNotification('Procesando pago...', 'info');
+// Global payment variables
+let currentPurchaseAmount = 0;
+let currentPurchaseCoins = 0;
+
+// Show payment modal
+function showPaymentModal(amount, coins) {
+    currentPurchaseAmount = amount;
+    currentPurchaseCoins = coins;
+    
+    const modal = document.getElementById('paymentModal');
+    modal.classList.add('active');
+    
+    // Reset form
+    const cardForm = document.getElementById('cardForm');
+    cardForm.style.display = 'none';
+    
+    // Reset payment options
+    document.querySelectorAll('.payment-option').forEach(option => {
+        option.style.background = '#16181c';
+    });
+}
+
+function hidePaymentModal() {
+    const modal = document.getElementById('paymentModal');
+    modal.classList.remove('active');
+}
+
+// Apple Pay implementation
+function processApplePay() {
+    if (window.ApplePaySession && ApplePaySession.canMakePayments()) {
+        const request = {
+            countryCode: 'US',
+            currencyCode: 'USD',
+            supportedNetworks: ['visa', 'masterCard', 'amex'],
+            merchantCapabilities: ['supports3DS'],
+            total: {
+                label: `${currentPurchaseCoins} Monedas Beemo`,
+                amount: (currentPurchaseAmount / 100).toFixed(2)
+            }
+        };
+
+        const session = new ApplePaySession(3, request);
         
-        // Create payment intent (in real app, this would be a server call)
-        const { error } = await stripe.redirectToCheckout({
-            lineItems: [{
-                price_data: {
-                    currency: 'usd',
-                    product_data: {
-                        name: `${coins} Monedas Beemo`,
-                        description: 'Monedas virtuales para desbloquear episodios premium'
-                    },
-                    unit_amount: amount,
-                },
-                quantity: 1,
-            }],
-            mode: 'payment',
-            successUrl: `${window.location.origin}?payment=success&coins=${coins}`,
-            cancelUrl: `${window.location.origin}?payment=cancel`,
+        session.onvalidatemerchant = async (event) => {
+            // In a real app, you would validate with your server
+            showNotification('Autenticando con Apple Pay...', 'info');
+        };
+
+        session.onpaymentauthorized = async (event) => {
+            // Process payment
+            const payment = event.payment;
+            
+            try {
+                // Simulate payment processing
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                session.completePayment(ApplePaySession.STATUS_SUCCESS);
+                addCoins(currentPurchaseCoins);
+                hidePaymentModal();
+                showNotification(`¡Compra exitosa! ${currentPurchaseCoins} monedas agregadas`, 'success');
+            } catch (error) {
+                session.completePayment(ApplePaySession.STATUS_FAILURE);
+                showNotification('Error en el pago', 'error');
+            }
+        };
+
+        session.begin();
+    } else {
+        showNotification('Apple Pay no está disponible en este dispositivo', 'warning');
+    }
+}
+
+// Credit card processing with Stripe
+async function processCreditCard() {
+    const cardNumber = document.getElementById('cardNumber').value;
+    const cardExpiry = document.getElementById('cardExpiry').value;
+    const cardCvc = document.getElementById('cardCvc').value;
+    const cardName = document.getElementById('cardName').value;
+
+    if (!cardNumber || !cardExpiry || !cardCvc || !cardName) {
+        showNotification('Por favor completa todos los campos', 'warning');
+        return;
+    }
+
+    try {
+        showNotification('Procesando pago con Stripe...', 'info');
+        document.getElementById('processPaymentBtn').disabled = true;
+        document.getElementById('processPaymentBtn').innerHTML = `
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div class="loading-spinner"></div>
+                Procesando...
+            </div>
+        `;
+
+        // Create payment intent on your server
+        const response = await fetch('https://api.stripe.com/v1/payment_intents', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer sk_test_51RF622RCIbJ5KY2oXhGpadJFs8tpUIXVad4c6rL2HBq1YuWnkiKR3x4THEdrhDe9Lda8LMsMkPADUDhHDqBeA52z00heZI3BbD',
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                amount: currentPurchaseAmount,
+                currency: 'usd',
+                description: `${currentPurchaseCoins} Monedas Beemo`,
+                'payment_method_types[]': 'card'
+            })
         });
 
-        if (error) {
-            showNotification('Error en el pago. Intenta de nuevo.', 'error');
+        const paymentIntent = await response.json();
+
+        if (paymentIntent.error) {
+            throw new Error(paymentIntent.error.message);
         }
-    } catch (err) {
-        console.error('Payment error:', err);
-        showNotification('Error en el pago. Intenta de nuevo.', 'error');
+
+        // Create payment method with card details
+        const { error: pmError, paymentMethod } = await stripe.createPaymentMethod({
+            type: 'card',
+            card: {
+                number: cardNumber.replace(/\s/g, ''),
+                exp_month: parseInt(cardExpiry.split('/')[0]),
+                exp_year: parseInt('20' + cardExpiry.split('/')[1]),
+                cvc: cardCvc,
+            },
+            billing_details: {
+                name: cardName,
+            },
+        });
+
+        if (pmError) {
+            throw pmError;
+        }
+
+        // Confirm payment
+        const { error: confirmError, paymentIntent: confirmedPayment } = await stripe.confirmCardPayment(
+            paymentIntent.client_secret,
+            {
+                payment_method: paymentMethod.id
+            }
+        );
+
+        if (confirmError) {
+            throw confirmError;
+        }
+
+        if (confirmedPayment.status === 'succeeded') {
+            addCoins(currentPurchaseCoins);
+            hidePaymentModal();
+            showNotification(`¡Pago exitoso! ${currentPurchaseCoins} monedas agregadas`, 'success');
+            
+            // Log successful payment
+            console.log('Payment successful:', confirmedPayment.id);
+        }
+
+    } catch (error) {
+        console.error('Payment error:', error);
+        showNotification(`Error en el pago: ${error.message}`, 'error');
+    } finally {
+        document.getElementById('processPaymentBtn').disabled = false;
+        document.getElementById('processPaymentBtn').innerHTML = 'Procesar Pago';
     }
+}
+
+// PayPal processing
+function processPayPal() {
+    showNotification('PayPal está temporalmente fuera de servicio. Intenta con otro método de pago.', 'warning');
+}
+
+// Purchase coins function
+function purchaseCoins(amount, coins) {
+    showPaymentModal(amount, coins);
 }
 
 // Check for successful payment
@@ -1096,12 +1237,147 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     
+    // Payment modal event listeners
+    const paymentClose = document.getElementById('paymentClose');
+    const paymentModal = document.getElementById('paymentModal');
+    const applePayOption = document.getElementById('applePayOption');
+    const creditCardOption = document.getElementById('creditCardOption');
+    const paypalOption = document.getElementById('paypalOption');
+    const cardForm = document.getElementById('cardForm');
+    const processPaymentBtn = document.getElementById('processPaymentBtn');
+
+    if (paymentClose) {
+        paymentClose.addEventListener('click', hidePaymentModal);
+    }
+
+    if (paymentModal) {
+        paymentModal.addEventListener('click', (e) => {
+            if (e.target === paymentModal) {
+                hidePaymentModal();
+            }
+        });
+    }
+
+    if (applePayOption) {
+        applePayOption.addEventListener('click', () => {
+            document.querySelectorAll('.payment-option').forEach(option => {
+                option.style.background = '#16181c';
+            });
+            applePayOption.style.background = 'rgba(29, 155, 240, 0.1)';
+            cardForm.style.display = 'none';
+            
+            setTimeout(() => {
+                processApplePay();
+            }, 500);
+        });
+    }
+
+    if (creditCardOption) {
+        creditCardOption.addEventListener('click', () => {
+            document.querySelectorAll('.payment-option').forEach(option => {
+                option.style.background = '#16181c';
+            });
+            creditCardOption.style.background = 'rgba(29, 155, 240, 0.1)';
+            cardForm.style.display = 'block';
+        });
+    }
+
+    if (paypalOption) {
+        paypalOption.addEventListener('click', () => {
+            if (!paypalOption.classList.contains('disabled')) {
+                processPayPal();
+            }
+        });
+    }
+
+    if (processPaymentBtn) {
+        processPaymentBtn.addEventListener('click', processCreditCard);
+    }
+
+    // Card input formatting with better mobile support
+    const cardNumberInput = document.getElementById('cardNumber');
+    const cardExpiryInput = document.getElementById('cardExpiry');
+    const cardCvcInput = document.getElementById('cardCvc');
+
+    if (cardNumberInput) {
+        cardNumberInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
+            let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+            if (formattedValue.length <= 19) { // Max length with spaces
+                e.target.value = formattedValue;
+            }
+            validateCardForm();
+        });
+
+        // Prevent non-numeric input
+        cardNumberInput.addEventListener('keypress', (e) => {
+            if (!/[0-9\s]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
+                e.preventDefault();
+            }
+        });
+    }
+
+    if (cardExpiryInput) {
+        cardExpiryInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.substring(0,2) + '/' + value.substring(2,4);
+            }
+            e.target.value = value;
+            validateCardForm();
+        });
+
+        cardExpiryInput.addEventListener('keypress', (e) => {
+            if (!/[0-9/]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
+                e.preventDefault();
+            }
+        });
+    }
+
+    if (cardCvcInput) {
+        cardCvcInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            e.target.value = value.substring(0, 4); // Max 4 digits
+            validateCardForm();
+        });
+
+        cardCvcInput.addEventListener('keypress', (e) => {
+            if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
+                e.preventDefault();
+            }
+        });
+    }
+
+    const cardNameInput = document.getElementById('cardName');
+    if (cardNameInput) {
+        cardNameInput.addEventListener('input', validateCardForm);
+    }
+    
     // Check for payment success on page load
     checkPaymentSuccess();
     
     // Initialize expanded search with all series
     displayExpandedSearchResults(getAllSeries());
 });
+
+// Card form validation
+function validateCardForm() {
+    const cardNumber = document.getElementById('cardNumber').value;
+    const cardExpiry = document.getElementById('cardExpiry').value;
+    const cardCvc = document.getElementById('cardCvc').value;
+    const cardName = document.getElementById('cardName').value;
+    const processBtn = document.getElementById('processPaymentBtn');
+
+    const isValid = cardNumber.replace(/\s/g, '').length >= 16 &&
+                   cardExpiry.length === 5 &&
+                   cardCvc.length >= 3 &&
+                   cardName.trim().length > 0;
+
+    if (processBtn) {
+        processBtn.disabled = !isValid;
+        processBtn.style.opacity = isValid ? '1' : '0.5';
+    }
+}
 
 // Add CSS animation for fade out
 const additionalStyles = document.createElement('style');
