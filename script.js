@@ -471,25 +471,38 @@ function showTikTokPlayer(title, startEpisode = 1) {
     function getEpisodeVideoUrl(episodeNumber) {
         // URLs específicas para cada episodio de "La Niña de los Cuatro CEO"
         const episodeUrls = {
-            1: 'https://streamtape.com/v/aYYV2bMjLvuxjyy/copy_83C56A17-4254-477E-9770-8722C1307B84.mov',
-            2: 'https://streamtape.com/v/aYYV2bMjLvuxjyy/copy_83C56A17-4254-477E-9770-8722C1307B84.mov', // Usando mismo video para demostración
-            3: 'https://streamtape.com/v/aYYV2bMjLvuxjyy/copy_83C56A17-4254-477E-9770-8722C1307B84.mov',
-            4: 'https://streamtape.com/v/aYYV2bMjLvuxjyy/copy_83C56A17-4254-477E-9770-8722C1307B84.mov',
-            5: 'https://streamtape.com/v/aYYV2bMjLvuxjyy/copy_83C56A17-4254-477E-9770-8722C1307B84.mov',
+            1: 'https://streamable.com/e/x0t3qj',
+            2: 'https://streamable.com/e/0klxmv',
+            3: 'https://streamable.com/e/0klxmv', // Usando episodio 2 como placeholder
+            4: 'https://streamable.com/e/0klxmv', // Usando episodio 2 como placeholder
+            5: 'https://streamable.com/e/0klxmv', // Usando episodio 2 como placeholder
         };
         
         return episodeUrls[episodeNumber] || null;
     }
 
-    // Función mejorada para manejar URLs de Streamtape
-    async function createStreamtapePlayer(streamtapeUrl) {
+    // Función mejorada para manejar URLs de Streamable
+    async function createStreamablePlayer(streamableUrl) {
         try {
-            showNotification('Cargando reproductor...', 'info');
+            showNotification('Cargando video...', 'info');
             
-            // Crear iframe de Streamtape optimizado para pantalla completa
+            // Ocultar completamente todos los elementos de la página
+            document.body.style.overflow = 'hidden';
+            document.body.style.margin = '0';
+            document.body.style.padding = '0';
+            
+            // Ocultar todos los elementos existentes
+            const allElements = document.querySelectorAll('*:not(.tiktok-player):not(.video-container-tiktok)');
+            allElements.forEach(el => {
+                if (!el.closest('.tiktok-player')) {
+                    el.style.display = 'none';
+                }
+            });
+            
+            // Crear iframe de Streamable completamente inmersivo
             const iframe = document.createElement('iframe');
-            iframe.id = 'streamtapePlayer';
-            iframe.src = streamtapeUrl;
+            iframe.id = 'streamablePlayer';
+            iframe.src = streamableUrl;
             iframe.style.cssText = `
                 width: 100vw !important;
                 height: 100vh !important;
@@ -497,8 +510,10 @@ function showTikTokPlayer(title, startEpisode = 1) {
                 position: fixed !important;
                 top: 0 !important;
                 left: 0 !important;
-                z-index: 1 !important;
+                z-index: 999999 !important;
                 background: #000 !important;
+                margin: 0 !important;
+                padding: 0 !important;
             `;
             iframe.setAttribute('allowfullscreen', '');
             iframe.setAttribute('webkitallowfullscreen', '');
@@ -506,7 +521,54 @@ function showTikTokPlayer(title, startEpisode = 1) {
             iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media');
             iframe.setAttribute('loading', 'eager');
             
-            return iframe;
+            // Crear botón de cierre mínimo
+            const closeBtn = document.createElement('button');
+            closeBtn.innerHTML = '×';
+            closeBtn.style.cssText = `
+                position: fixed !important;
+                top: 20px !important;
+                right: 20px !important;
+                width: 40px !important;
+                height: 40px !important;
+                background: rgba(0, 0, 0, 0.8) !important;
+                color: white !important;
+                border: none !important;
+                border-radius: 50% !important;
+                font-size: 24px !important;
+                cursor: pointer !important;
+                z-index: 9999999 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                font-weight: bold !important;
+            `;
+            
+            closeBtn.onclick = () => {
+                // Restaurar todos los elementos
+                allElements.forEach(el => {
+                    el.style.display = '';
+                });
+                
+                // Restaurar estilos del body
+                document.body.style.overflow = '';
+                document.body.style.margin = '';
+                document.body.style.padding = '';
+                
+                // Cerrar reproductor
+                const player = document.querySelector('.tiktok-player');
+                if (player) {
+                    player.remove();
+                }
+                
+                showNotification('Video cerrado', 'info');
+            };
+            
+            // Agregar elementos al contenedor
+            const container = document.createElement('div');
+            container.appendChild(iframe);
+            container.appendChild(closeBtn);
+            
+            return container;
         } catch (error) {
             console.log('Error creando reproductor:', error);
             return null;
@@ -543,38 +605,40 @@ function showTikTokPlayer(title, startEpisode = 1) {
             `;
 
             try {
-                // Crear reproductor iframe optimizado
-                const iframe = await createStreamtapePlayer(videoUrl);
+                // Crear reproductor completamente inmersivo
+                const playerContainer = await createStreamablePlayer(videoUrl);
                 
-                if (iframe) {
-                    // Reemplazar contenido con iframe
+                if (playerContainer) {
+                    // Reemplazar todo el contenido con el reproductor
                     videoContent.innerHTML = '';
-                    videoContent.appendChild(iframe);
+                    videoContent.appendChild(playerContainer);
                     
-                    // Agregar overlay de información
-                    const overlay = document.createElement('div');
-                    overlay.innerHTML = `
-                        <div class="episode-info-overlay" style="
-                            position: fixed; 
-                            top: 20px; 
-                            left: 20px; 
-                            background: rgba(0,0,0,0.9); 
-                            padding: 15px 20px; 
-                            border-radius: 15px; 
-                            color: white;
-                            backdrop-filter: blur(10px);
-                            border: 1px solid rgba(255,255,255,0.3);
-                            z-index: 10;
-                            pointer-events: none;
-                        ">
-                            <h4 style="margin: 0; font-size: 1.2rem; font-weight: 700;">Episodio ${episodeNumber}</h4>
-                            <p style="margin: 8px 0 0 0; font-size: 0.9rem; opacity: 0.8;">${getEpisodeTitle(title, episodeNumber)}</p>
-                        </div>
-                    `;
-                    videoContent.appendChild(overlay);
+                    showNotification(`Reproduciendo Episodio ${episodeNumber} - Solo video`, 'success');
                     
-                    showNotification(`Reproduciendo Episodio ${episodeNumber}`, 'success');
-                    setupStreamtapePlayer(iframe, episodeNumber);
+                    // Configurar seguimiento básico del progreso
+                    let currentTime = 0;
+                    const duration = 60; // 1 minuto por episodio
+                    const progressBar = document.getElementById('videoProgressBar');
+                    
+                    const progressInterval = setInterval(() => {
+                        currentTime += 1;
+                        const progress = (currentTime / duration) * 100;
+                        if (progressBar) {
+                            progressBar.style.width = `${Math.min(progress, 100)}%`;
+                        }
+                        
+                        // Actualizar historial cada 10 segundos
+                        if (currentTime % 10 === 0) {
+                            addToWatchHistory(title, episodeNumber, progress);
+                        }
+                        
+                        // Auto-avanzar después de 1 minuto
+                        if (currentTime >= duration) {
+                            clearInterval(progressInterval);
+                            transitionToNextEpisode();
+                        }
+                    }, 1000);
+                    
                 } else {
                     throw new Error('No se pudo crear el reproductor');
                 }
