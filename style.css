@@ -908,7 +908,7 @@ body {
     transition: width 0.3s ease;
 }
 
-/* TikTok Style Video Player */
+/* TikTok Style Video Player - Pantalla Completa */
 .tiktok-player {
     position: fixed;
     top: 0;
@@ -920,6 +920,9 @@ body {
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .tiktok-player.active {
@@ -935,10 +938,84 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: #1a1a1a;
+    background: #000000;
     border-radius: 0;
     overflow: hidden;
     z-index: 10001;
+}
+
+/* Video en pantalla completa sin controles externos */
+#mainVideo {
+    width: 100vw !important;
+    height: 100vh !important;
+    object-fit: cover !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 1 !important;
+    background: #000 !important;
+    border: none !important;
+    outline: none !important;
+    cursor: none;
+}
+
+/* Bloquear controles nativos del video */
+#mainVideo::-webkit-media-controls {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+#mainVideo::-webkit-media-controls-enclosure {
+    display: none !important;
+}
+
+#mainVideo::-webkit-media-controls-panel {
+    display: none !important;
+}
+
+#mainVideo::-webkit-media-controls-play-button {
+    display: none !important;
+}
+
+#mainVideo::-webkit-media-controls-start-playback-button {
+    display: none !important;
+}
+
+#mainVideo::-webkit-media-controls-volume-slider {
+    display: none !important;
+}
+
+#mainVideo::-webkit-media-controls-mute-button {
+    display: none !important;
+}
+
+#mainVideo::-webkit-media-controls-timeline {
+    display: none !important;
+}
+
+#mainVideo::-webkit-media-controls-current-time-display {
+    display: none !important;
+}
+
+#mainVideo::-webkit-media-controls-time-remaining-display {
+    display: none !important;
+}
+
+#mainVideo::-webkit-media-controls-fullscreen-button {
+    display: none !important;
+}
+
+/* Overlay de información mejorado */
+.video-fullscreen-overlay {
+    pointer-events: none;
+    z-index: 2;
+}
+
+.episode-info-overlay {
+    backdrop-filter: blur(15px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
 }
 
 .video-placeholder-tiktok {
