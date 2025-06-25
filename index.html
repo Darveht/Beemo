@@ -105,14 +105,47 @@
         </div>
     </div>
 
+    <!-- Expanded Search Modal -->
+    <div class="expanded-search-modal-overlay" id="expandedSearchModal">
+        <div class="expanded-search-container">
+            <div class="expanded-search-header">
+                <div class="expanded-search-input-container">
+                    <svg class="search-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"/>
+                    </svg>
+                    <input type="text" placeholder="Buscar series, dramas, géneros..." class="expanded-search-input" id="expandedSearchInput" autocomplete="off">
+                </div>
+                <button class="expanded-search-close" id="expandedSearchClose">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="expanded-search-categories">
+                <div class="expanded-category-chip active" data-category="todos">Todos</div>
+                <div class="expanded-category-chip" data-category="romance">Romance</div>
+                <div class="expanded-category-chip" data-category="accion">Acción</div>
+                <div class="expanded-category-chip" data-category="comedia">Comedia</div>
+                <div class="expanded-category-chip" data-category="drama">Drama Imperial</div>
+                <div class="expanded-category-chip" data-category="fantasia">Fantasía</div>
+                <div class="expanded-category-chip" data-category="artes">Artes Marciales</div>
+            </div>
+
+            <div class="expanded-search-results" id="expandedSearchResults">
+                <!-- Results will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
     <!-- Monetization Modal -->
     <div class="monetization-modal-overlay" id="monetizationModal">
-        <div class="monetization-modal-container">
+        <div class="monetization-modal-container-fullscreen">
             <div class="monetization-header">
                 <h2>💰 Centro de Recompensas</h2>
                 <button class="monetization-close" id="monetizationClose">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
                     </svg>
                 </button>
             </div>
@@ -126,32 +159,70 @@
                     </div>
                 </div>
 
-                <div class="earn-methods">
-                    <h3>Gana Monedas</h3>
+                <div class="monetization-sections">
+                    <div class="earn-methods">
+                        <h3>Gana Monedas Gratis</h3>
 
-                    <div class="earn-option">
-                        <div class="earn-icon">📺</div>
-                        <div class="earn-info">
-                            <h4>Ver Anuncio</h4>
-                            <p>Gana 20 monedas por cada anuncio de 30 segundos</p>
+                        <div class="earn-option">
+                            <div class="earn-icon">📺</div>
+                            <div class="earn-info">
+                                <h4>Ver Anuncio</h4>
+                                <p>Gana 20 monedas por cada anuncio de 30 segundos</p>
+                            </div>
+                            <button class="earn-btn" id="watchAdBtn">Ver Anuncio</button>
                         </div>
-                        <button class="earn-btn" id="watchAdBtn">Ver Anuncio</button>
+
+                        <div class="earn-option">
+                            <div class="earn-icon">📤</div>
+                            <div class="earn-info">
+                                <h4>Compartir con Amigos</h4>
+                                <p>Gana 50 monedas cuando un amigo abra tu enlace</p>
+                            </div>
+                            <button class="earn-btn" id="shareBtn">Compartir</button>
+                        </div>
                     </div>
 
-                    <div class="earn-option">
-                        <div class="earn-icon">📤</div>
-                        <div class="earn-info">
-                            <h4>Compartir con Amigos</h4>
-                            <p>Gana 50 monedas cuando un amigo abra tu enlace</p>
-                        </div>
-                        <button class="earn-btn" id="shareBtn">Compartir</button>
-                    </div>
-                </div>
+                    <div class="purchase-methods">
+                        <h3>Comprar Monedas</h3>
+                        <p class="purchase-subtitle">Compra monedas con dinero real y desbloquea todo al instante</p>
 
-                <div class="unlock-episodes">
-                    <h3>Desbloquear Episodios</h3>
-                    <p>Episodios 1-8: Gratis</p>
-                    <p>Episodios 9+: 30 monedas cada uno</p>
+                        <div class="purchase-options">
+                            <div class="purchase-option">
+                                <div class="purchase-coins">100</div>
+                                <div class="purchase-price">$0.99</div>
+                                <button class="purchase-btn" data-amount="99" data-coins="100">Comprar</button>
+                            </div>
+                            <div class="purchase-option popular">
+                                <div class="popular-badge">Más Popular</div>
+                                <div class="purchase-coins">500</div>
+                                <div class="purchase-price">$3.99</div>
+                                <div class="purchase-savings">¡Ahorras $0.96!</div>
+                                <button class="purchase-btn" data-amount="399" data-coins="500">Comprar</button>
+                            </div>
+                            <div class="purchase-option">
+                                <div class="purchase-coins">1000</div>
+                                <div class="purchase-price">$6.99</div>
+                                <div class="purchase-savings">¡Ahorras $2.91!</div>
+                                <button class="purchase-btn" data-amount="699" data-coins="1000">Comprar</button>
+                            </div>
+                            <div class="purchase-option premium">
+                                <div class="premium-badge">Mejor Valor</div>
+                                <div class="purchase-coins">2500</div>
+                                <div class="purchase-price">$14.99</div>
+                                <div class="purchase-savings">¡Ahorras $9.76!</div>
+                                <button class="purchase-btn" data-amount="1499" data-coins="2500">Comprar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="unlock-episodes">
+                        <h3>Desbloquear Episodios</h3>
+                        <p>Episodios 1-8: Gratis</p>
+                        <p>Episodios 9+: 30 monedas cada uno</p>
+                        <div id="autoUnlockStatus" class="auto-unlock-status" style="display: none;">
+                            <p class="auto-unlock-text">🔓 Tienes suficientes monedas para desbloquear más episodios automáticamente</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -360,36 +431,7 @@
         </section>
     </main>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-section">
-                <h4>Beemo</h4>
-                <p>La mejor plataforma para disfrutar de dramas y novelas chinas con episodios cortos perfectos para cualquier momento.</p>
-            </div>
-            <div class="footer-section">
-                <h4>Contenido</h4>
-                <ul>
-                    <li><a href="#">Series</a></li>
-                    <li><a href="#">Películas</a></li>
-                    <li><a href="#">Documentales</a></li>
-                    <li><a href="#">Infantil</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h4>Ayuda</h4>
-                <ul>
-                    <li><a href="#">Centro de Ayuda</a></li>
-                    <li><a href="#">Contacto</a></li>
-                    <li><a href="#">Términos de Uso</a></li>
-                    <li><a href="#">Privacidad</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2024 Beemo. Todos los derechos reservados.</p>
-        </div>
-    </footer>
+    
 
     <script src="script.js"></script>
 </body>
