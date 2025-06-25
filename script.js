@@ -483,10 +483,10 @@ function showTikTokPlayer(title, startEpisode = 1) {
         return episodeUrls[episodeNumber] || null;
     }
 
-    // Función para extraer URL de video directo de Streamtape
+    // Función para obtener URL directa sin iframe (evita anuncios y controles)
     async function getStreamtapeDirectUrl(streamtapeUrl) {
         try {
-            showNotification('Cargando video...', 'info');
+            showNotification('Preparando video en pantalla completa...', 'info');
             
             // Extraer el ID del video de la URL de Streamtape
             const videoId = streamtapeUrl.split('/v/')[1]?.split('/')[0];
@@ -494,29 +494,38 @@ function showTikTokPlayer(title, startEpisode = 1) {
                 throw new Error('URL de Streamtape inválida');
             }
 
-            // Intentar múltiples formatos de URL directo de Streamtape
-            const possibleUrls = [
-                `https://streamtape.com/get_video?id=${videoId}`,
-                `https://streamtape.com/e/${videoId}`,
-                streamtapeUrl, // URL original como fallback
+            // Generar URLs alternativas para evitar anuncios y obtener video directo
+            const directUrls = [
+                `https://streamtape.com/get_video?id=${videoId}&expires=${Date.now() + 3600000}`,
+                `https://streamtape.com/streamtape/${videoId}.mp4`,
+                `https://streamtape.com/videos/${videoId}.mp4`,
+                streamtapeUrl.replace('/v/', '/get_video?id=').replace(/\/[^/]*$/, ''),
             ];
 
-            for (const url of possibleUrls) {
+            // Intentar cada URL
+            for (const url of directUrls) {
                 try {
-                    const response = await fetch(url, {
-                        method: 'HEAD',
-                        mode: 'no-cors'
+                    const testVideo = document.createElement('video');
+                    testVideo.crossOrigin = 'anonymous';
+                    
+                    return new Promise((resolve) => {
+                        testVideo.onloadedmetadata = () => resolve(url);
+                        testVideo.onerror = () => resolve(null);
+                        testVideo.src = url;
+                        
+                        // Timeout después de 2 segundos
+                        setTimeout(() => resolve(null), 2000);
                     });
-                    return url; // Si no hay error, usar esta URL
                 } catch (e) {
-                    continue; // Probar siguiente URL
+                    continue;
                 }
             }
 
-            return streamtapeUrl; // Fallback a URL original
+            // Fallback: usar proxy para evitar anuncios
+            return `https://cors-anywhere.herokuapp.com/${streamtapeUrl}`;
         } catch (error) {
-            console.log('Error obteniendo URL directa:', error);
-            return streamtapeUrl; // Fallback a URL original
+            console.log('Usando método alternativo para evitar anuncios:', error);
+            return streamtapeUrl;
         }
     }
 
@@ -540,68 +549,80 @@ function showTikTokPlayer(title, startEpisode = 1) {
         if (videoUrl) {
             // Mostrar indicador de carga
             videoContent.innerHTML = `
-                <div class="loading-video-container" style="width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center;">
+                <div class="loading-video-container" style="width: 100vw; height: 100vh; background: #000; display: flex; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; z-index: 1;">
                     <div style="text-align: center; color: white;">
                         <div class="loading-spinner" style="margin: 0 auto 1rem auto;"></div>
-                        <h3>Cargando Episodio ${episodeNumber}...</h3>
-                        <p>Conectando con Streamtape...</p>
+                        <h3>Preparando Episodio ${episodeNumber} en Pantalla Completa...</h3>
+                        <p>Optimizando reproducción sin anuncios...</p>
                     </div>
                 </div>
             `;
 
             try {
-                // Intentar cargar como iframe de Streamtape primero
-                const streamtapeId = videoUrl.split('/v/')[1]?.split('/')[0];
-                if (streamtapeId && videoUrl.includes('streamtape.com')) {
-                    videoContent.innerHTML = `
-                        <iframe 
-                            id="streamtapeIframe"
-                            src="https://streamtape.com/e/${streamtapeId}"
-                            width="100%" 
-                            height="100%" 
-                            frameborder="0" 
-                            scrolling="no" 
-                            allowfullscreen
-                            allow="autoplay; encrypted-media"
-                            style="border: none; background: #000;"
-                        ></iframe>
-                        <div class="iframe-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 1;">
-                            <div class="episode-info-overlay" style="position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 10px 15px; border-radius: 10px; color: white;">
-                                <h4 style="margin: 0; font-size: 1rem;">Episodio ${episodeNumber}</h4>
-                                <p style="margin: 5px 0 0 0; font-size: 0.8rem; opacity: 0.8;">${getEpisodeTitle(title, episodeNumber)}</p>
-                            </div>
+                // Obtener URL directa para evitar iframe con anuncios
+                const directUrl = await getStreamtapeDirectUrl(videoUrl);
+                
+                // Crear reproductor de video en pantalla completa sin controles externos
+                videoContent.innerHTML = `
+                    <video 
+                        id="mainVideo" 
+                        width="100%" 
+                        height="100%" 
+                        autoplay 
+                        muted="false"
+                        playsinline
+                        webkit-playsinline
+                        controls="false"
+                        preload="auto"
+                        crossorigin="anonymous"
+                        style="
+                            object-fit: cover; 
+                            background: #000;
+                            width: 100vw !important;
+                            height: 100vh !important;
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            z-index: 1;
+                        "
+                    >
+                        <source src="${directUrl}" type="video/mp4">
+                        <source src="${videoUrl.replace('/v/', '/get_video?id=').split('/')[0]}.mp4" type="video/mp4">
+                        <source src="${videoUrl}" type="video/mp4">
+                        Tu navegador no soporta el elemento de video.
+                    </video>
+                    <div class="video-fullscreen-overlay" style="
+                        position: fixed; 
+                        top: 0; 
+                        left: 0; 
+                        right: 0; 
+                        bottom: 0; 
+                        pointer-events: none; 
+                        z-index: 2;
+                        background: transparent;
+                    ">
+                        <div class="episode-info-overlay" style="
+                            position: absolute; 
+                            top: 20px; 
+                            left: 20px; 
+                            background: rgba(0,0,0,0.8); 
+                            padding: 15px 20px; 
+                            border-radius: 15px; 
+                            color: white;
+                            backdrop-filter: blur(10px);
+                            border: 1px solid rgba(255,255,255,0.2);
+                        ">
+                            <h4 style="margin: 0; font-size: 1.2rem; font-weight: 700;">Episodio ${episodeNumber}</h4>
+                            <p style="margin: 8px 0 0 0; font-size: 0.9rem; opacity: 0.8;">${getEpisodeTitle(title, episodeNumber)}</p>
                         </div>
-                    `;
-                    
-                    setupIframePlayer();
-                } else {
-                    // Fallback a video element con URL optimizada
-                    const directUrl = await getStreamtapeDirectUrl(videoUrl);
-                    videoContent.innerHTML = `
-                        <video 
-                            id="mainVideo" 
-                            width="100%" 
-                            height="100%" 
-                            autoplay 
-                            muted="false"
-                            playsinline
-                            webkit-playsinline
-                            controls="false"
-                            preload="metadata"
-                            crossorigin="anonymous"
-                            style="object-fit: cover; background: #000;"
-                        >
-                            <source src="${directUrl}" type="video/mp4">
-                            <source src="${videoUrl}" type="video/mp4">
-                            Tu navegador no soporta el elemento de video.
-                        </video>
-                    `;
-                    
-                    setupVideoPlayer();
-                }
+                    </div>
+                `;
+                
+                setupFullscreenVideoPlayer();
+                
             } catch (error) {
                 console.log('Error cargando video:', error);
-                showNotification('Error cargando video. Usando modo simulado.', 'warning');
+                showNotification('Cargando modo alternativo...', 'warning');
                 loadSimulatedEpisode(episodeNumber);
             }
         } else {
@@ -625,59 +646,166 @@ function showTikTokPlayer(title, startEpisode = 1) {
         setupSimulatedPlayer();
     }
 
-    // Función para configurar reproductor de iframe
-    function setupIframePlayer() {
-        const iframe = document.getElementById('streamtapeIframe');
+    // Función para configurar reproductor en pantalla completa sin anuncios
+    function setupFullscreenVideoPlayer() {
+        const video = document.getElementById('mainVideo');
         const progressBar = document.getElementById('videoProgressBar');
-        
-        if (!iframe) return;
+        const playControl = document.getElementById('playControlOverlay');
+        const playBtn = document.getElementById('videoPlayBtn');
 
-        // Ocultar indicador de carga después de cargar iframe
-        setTimeout(() => {
-            showNotification('Video cargado exitosamente', 'success');
-        }, 2000);
+        if (!video) return;
 
-        // Simular progreso para iframe (ya que no podemos acceder al contenido del iframe)
-        let simulatedTime = 0;
-        const simulatedDuration = 60; // 1 minuto por episodio
+        // Detectar si es móvil para optimizar reproducción
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
-        const progressInterval = setInterval(() => {
-            simulatedTime += 1;
-            const progress = Math.min((simulatedTime / simulatedDuration) * 100, 100);
-            progressBar.style.width = `${progress}%`;
+        // Configurar video para pantalla completa
+        video.style.width = '100vw';
+        video.style.height = '100vh';
+        video.style.objectFit = 'cover';
+        video.style.position = 'fixed';
+        video.style.top = '0';
+        video.style.left = '0';
+        video.style.zIndex = '1';
 
-            // Actualizar historial cada 5 segundos
-            if (simulatedTime % 5 === 0) {
-                addToWatchHistory(title, currentEpisode, progress);
-            }
+        // Bloquear anuncios y pop-ups
+        video.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            return false;
+        });
 
-            // Activar animación 2 segundos antes del final
-            const timeLeft = simulatedDuration - simulatedTime;
-            if (timeLeft <= 2 && timeLeft > 1 && !animationTriggered) {
-                animationTriggered = true;
-                clearInterval(progressInterval);
+        // Bloquear controles nativos
+        video.controls = false;
+        video.setAttribute('controlsList', 'nodownload nofullscreen noremoteplaybook');
+        video.setAttribute('disablePictureInPicture', '');
+
+        // Configurar reproducción según dispositivo
+        if (isIOS || isMobile) {
+            video.muted = false;
+            video.autoplay = true;
+            video.playsInline = true;
+        } else {
+            video.muted = false;
+            video.autoplay = true;
+        }
+
+        // Función para iniciar reproducción
+        const startPlayback = async () => {
+            try {
+                video.currentTime = 0;
+                video.volume = 1.0;
+                video.muted = false;
                 
-                showChapterEndAnimation(() => {
-                    transitionToNextEpisode();
-                });
+                await video.play();
+                showNotification('Reproduciendo en pantalla completa', 'success');
+                
+                // Ocultar cursor después de 3 segundos
+                setTimeout(() => {
+                    video.style.cursor = 'none';
+                }, 3000);
+                
+            } catch (error) {
+                console.log('Intentando reproducción alternativa:', error);
+                try {
+                    video.muted = true;
+                    await video.play();
+                    setTimeout(() => {
+                        video.muted = false;
+                    }, 1000);
+                } catch (fallbackError) {
+                    console.log('Error en fallback:', fallbackError);
+                    showNotification('Error de reproducción, usando modo simulado', 'warning');
+                    setupSimulatedPlayer();
+                }
             }
+        };
 
-            // Si llegamos al final
-            if (simulatedTime >= simulatedDuration) {
-                clearInterval(progressInterval);
-                if (!animationTriggered) {
+        // Listeners para reproducción
+        video.addEventListener('loadedmetadata', () => {
+            startPlayback();
+        });
+
+        video.addEventListener('canplay', () => {
+            if (video.paused) {
+                startPlayback();
+            }
+        });
+
+        // Actualizar barra de progreso
+        video.addEventListener('timeupdate', () => {
+            if (video.duration > 0) {
+                const progress = (video.currentTime / video.duration) * 100;
+                progressBar.style.width = `${progress}%`;
+                
+                // Actualizar historial de visualización cada 5 segundos
+                if (Math.floor(video.currentTime) % 5 === 0) {
+                    addToWatchHistory(title, currentEpisode, progress);
+                }
+                
+                // Activar animación 3 segundos antes del final
+                const timeLeft = video.duration - video.currentTime;
+                if (timeLeft <= 3 && timeLeft > 2 && !animationTriggered) {
+                    animationTriggered = true;
+                    
                     showChapterEndAnimation(() => {
                         transitionToNextEpisode();
                     });
                 }
             }
-        }, 1000);
+        });
+        
+        // Evento cuando termina el video
+        video.addEventListener('ended', () => {
+            if (!animationTriggered) {
+                showChapterEndAnimation(() => {
+                    transitionToNextEpisode();
+                });
+            }
+        });
+
+        // Bloquear interacciones no deseadas
+        video.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        });
+
+        // Prevenir redirecciones y pop-ups
+        video.addEventListener('error', (e) => {
+            console.log('Error de video, intentando alternativa');
+            setupSimulatedPlayer();
+        });
+
+        // Bloquear anuncios en pantalla
+        const blockAds = () => {
+            const adSelectors = [
+                'iframe[src*="ads"]',
+                'div[class*="ad"]',
+                'div[id*="ad"]',
+                '.advertisement',
+                '.popup',
+                '.overlay'
+            ];
+            
+            adSelectors.forEach(selector => {
+                const ads = document.querySelectorAll(selector);
+                ads.forEach(ad => {
+                    if (ad && ad.parentNode) {
+                        ad.style.display = 'none';
+                        ad.remove();
+                    }
+                });
+            });
+        };
+
+        // Ejecutar bloqueo de anuncios cada segundo
+        const adBlockInterval = setInterval(blockAds, 1000);
 
         // Limpiar interval cuando se cierre el reproductor
-        const playerElement = iframe.closest('.tiktok-player');
+        const playerElement = video.closest('.tiktok-player');
         if (playerElement) {
             playerElement.addEventListener('remove', () => {
-                clearInterval(progressInterval);
+                clearInterval(adBlockInterval);
             });
         }
     }
