@@ -325,8 +325,66 @@ window.addEventListener('scroll', () => {
     }
 });
 
+// Watch history management
+let watchHistory = JSON.parse(localStorage.getItem('watchHistory') || '{}');
+
+function addToWatchHistory(title, episode, progress) {
+    watchHistory[title] = {
+        episode: episode,
+        progress: progress,
+        timestamp: Date.now(),
+        thumbnail: getCurrentSeriesThumbnail(title)
+    };
+    localStorage.setItem('watchHistory', JSON.stringify(watchHistory));
+    updateContinueWatchingSection();
+}
+
+function getCurrentSeriesThumbnail(title) {
+    const thumbnails = {
+        'El Emperador Eterno': 'https://via.placeholder.com/280x400/3a3a3a/fff?text=Continuar+1',
+        'Amor en la Dinastía Tang': 'https://via.placeholder.com/280x400/3a3a3a/fff?text=Continuar+2',
+        'La Médica Imperial': 'https://via.placeholder.com/280x400/3a3a3a/fff?text=Continuar+3'
+    };
+    return thumbnails[title] || 'https://via.placeholder.com/280x400/3a3a3a/fff?text=Serie';
+}
+
+function updateContinueWatchingSection() {
+    const continueSection = document.querySelector('.continue-section');
+    const continueCards = continueSection.parentElement;
+    
+    if (Object.keys(watchHistory).length === 0) {
+        continueCards.style.display = 'none';
+        return;
+    }
+    
+    continueCards.style.display = 'block';
+    
+    const sortedHistory = Object.entries(watchHistory)
+        .sort(([,a], [,b]) => b.timestamp - a.timestamp)
+        .slice(0, 3);
+    
+    continueSection.innerHTML = sortedHistory.map(([title, data]) => `
+        <div class="content-card continue-card" onclick="showTikTokPlayer('${title}', ${data.episode})">
+            <img src="${data.thumbnail}" alt="${title}">
+            <div class="progress-indicator">
+                <div class="progress-fill" style="width: ${data.progress}%"></div>
+            </div>
+            <div class="card-info">
+                <h3>${title}</h3>
+                <p>Episodio ${data.episode} de 45</p>
+            </div>
+            <button class="play-btn" onclick="event.stopPropagation(); showTikTokPlayer('${title}', ${data.episode})">▶</button>
+        </div>
+    `).join('');
+}
+
 // TikTok Style Video Player
-function showTikTokPlayer(title) {
+function showTikTokPlayer(title, startEpisode = 1) {
+    // Prevent scroll issues
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    
     const player = document.createElement('div');
     player.className = 'tiktok-player';
     player.innerHTML = `
@@ -339,7 +397,7 @@ function showTikTokPlayer(title) {
             <div class="video-placeholder-tiktok">
                 <div class="video-info-tiktok">
                     <h3 class="video-title-tiktok">${title}</h3>
-                    <p class="video-description-tiktok">Episodio 1 - "El Despertar"</p>
+                    <p class="video-description-tiktok">Episodio ${startEpisode} - "El Despertar"</p>
                     <div class="video-progress-tiktok">
                         <div class="video-progress-fill"></div>
                     </div>
@@ -373,6 +431,26 @@ function showTikTokPlayer(title) {
     document.body.appendChild(player);
     setTimeout(() => player.classList.add('active'), 100);
 
+    // Simulate video progress tracking
+    let currentEpisode = startEpisode;
+    let watchTime = 0;
+    const watchInterval = setInterval(() => {
+        watchTime += 1;
+        const progress = Math.min((watchTime / 60) * 100, 100); // 60 seconds = 100%
+        
+        // Update watch history every 5 seconds
+        if (watchTime % 5 === 0) {
+            addToWatchHistory(title, currentEpisode, progress);
+        }
+        
+        // Auto advance to next episode after 60 seconds
+        if (watchTime >= 60) {
+            watchTime = 0;
+            currentEpisode++;
+            player.querySelector('.video-description-tiktok').textContent = `Episodio ${currentEpisode} - "Continuación"`;
+        }
+    }, 1000);
+
     // Event listeners
     const closeBtn = player.querySelector('.close-player');
     const likeBtn = player.querySelector('#likeBtn');
@@ -381,6 +459,10 @@ function showTikTokPlayer(title) {
     const episodesBtn = player.querySelector('#episodesBtn');
 
     closeBtn.addEventListener('click', () => {
+        clearInterval(watchInterval);
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
         player.classList.remove('active');
         setTimeout(() => document.body.removeChild(player), 300);
     });
@@ -1415,6 +1497,62 @@ function showAdModal() {
     modal.classList.add('active');
     closeBtn.style.display = 'none';
 
+    // Update ad content with Netflix video
+    const adContent = modal.querySelector('.ad-content');
+    adContent.innerHTML = `
+        <div class="netflix-ad-container">
+            <video 
+                id="netflixAdVideo" 
+                width="100%" 
+                height="400px" 
+                autoplay 
+                muted
+                style="border-radius: 12px; object-fit: cover;"
+            >
+                <source src="https://www.dropbox.com/scl/fi/oa2blfwyvg84csw5w13ky/copy_0B8A47E6-5756-4AA7-A69F-FF4E6C6A3194.mov?rlkey=pxs3j8ujtrnyhpf9u7qn6iyl1&st=uy6kb9o7&raw=1" type="video/mp4">
+                Tu navegador no soporta el elemento de video.
+            </video>
+            <div class="netflix-ad-overlay">
+                <div class="netflix-logo">
+                    <h2 style="color: #e50914; font-weight: 800; font-size: 2rem;">NETFLIX</h2>
+                </div>
+                <div class="netflix-cta">
+                    <h3 style="color: white; margin-bottom: 1rem;">¿Te gustó lo que viste?</h3>
+                    <button class="netflix-download-btn" id="netflixDownloadBtn">
+                        📱 Descargar Netflix
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const video = document.getElementById('netflixAdVideo');
+    const downloadBtn = document.getElementById('netflixDownloadBtn');
+
+    // Netflix download button functionality
+    downloadBtn.addEventListener('click', () => {
+        // Check if user is on mobile
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        if (isMobile) {
+            // Try to open Netflix app or App Store/Play Store
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            const isAndroid = /Android/.test(navigator.userAgent);
+            
+            if (isIOS) {
+                window.open('https://apps.apple.com/app/netflix/id363590051', '_blank');
+            } else if (isAndroid) {
+                window.open('https://play.google.com/store/apps/details?id=com.netflix.mediaclient', '_blank');
+            } else {
+                window.open('https://www.netflix.com/download', '_blank');
+            }
+        } else {
+            window.open('https://www.netflix.com', '_blank');
+        }
+        
+        showNotification('¡Redirigiendo a Netflix! 🎬', 'success');
+    });
+
     let timeLeft = 30;
     const interval = setInterval(() => {
         timeLeft--;
@@ -1425,11 +1563,29 @@ function showAdModal() {
             clearInterval(interval);
             closeBtn.style.display = 'flex';
             addCoins(20);
+            
+            // Show interactive Netflix CTA
+            const netflixCta = modal.querySelector('.netflix-cta');
+            if (netflixCta) {
+                netflixCta.style.display = 'block';
+                netflixCta.style.animation = 'bounceIn 0.5s ease';
+            }
+            
             setTimeout(() => {
                 modal.classList.remove('active');
                 timer.textContent = '30';
                 progress.style.width = '0%';
-            }, 2000);
+                // Reset ad content for next time
+                adContent.innerHTML = `
+                    <div class="ad-placeholder">
+                        <h2>🎬 Anuncio Publicitario</h2>
+                        <p>Este es un anuncio simulado de 30 segundos</p>
+                        <div class="ad-progress">
+                            <div class="ad-progress-fill" id="adProgress"></div>
+                        </div>
+                    </div>
+                `;
+            }, 5000); // Give more time to interact with Netflix button
         }
     }, 1000);
 }
@@ -1502,6 +1658,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize monetization
     updateCoinDisplay();
     checkReferral();
+    
+    // Initialize continue watching section
+    updateContinueWatchingSection();
 
     // Monetization event listeners
     const rewardsBtn = document.getElementById('rewardsBtn');
