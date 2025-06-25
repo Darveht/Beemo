@@ -1,3 +1,318 @@
+// Yahoo OAuth Configuration
+const YAHOO_CLIENT_ID = 'dj0yJmk9bDdrb2lTMFNWT0tDJmQ9WVdrOVNHaHlkMHhZUkV3bWNHbzlNQT09JnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PWU5';
+// Configuración para Netlify
+const YAHOO_REDIRECT_URI = 'https://beemotv.netlify.app';
+
+// Auth State Management
+let currentUser = null;
+let isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+
+// Initialize Auth on page load
+document.addEventListener('DOMContentLoaded', () => {
+    initializeAuth();
+
+    // Auth screen event listeners
+    setupAuthEventListeners();
+
+    // Check if user is already authenticated
+    if (isAuthenticated) {
+        showMainApp();
+    } else {
+        showWelcomeScreen();
+    }
+
+    // Check for OAuth callback
+    handleOAuthCallback();
+});
+
+function initializeAuth() {
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    const loginScreen = document.getElementById('loginScreen');
+    const registerScreen = document.getElementById('registerScreen');
+    const mainApp = document.getElementById('mainApp');
+
+    // Ensure all screens are properly positioned
+    if (isAuthenticated) {
+        welcomeScreen.style.display = 'none';
+        loginScreen.style.display = 'none';
+        registerScreen.style.display = 'none';
+        mainApp.style.display = 'block';
+        mainApp.classList.add('active');
+    }
+}
+
+function setupAuthEventListeners() {
+    // Welcome screen buttons
+    const loginBtn = document.getElementById('loginBtn');
+    const registerBtn = document.getElementById('registerBtn');
+
+    // Back buttons
+    const loginBackBtn = document.getElementById('loginBackBtn');
+    const registerBackBtn = document.getElementById('registerBackBtn');
+
+    // Switch between login/register
+    const switchToRegister = document.getElementById('switchToRegister');
+    const switchToLogin = document.getElementById('switchToLogin');
+
+    // Yahoo auth buttons
+    const yahooLoginBtn = document.getElementById('yahooLoginBtn');
+    const yahooRegisterBtn = document.getElementById('yahooRegisterBtn');
+
+    // Enter app button
+    const enterAppBtn = document.getElementById('enterAppBtn');
+
+    if (loginBtn) loginBtn.addEventListener('click', showLoginScreen);
+    if (registerBtn) registerBtn.addEventListener('click', showRegisterScreen);
+    if (loginBackBtn) loginBackBtn.addEventListener('click', showWelcomeScreen);
+    if (registerBackBtn) registerBackBtn.addEventListener('click', showWelcomeScreen);
+    if (switchToRegister) switchToRegister.addEventListener('click', showRegisterScreen);
+    if (switchToLogin) switchToLogin.addEventListener('click', showLoginScreen);
+    if (yahooLoginBtn) yahooLoginBtn.addEventListener('click', () => startYahooAuth('login'));
+    if (yahooRegisterBtn) yahooRegisterBtn.addEventListener('click', () => startYahooAuth('register'));
+    if (enterAppBtn) enterAppBtn.addEventListener('click', enterMainApp);
+}
+
+function showWelcomeScreen() {
+    document.getElementById('welcomeScreen').style.display = 'block';
+    document.getElementById('loginScreen').classList.remove('active');
+    document.getElementById('registerScreen').classList.remove('active');
+
+    setTimeout(() => {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('registerScreen').style.display = 'none';
+    }, 300);
+}
+
+function showLoginScreen() {
+    document.getElementById('loginScreen').style.display = 'block';
+    document.getElementById('welcomeScreen').style.display = 'none';
+    document.getElementById('registerScreen').classList.remove('active');
+
+    setTimeout(() => {
+        document.getElementById('loginScreen').classList.add('active');
+        document.getElementById('registerScreen').style.display = 'none';
+    }, 50);
+}
+
+function showRegisterScreen() {
+    document.getElementById('registerScreen').style.display = 'block';
+    document.getElementById('welcomeScreen').style.display = 'none';
+    document.getElementById('loginScreen').classList.remove('active');
+
+    setTimeout(() => {
+        document.getElementById('registerScreen').classList.add('active');
+        document.getElementById('loginScreen').style.display = 'none';
+    }, 50);
+}
+
+function startYahooAuth(type) {
+    // Store auth type for callback
+    localStorage.setItem('authType', type);
+
+    // Sistema de autenticación simulada (temporal mientras configuras Yahoo)
+    showAuthLoading('Conectando con Yahoo...');
+
+    // Simular proceso de autenticación real
+    setTimeout(() => {
+        // Simular respuesta exitosa de Yahoo
+        const mockUserData = {
+            id: 'yahoo_' + Math.random().toString(36).substring(7),
+            email: 'usuario@yahoo.com',
+            name: 'Usuario Beemo',
+            provider: 'yahoo',
+            authenticated_at: Date.now()
+        };
+
+        handleAuthSuccess(mockUserData);
+    }, 2500); // Tiempo realista de autenticación
+
+    return;
+
+    // Código real de Yahoo OAuth (comentado temporalmente)
+    /*
+    const yahooAuthUrl = `https://api.login.yahoo.com/oauth2/request_auth?` +
+        `client_id=${YAHOO_CLIENT_ID}&` +
+        `redirect_uri=${encodeURIComponent(YAHOO_REDIRECT_URI)}&` +
+        `response_type=code&` +
+        `scope=openid email profile&` +
+        `state=${generateRandomState()}`;
+
+    // Redirect to Yahoo OAuth
+    window.location.href = yahooAuthUrl;
+    */
+}
+
+function generateRandomState() {
+    const state = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    localStorage.setItem('oauthState', state);
+    return state;
+}
+
+function handleOAuthCallback() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const state = urlParams.get('state');
+    const error = urlParams.get('error');
+
+    if (error) {
+        console.error('OAuth error:', error);
+        showAuthError('Error al autenticar con Yahoo. Por favor intenta de nuevo.');
+        return;
+    }
+
+    if (code && state) {
+        const storedState = localStorage.getItem('oauthState');
+        if (state !== storedState) {
+            console.error('State mismatch');
+            showAuthError('Error de seguridad. Por favor intenta de nuevo.');
+            return;
+        }
+
+        // Exchange code for token (simulated)
+        exchangeCodeForToken(code);
+    }
+}
+
+async function exchangeCodeForToken(code) {
+    try {
+        // In a real implementation, this would be done on your backend
+        // For demo purposes, we'll simulate a successful auth
+
+        showAuthLoading('Completando autenticación...');
+
+        // Simulate API call delay
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Simulate successful auth
+        const mockUserData = {
+            id: 'yahoo_' + Math.random().toString(36).substring(7),
+            email: 'usuario@yahoo.com',
+            name: 'Usuario Beemo',
+            provider: 'yahoo'
+        };
+
+        handleAuthSuccess(mockUserData);
+
+    } catch (error) {
+        console.error('Token exchange error:', error);
+        showAuthError('Error al completar la autenticación. Por favor intenta de nuevo.');
+    }
+}
+
+function handleAuthSuccess(userData) {
+    currentUser = userData;
+    isAuthenticated = true;
+
+    // Store auth state
+    localStorage.setItem('isAuthenticated', 'true');
+    localStorage.setItem('currentUser', JSON.stringify(userData));
+    localStorage.setItem('authTimestamp', Date.now().toString());
+
+    // Clean up OAuth params from URL
+    const url = new URL(window.location);
+    url.searchParams.delete('code');
+    url.searchParams.delete('state');
+    window.history.replaceState({}, document.title, url.pathname);
+
+    // Clean up localStorage
+    localStorage.removeItem('oauthState');
+    localStorage.removeItem('authType');
+
+    // Show success modal
+    showAuthSuccessModal();
+}
+
+function showAuthSuccessModal() {
+    const modal = document.getElementById('authSuccessModal');
+    modal.classList.add('active');
+}
+
+function enterMainApp() {
+    const modal = document.getElementById('authSuccessModal');
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    const loginScreen = document.getElementById('loginScreen');
+    const registerScreen = document.getElementById('registerScreen');
+    const mainApp = document.getElementById('mainApp');
+
+    modal.classList.remove('active');
+
+    setTimeout(() => {
+        welcomeScreen.style.display = 'none';
+        loginScreen.style.display = 'none';
+        registerScreen.style.display = 'none';
+        mainApp.style.display = 'block';
+
+        setTimeout(() => {
+            mainApp.classList.add('active');
+        }, 50);
+    }, 300);
+}
+
+function showMainApp() {
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    const loginScreen = document.getElementById('loginScreen');
+    const registerScreen = document.getElementById('registerScreen');
+    const mainApp = document.getElementById('mainApp');
+
+    welcomeScreen.style.display = 'none';
+    loginScreen.style.display = 'none';
+    registerScreen.style.display = 'none';
+    mainApp.style.display = 'block';
+    mainApp.classList.add('active');
+}
+
+function showAuthLoading(message) {
+    showNotification(message, 'info');
+}
+
+function showAuthError(message) {
+    showNotification(message, 'error');
+
+    // Reset auth screens
+    setTimeout(() => {
+        const loginLoading = document.getElementById('loginLoading');
+        const registerLoading = document.getElementById('registerLoading');
+        const yahooLoginBtn = document.getElementById('yahooLoginBtn');
+        const yahooRegisterBtn = document.getElementById('yahooRegisterBtn');
+
+        if (loginLoading) loginLoading.style.display = 'none';
+        if (registerLoading) registerLoading.style.display = 'none';
+        if (yahooLoginBtn) yahooLoginBtn.style.display = 'flex';
+        if (yahooRegisterBtn) yahooRegisterBtn.style.display = 'flex';
+
+        showWelcomeScreen();
+    }, 3000);
+}
+
+// Logout function
+function logout() {
+    currentUser = null;
+    isAuthenticated = false;
+
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('authTimestamp');
+
+    // Reload page to show welcome screen
+    window.location.reload();
+}
+
+// Add logout button functionality to header (can be added later)
+function addLogoutToHeader() {
+    const navRight = document.querySelector('.nav-right');
+    if (navRight && isAuthenticated) {
+        const logoutBtn = document.createElement('button');
+        logoutBtn.className = 'logout-btn';
+        logoutBtn.innerHTML = `
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.59L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+            </svg>
+        `;
+        logoutBtn.onclick = logout;
+        navRight.appendChild(logoutBtn);
+    }
+}
+
 // Header scroll effect
 window.addEventListener('scroll', () => {
     const header = document.querySelector('.header');
@@ -147,7 +462,7 @@ function generateEpisodesList() {
                 <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM15.1 8H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/>
             </svg>
         ` : '';
-        
+
         episodes += `
             <div class="episode-item ${i === 1 ? 'current' : ''} ${isLocked ? 'locked' : ''} ${canUnlock ? 'can-unlock' : ''}" data-episode="${i}">
                 <div class="episode-number">
@@ -171,15 +486,15 @@ function generateEpisodesList() {
 function updateAutoUnlockStatus() {
     const autoUnlockStatus = document.getElementById('autoUnlockStatus');
     const lockedEpisodes = [];
-    
+
     for (let i = 9; i <= 45; i++) {
         if (!unlockedEpisodes.includes(i)) {
             lockedEpisodes.push(i);
         }
     }
-    
+
     const canAutoUnlock = lockedEpisodes.length > 0 && userCoins >= 30;
-    
+
     if (canAutoUnlock && autoUnlockStatus) {
         autoUnlockStatus.style.display = 'block';
     } else if (autoUnlockStatus) {
@@ -192,21 +507,21 @@ function showNotification(message, type = 'success') {
     const container = document.getElementById('notificationContainer');
     const notification = document.createElement('div');
     notification.className = 'notification';
-    
+
     const icons = {
         success: '✓',
         info: 'i',
         warning: '!',
         error: '×'
     };
-    
+
     notification.innerHTML = `
         <span class="notification-icon">${icons[type] || icons.success}</span>
         <span>${message}</span>
     `;
-    
+
     container.appendChild(notification);
-    
+
     setTimeout(() => {
         if (container.contains(notification)) {
             container.removeChild(notification);
@@ -218,7 +533,7 @@ function showNotification(message, type = 'success') {
 function showSearchModal() {
     const modal = document.getElementById('searchModal');
     const input = document.getElementById('searchInput');
-    
+
     modal.classList.add('active');
     setTimeout(() => input.focus(), 100);
 }
@@ -237,10 +552,10 @@ const stripe = Stripe('pk_test_51RF622RCIbJ5KY2omXVZiiIrOdzRWt7oPCxx6klyoMVfudhB
 function showExpandedSearch() {
     const modal = document.getElementById('expandedSearchModal');
     const input = document.getElementById('expandedSearchInput');
-    
+
     modal.classList.add('active');
     setTimeout(() => input.focus(), 100);
-    
+
     // Load all series initially
     displayExpandedSearchResults(getAllSeries());
 }
@@ -366,7 +681,7 @@ function getAllSeries() {
 
 function displayExpandedSearchResults(results) {
     const resultsContainer = document.getElementById('expandedSearchResults');
-    
+
     resultsContainer.innerHTML = results.map(result => `
         <div class="expanded-result-card" onclick="selectExpandedSearchResult('${result.title}')">
             <img src="${result.thumbnail}" alt="${result.title}" class="expanded-result-image">
@@ -400,27 +715,27 @@ function selectExpandedSearchResult(title) {
 
 function performExpandedSearch(query) {
     console.log('Searching for:', query);
-    
+
     const allSeries = getAllSeries();
     const filteredResults = allSeries.filter(result => 
         result.title.toLowerCase().includes(query.toLowerCase()) ||
         result.genre.toLowerCase().includes(query.toLowerCase()) ||
         result.description.toLowerCase().includes(query.toLowerCase())
     );
-    
+
     displayExpandedSearchResults(filteredResults);
 }
 
 function filterExpandedResults(category) {
     const allSeries = getAllSeries();
     let filteredResults = allSeries;
-    
+
     if (category !== 'todos') {
         filteredResults = allSeries.filter(result => 
             result.genre.toLowerCase().includes(category.toLowerCase())
         );
     }
-    
+
     displayExpandedSearchResults(filteredResults);
 }
 
@@ -432,14 +747,14 @@ let currentPurchaseCoins = 0;
 function showPaymentModal(amount, coins) {
     currentPurchaseAmount = amount;
     currentPurchaseCoins = coins;
-    
+
     const modal = document.getElementById('paymentModal');
     modal.classList.add('active');
-    
+
     // Reset form
     const cardForm = document.getElementById('cardForm');
     cardForm.style.display = 'none';
-    
+
     // Reset payment options
     document.querySelectorAll('.payment-option').forEach(option => {
         option.style.background = '#16181c';
@@ -466,7 +781,7 @@ function processApplePay() {
         };
 
         const session = new ApplePaySession(3, request);
-        
+
         session.onvalidatemerchant = async (event) => {
             // In a real app, you would validate with your server
             showNotification('Autenticando con Apple Pay...', 'info');
@@ -475,11 +790,11 @@ function processApplePay() {
         session.onpaymentauthorized = async (event) => {
             // Process payment
             const payment = event.payment;
-            
+
             try {
                 // Simulate payment processing
                 await new Promise(resolve => setTimeout(resolve, 2000));
-                
+
                 session.completePayment(ApplePaySession.STATUS_SUCCESS);
                 addCoins(currentPurchaseCoins);
                 hidePaymentModal();
@@ -573,7 +888,7 @@ async function processCreditCard() {
             addCoins(currentPurchaseCoins);
             hidePaymentModal();
             showNotification(`¡Pago exitoso! ${currentPurchaseCoins} monedas agregadas`, 'success');
-            
+
             // Log successful payment
             console.log('Payment successful:', confirmedPayment.id);
         }
@@ -602,11 +917,11 @@ function checkPaymentSuccess() {
     const urlParams = new URLSearchParams(window.location.search);
     const payment = urlParams.get('payment');
     const coins = urlParams.get('coins');
-    
+
     if (payment === 'success' && coins) {
         addCoins(parseInt(coins));
         showNotification(`¡Compra exitosa! ${coins} monedas agregadas a tu cuenta`, 'success');
-        
+
         // Clean URL
         window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -615,7 +930,7 @@ function checkPaymentSuccess() {
 // Enhanced search functionality with real-time results
 function performSearch(query) {
     console.log('Searching for:', query);
-    
+
     const allSeries = [
         { title: 'Amor en la Dinastía Tang', rating: '8.9', episodes: '30 eps', year: '2024', genre: 'Romance Histórico', thumbnail: 'https://via.placeholder.com/280x400/1a1a1a/fff?text=Drama+1' },
         { title: 'El Príncipe Perdido', rating: '9.1', episodes: '25 eps', year: '2024', genre: 'Artes Marciales', thumbnail: 'https://via.placeholder.com/280x400/1a1a1a/fff?text=Drama+2' },
@@ -632,24 +947,24 @@ function performSearch(query) {
         { title: 'Corazón de Jade', rating: '8.7', episodes: '35 eps', year: '2024', genre: 'Romance', thumbnail: 'https://via.placeholder.com/280x400/1a1a1a/fff?text=Romance+2' },
         { title: 'El Jardín del Emperador', rating: '9.0', episodes: '25 eps', year: '2024', genre: 'Drama Imperial', thumbnail: 'https://via.placeholder.com/280x400/1a1a1a/fff?text=Imperial+1' }
     ];
-    
+
     const filteredResults = allSeries.filter(result => 
         result.title.toLowerCase().includes(query.toLowerCase()) ||
         result.genre.toLowerCase().includes(query.toLowerCase())
     );
-    
+
     displaySearchResults(filteredResults);
 }
 
 function displaySearchResults(results) {
     const resultsContainer = document.getElementById('searchResults');
     const resultsList = document.getElementById('resultsList');
-    
+
     if (results.length === 0) {
         resultsContainer.style.display = 'none';
         return;
     }
-    
+
     resultsList.innerHTML = results.map(result => `
         <div class="result-item" onclick="selectSearchResult('${result.title}')">
             <img src="${result.thumbnail}" alt="${result.title}" class="result-image">
@@ -660,7 +975,7 @@ function displaySearchResults(results) {
             </div>
         </div>
     `).join('');
-    
+
     resultsContainer.style.display = 'block';
 }
 
@@ -733,23 +1048,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const expandedSearchModal = document.getElementById('expandedSearchModal');
     const expandedSearchClose = document.getElementById('expandedSearchClose');
     const expandedSearchInput = document.getElementById('expandedSearchInput');
-    
+
     if (searchBarInput) {
         searchBarInput.addEventListener('click', showExpandedSearch);
         searchBarInput.addEventListener('focus', showExpandedSearch);
     }
-    
+
     if (expandedSearchClose) {
         expandedSearchClose.addEventListener('click', hideExpandedSearch);
     }
-    
+
     if (expandedSearchModal) {
         expandedSearchModal.addEventListener('click', (e) => {
             if (e.target === expandedSearchModal) {
                 hideExpandedSearch();
             }
         });
-        
+
         // ESC key to close
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && expandedSearchModal.classList.contains('active')) {
@@ -757,7 +1072,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
+
     if (expandedSearchInput) {
         expandedSearchInput.addEventListener('input', (e) => {
             const query = e.target.value.trim();
@@ -768,19 +1083,19 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
+
     // Expanded search category filters
     const expandedCategoryChips = document.querySelectorAll('.expanded-category-chip');
     expandedCategoryChips.forEach(chip => {
         chip.addEventListener('click', () => {
             expandedCategoryChips.forEach(c => c.classList.remove('active'));
             chip.classList.add('active');
-            
+
             const category = chip.dataset.category;
             filterExpandedResults(category);
         });
     });
-    
+
     // Suggestion clicks
     const suggestions = document.querySelectorAll('.suggestion-item');
     suggestions.forEach(suggestion => {
@@ -1096,16 +1411,16 @@ function showAdModal() {
     const timer = document.getElementById('adTimer');
     const closeBtn = document.getElementById('adClose');
     const progress = document.getElementById('adProgress');
-    
+
     modal.classList.add('active');
     closeBtn.style.display = 'none';
-    
+
     let timeLeft = 30;
     const interval = setInterval(() => {
         timeLeft--;
         timer.textContent = timeLeft;
         progress.style.width = `${((30 - timeLeft) / 30) * 100}%`;
-        
+
         if (timeLeft <= 0) {
             clearInterval(interval);
             closeBtn.style.display = 'flex';
@@ -1141,7 +1456,7 @@ function generateShareCode() {
 function checkReferral() {
     const urlParams = new URLSearchParams(window.location.search);
     const ref = urlParams.get('ref');
-    
+
     if (ref && !localStorage.getItem('referralUsed_' + ref)) {
         localStorage.setItem('referralUsed_' + ref, 'true');
         addCoins(50);
@@ -1236,7 +1551,7 @@ document.addEventListener('DOMContentLoaded', () => {
             purchaseCoins(amount, coins);
         });
     });
-    
+
     // Payment modal event listeners
     const paymentClose = document.getElementById('paymentClose');
     const paymentModal = document.getElementById('paymentModal');
@@ -1265,7 +1580,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             applePayOption.style.background = 'rgba(29, 155, 240, 0.1)';
             cardForm.style.display = 'none';
-            
+
             setTimeout(() => {
                 processApplePay();
             }, 500);
@@ -1352,10 +1667,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (cardNameInput) {
         cardNameInput.addEventListener('input', validateCardForm);
     }
-    
+
     // Check for payment success on page load
     checkPaymentSuccess();
-    
+
     // Initialize expanded search with all series
     displayExpandedSearchResults(getAllSeries());
 });
@@ -1386,16 +1701,16 @@ additionalStyles.textContent = `
         from { opacity: 1; transform: scale(1); }
         to { opacity: 0; transform: scale(0.95); }
     }
-    
+
     .episode-item.locked {
         opacity: 0.6;
         background: #2f3336;
     }
-    
+
     .episode-item.locked:hover {
         background: rgba(29, 155, 240, 0.1);
     }
-    
+
     .unlock-cost {
         color: #ffd700 !important;
         font-weight: 600 !important;
