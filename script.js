@@ -262,7 +262,18 @@ function showMainApp() {
 }
 
 function showAuthLoading(message) {
-    showNotification(message, 'info');
+    // Mostrar loading sin notificación molesta
+    const loginLoading = document.getElementById('loginLoading');
+    const registerLoading = document.getElementById('registerLoading');
+    
+    if (loginLoading) {
+        loginLoading.style.display = 'block';
+        loginLoading.querySelector('p').textContent = message;
+    }
+    if (registerLoading) {
+        registerLoading.style.display = 'block';
+        registerLoading.querySelector('p').textContent = message;
+    }
 }
 
 function showAuthError(message) {
@@ -484,8 +495,6 @@ function showTikTokPlayer(title, startEpisode = 1) {
     // Función mejorada para manejar URLs de Streamable como fondo
     async function createStreamablePlayer(streamableUrl) {
         try {
-            showNotification('Cargando video...', 'info');
-
             // Crear iframe de Streamable como fondo del reproductor
             const iframe = document.createElement('iframe');
             iframe.id = 'streamablePlayer';
@@ -518,19 +527,14 @@ function showTikTokPlayer(title, startEpisode = 1) {
 
             // Manejar carga del iframe
             iframe.onload = () => {
-                showNotification('Video cargado correctamente', 'success');
+                console.log('Video cargado correctamente');
             };
 
             // Manejar error de carga
             iframe.onerror = () => {
-                showNotification('Error cargando video, usando modo simulado', 'warning');
+                console.log('Error cargando video, usando modo simulado');
                 loadSimulatedEpisode(currentEpisode);
             };
-
-            // Timeout de seguridad
-            setTimeout(() => {
-                showNotification('Video listo para reproducir', 'info');
-            }, 3000);
 
             // Retornar contenedor
             const container = document.createElement('div');
@@ -589,7 +593,7 @@ function showTikTokPlayer(title, startEpisode = 1) {
                 const playerContainer = await createStreamablePlayer(videoUrl);
 
                 if (playerContainer) {
-                    showNotification(`Episodio ${episodeNumber} cargado correctamente`, 'success');
+                    console.log(`Episodio ${episodeNumber} cargado correctamente`);
 
                     // Configurar seguimiento básico del progreso
                     let currentTime = 0;
@@ -1069,7 +1073,7 @@ function showTikTokPlayer(title, startEpisode = 1) {
             }
         }, 300);
 
-        showNotification('Reproductor cerrado', 'info');
+        console.log('Reproductor cerrado');
     });
 
     likeBtn.addEventListener('click', () => {
@@ -1127,7 +1131,9 @@ function showTikTokPlayer(title, startEpisode = 1) {
         }
     });
 
-    episodesBtn.addEventListener('click', () => {
+    episodesBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         showEpisodesModal(title, currentEpisode);
     });
 }
@@ -1135,27 +1141,101 @@ function showTikTokPlayer(title, startEpisode = 1) {
 function showEpisodesModal(seriesTitle, currentEpisodeNum = 1) {
     const modal = document.createElement('div');
     modal.className = 'episodes-modal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.95);
+        z-index: 10000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    `;
+    
     modal.innerHTML = `
-        <div class="episodes-header">
-            <h3 class="episodes-title">${seriesTitle} - Episodios</h3>
-            <button class="episodes-close">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
-                </svg>
-            </button>
-        </div>
-        <div class="episodes-list">
-            ${generateEpisodesList(currentEpisodeNum)}
+        <div class="episodes-container" style="
+            background: #16181c;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow: hidden;
+            border: 1px solid #2f3336;
+        ">
+            <div class="episodes-header" style="
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 1.5rem 2rem;
+                border-bottom: 1px solid #2f3336;
+                background: #000;
+            ">
+                <h3 class="episodes-title" style="color: #e7e9ea; font-size: 1.3rem; font-weight: 600; margin: 0;">${seriesTitle} - Episodios</h3>
+                <button class="episodes-close" style="
+                    background: none;
+                    border: 1px solid #536471;
+                    color: #e7e9ea;
+                    cursor: pointer;
+                    padding: 0.5rem;
+                    border-radius: 50%;
+                    width: 36px;
+                    height: 36px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.2s ease;
+                ">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="episodes-list" style="
+                max-height: 60vh;
+                overflow-y: auto;
+                padding: 1rem;
+            ">
+                ${generateEpisodesList(currentEpisodeNum)}
+            </div>
         </div>
     `;
 
     document.body.appendChild(modal);
-    setTimeout(() => modal.classList.add('active'), 100);
+    
+    // Activar modal
+    setTimeout(() => {
+        modal.style.opacity = '1';
+        modal.style.visibility = 'visible';
+    }, 10);
 
     const closeBtn = modal.querySelector('.episodes-close');
     closeBtn.addEventListener('click', () => {
-        modal.classList.remove('active');
-        setTimeout(() => document.body.removeChild(modal), 300);
+        modal.style.opacity = '0';
+        modal.style.visibility = 'hidden';
+        setTimeout(() => {
+            if (document.body.contains(modal)) {
+                document.body.removeChild(modal);
+            }
+        }, 300);
+    });
+    
+    // Cerrar al hacer clic fuera
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.opacity = '0';
+            modal.style.visibility = 'hidden';
+            setTimeout(() => {
+                if (document.body.contains(modal)) {
+                    document.body.removeChild(modal);
+                }
+            }, 300);
+        }
     });
 
     // Episode selection with monetization
@@ -1166,7 +1246,8 @@ function showEpisodesModal(seriesTitle, currentEpisodeNum = 1) {
             if (handleEpisodeClick(episodeNum)) {
                 episodeItems.forEach(ep => ep.classList.remove('current'));
                 item.classList.add('current');
-                modal.classList.remove('active');
+                modal.style.opacity = '0';
+                modal.style.visibility = 'hidden';
                 setTimeout(() => {
                     if (document.body.contains(modal)) {
                         document.body.removeChild(modal);
@@ -1195,25 +1276,43 @@ function generateEpisodesList(currentEpisode = 1) {
         const isLocked = i > 8 && !unlockedEpisodes.includes(i);
         const canUnlock = isLocked && userCoins >= 30;
         const isCurrent = i === currentEpisode;
-        const lockIcon = isLocked ? `
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="lock-icon">
-                <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM15.1 8H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/>
-            </svg>
-        ` : '';
+        const lockIcon = isLocked ? `🔒` : '';
 
         episodes += `
-            <div class="episode-item ${isCurrent ? 'current' : ''} ${isLocked ? 'locked' : ''} ${canUnlock ? 'can-unlock' : ''}" data-episode="${i}">
-                <div class="episode-number">
-                    ${i} 
-                    ${lockIcon}
-                    ${canUnlock ? '<span class="auto-unlock-indicator">Auto-desbloquear</span>' : ''}
+            <div class="episode-item" data-episode="${i}" style="
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                padding: 1rem;
+                margin-bottom: 0.5rem;
+                background: ${isCurrent ? 'rgba(29, 155, 240, 0.1)' : (isLocked ? '#2f3336' : '#16181c')};
+                border: 1px solid ${isCurrent ? '#1d9bf0' : '#2f3336'};
+                border-radius: 12px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                opacity: ${isLocked ? '0.7' : '1'};
+            " onmouseover="this.style.background='rgba(29, 155, 240, 0.1)'" onmouseout="this.style.background='${isCurrent ? 'rgba(29, 155, 240, 0.1)' : (isLocked ? '#2f3336' : '#16181c')}'">
+                <div class="episode-number" style="
+                    width: 40px;
+                    height: 40px;
+                    background: ${isCurrent ? '#1d9bf0' : '#2f3336'};
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-weight: 600;
+                    flex-shrink: 0;
+                ">
+                    ${lockIcon || i}
                 </div>
-                <div class="episode-info">
-                    <h4>Episodio ${i}</h4>
-                    <p>1 min • ${Math.floor(Math.random() * 2) + 8}.${Math.floor(Math.random() * 9)}</p>
-                    ${isLocked && !canUnlock ? '<p class="unlock-cost">30 monedas</p>' : ''}
-                    ${canUnlock ? '<p class="unlock-ready">¡Listo para desbloquear!</p>' : ''}
+                <div class="episode-info" style="flex: 1;">
+                    <h4 style="color: #e7e9ea; margin: 0 0 0.25rem 0; font-size: 1rem; font-weight: 600;">Episodio ${i}</h4>
+                    <p style="color: #71767b; margin: 0; font-size: 0.9rem;">1 min • ${Math.floor(Math.random() * 2) + 8}.${Math.floor(Math.random() * 9)} ⭐</p>
+                    ${isLocked && !canUnlock ? '<p style="color: #ffd700; margin: 0.25rem 0 0 0; font-size: 0.8rem; font-weight: 600;">30 monedas para desbloquear</p>' : ''}
+                    ${canUnlock ? '<p style="color: #22c55e; margin: 0.25rem 0 0 0; font-size: 0.8rem; font-weight: 600;">¡Listo para desbloquear automáticamente!</p>' : ''}
                 </div>
+                ${isCurrent ? '<div style="color: #1d9bf0; font-size: 1.2rem;">▶</div>' : ''}
             </div>
         `;
     }
@@ -2037,13 +2136,34 @@ function unlockEpisode(episodeNum) {
 
 function showMonetizationModal() {
     const modal = document.getElementById('monetizationModal');
-    modal.classList.add('active');
+    
+    // Bloquear scroll del body para pantalla completa
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.height = '100%';
+    
+    modal.style.display = 'block';
+    setTimeout(() => {
+        modal.classList.add('active');
+    }, 10);
+    
     updateCoinDisplay();
 }
 
 function hideMonetizationModal() {
     const modal = document.getElementById('monetizationModal');
+    
+    // Restaurar scroll del body
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
+    document.body.style.height = '';
+    
     modal.classList.remove('active');
+    setTimeout(() => {
+        modal.style.display = 'none';
+    }, 300);
 }
 
 function showAdModal() {
