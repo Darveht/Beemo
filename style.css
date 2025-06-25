@@ -1932,18 +1932,15 @@ body {
     text-align: center;
 }
 
-/* Ad Modal */
+/* Ad Modal - Pantalla Completa */
 .ad-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.95);
-    z-index: 10000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background: #000000;
+    z-index: 99999;
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
@@ -1956,49 +1953,60 @@ body {
 
 .ad-modal-container {
     background: #000000;
-    border: 2px solid #1d9bf0;
-    border-radius: 16px;
-    width: 90%;
-    max-width: 700px;
+    width: 100vw;
+    height: 100vh;
     overflow: hidden;
+    position: relative;
 }
 
 .ad-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 1rem;
-    background: #1d9bf0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
     color: white;
+    z-index: 10;
 }
 
 .ad-timer {
     font-weight: 600;
     font-size: 1.1rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
 }
 
 .ad-close {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    color: white;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #1d9bf0;
+    color: #1d9bf0;
     cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 50%;
+    padding: 0.75rem;
+    border-radius: 12px;
     transition: all 0.2s ease;
-    width: 36px;
-    height: 36px;
+    width: 48px;
+    height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
+    backdrop-filter: blur(10px);
 }
 
 .ad-close:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: #1d9bf0;
+    color: white;
+    transform: scale(1.05);
 }
 
 .ad-content {
-    padding: 2rem;
+    width: 100%;
+    height: 100%;
+    padding: 0;
     text-align: center;
+    position: relative;
 }
 
 .ad-placeholder {
@@ -2032,6 +2040,190 @@ body {
     background: white;
     width: 0%;
     transition: width 0.1s linear;
+}
+
+/* Netflix Ad Fullscreen Styles */
+.netflix-ad-container-fullscreen {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    overflow: hidden;
+}
+
+.netflix-ad-overlay-fullscreen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        transparent 20%,
+        rgba(0, 0, 0, 0.3) 50%,
+        rgba(0, 0, 0, 0.8) 80%,
+        rgba(0, 0, 0, 0.95) 100%
+    );
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 2rem;
+    z-index: 5;
+}
+
+.netflix-logo-fullscreen {
+    align-self: flex-start;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(229, 9, 20, 0.3);
+}
+
+.netflix-cta-fullscreen {
+    align-self: center;
+    text-align: center;
+    display: none;
+    background: rgba(0, 0, 0, 0.9);
+    padding: 2rem;
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+    border: 2px solid rgba(229, 9, 20, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.6s ease;
+}
+
+.netflix-cta-fullscreen.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.netflix-download-btn-fullscreen {
+    background: linear-gradient(135deg, #e50914, #b81d24);
+    color: white;
+    border: none;
+    padding: 1.5rem 3rem;
+    border-radius: 30px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(229, 9, 20, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+}
+
+.netflix-download-btn-fullscreen:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(229, 9, 20, 0.6);
+    background: linear-gradient(135deg, #f40612, #e50914);
+}
+
+.netflix-download-btn-fullscreen:active {
+    transform: translateY(-1px);
+}
+
+.ad-timer-overlay {
+    position: absolute;
+    top: 50%;
+    right: 2rem;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: #1d9bf0;
+    padding: 1rem;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    font-weight: 700;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    border: 2px solid #1d9bf0;
+    z-index: 10;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(29, 155, 240, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(29, 155, 240, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(29, 155, 240, 0); }
+}
+
+@keyframes slideUpFromBottom {
+    from {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Bloquear controles de video nativos */
+video::-webkit-media-controls {
+    display: none !important;
+}
+
+video::-webkit-media-controls-enclosure {
+    display: none !important;
+}
+
+video::-webkit-media-controls-panel {
+    display: none !important;
+}
+
+video::-webkit-media-controls-play-button {
+    display: none !important;
+}
+
+video::-webkit-media-controls-start-playback-button {
+    display: none !important;
+}
+
+video::-moz-media-controls {
+    display: none !important;
+}
+
+video::-ms-media-controls {
+    display: none !important;
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+    .netflix-logo-fullscreen {
+        padding: 0.75rem 1rem;
+    }
+    
+    .netflix-logo-fullscreen h2 {
+        font-size: 2rem !important;
+    }
+    
+    .netflix-cta-fullscreen {
+        padding: 1.5rem;
+        margin: 0 1rem;
+    }
+    
+    .netflix-cta-fullscreen h3 {
+        font-size: 1.2rem !important;
+    }
+    
+    .netflix-download-btn-fullscreen {
+        padding: 1.25rem 2rem;
+        font-size: 1.1rem;
+    }
+    
+    .ad-timer-overlay {
+        right: 1rem;
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
 }
 
 /* Netflix Ad Styles */
