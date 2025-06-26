@@ -955,6 +955,12 @@ function showTikTokPlayer(title, startEpisode = 1) {
         }
     }
 
+    // Variables para el sistema de zoom y anuncios
+    let controlsVisible = true;
+    let lastScale = 1;
+    let adScheduled = false;
+    let adShownAt = [];
+    
     // Función para configurar reproductor de video real
     function setupVideoPlayer() {
         const video = document.getElementById('mainVideo');
@@ -971,32 +977,52 @@ function showTikTokPlayer(title, startEpisode = 1) {
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
-        // Configurar video según dispositivo
-        video.muted = true; // Inicialmente muted para autoplay
+        // Configurar video según dispositivo con optimización de carga
+        video.muted = true;
         video.autoplay = true;
         video.playsInline = true;
         video.controls = false;
+        video.preload = 'auto'; // Precargar todo el video
+        video.buffered = true;
         
+        // Optimización adicional para carga rápida
+        video.setAttribute('webkit-playsinline', '');
+        video.setAttribute('x-webkit-airplay', 'allow');
+        
+        // Mostrar overlay de play al inicio
         if (playControl) {
             playControl.style.display = 'flex';
+            playControl.style.background = 'rgba(0, 0, 0, 0.8)';
+            playControl.style.zIndex = '1000';
         }
 
-        // Función para iniciar reproducción con sonido
+        // Configurar sistema de gestos zoom (pinch)
+        setupZoomGestures(video);
+        
+        // Configurar sistema de anuncios interrumpidos
+        setupAdSystem(video);
+
+        // Función para iniciar reproducción con sonido optimizada
         const startPlayback = async () => {
             try {
-                // Primero reproducir muted
                 video.currentTime = 0;
-                await video.play();
-                
-                // Luego activar sonido después de interacción del usuario
                 video.muted = false;
                 video.volume = 1.0;
+                
+                // Precargar datos para reproducción más rápida
+                if (video.readyState < 2) {
+                    await new Promise(resolve => {
+                        video.addEventListener('canplay', resolve, { once: true });
+                    });
+                }
+                
+                await video.play();
                 
                 if (playControl) {
                     playControl.style.display = 'none';
                 }
                 
-                showNotification('Reproduciendo con sonido', 'success');
+                showNotification('Reproduciendo episodio', 'success');
                 
             } catch (error) {
                 console.log('Error al reproducir video:', error);
@@ -1007,10 +1033,17 @@ function showTikTokPlayer(title, startEpisode = 1) {
                     if (playControl) {
                         playControl.style.display = 'none';
                     }
-                    showNotification('Reproduciendo sin sonido', 'info');
+                    showNotification('Toca para activar sonido', 'info');
+                    
+                    // Permitir activar sonido después
+                    video.addEventListener('click', () => {
+                        video.muted = false;
+                        video.volume = 1.0;
+                    });
                 } catch (fallbackError) {
                     console.log('Error en fallback:', fallbackError);
                     showNotification('Error de reproducción', 'error');
+                    setupSimulatedPlayer();
                 }
             }
         };
@@ -1024,15 +1057,21 @@ function showTikTokPlayer(title, startEpisode = 1) {
             playControl.addEventListener('click', startPlayback);
         }
 
-        // Intentar reproducción automática muted
-        video.play().catch(() => {
-            console.log('Autoplay falló, mostrando controles');
-            if (playControl) {
-                playControl.style.display = 'flex';
-            }
-        });
+        // Reproducción automática optimizada más rápida
+        setTimeout(() => {
+            video.play().then(() => {
+                if (playControl) {
+                    playControl.style.display = 'none';
+                }
+            }).catch(() => {
+                console.log('Autoplay falló, mostrando controles');
+                if (playControl) {
+                    playControl.style.display = 'flex';
+                }
+            });
+        }, 300); // Reducido de 1000ms a 300ms
 
-        // Actualizar barra de progreso si existe
+        // Actualizar barra de progreso visible y sistema de anuncios
         video.addEventListener('timeupdate', () => {
             if (video.duration > 0 && progressBar) {
                 const progress = (video.currentTime / video.duration) * 100;
@@ -1043,16 +1082,21 @@ function showTikTokPlayer(title, startEpisode = 1) {
                     addToWatchHistory(title, currentEpisode, progress);
                 }
                 
-                // Activar animación cerca del final
+                // Sistema de anuncios interrumpidos cada 30 segundos
+                const currentTime = Math.floor(video.currentTime);
+                if (currentTime > 0 && currentTime % 30 === 0 && !adShownAt.includes(currentTime)) {
+                    adShownAt.push(currentTime);
+                    showAdInterruption(video, currentTime);
+                }
+                
+                // Activar animación 2 segundos antes del final
                 const timeLeft = video.duration - video.currentTime;
-                if (timeLeft <= 3 && timeLeft > 2 && !animationTriggered) {
+                if (timeLeft <= 2 && timeLeft > 1.8 && !animationTriggered) {
                     animationTriggered = true;
-                    
-                    setTimeout(() => {
-                        showChapterEndAnimation(() => {
-                            transitionToNextEpisode();
-                        });
-                    }, 2000);
+                    console.log('Activando animación de final');
+                    showChapterEndAnimation(() => {
+                        transitionToNextEpisode();
+                    });
                 }
             }
         });
@@ -1060,13 +1104,18 @@ function showTikTokPlayer(title, startEpisode = 1) {
         // Evento cuando termina el video
         video.addEventListener('ended', () => {
             if (!animationTriggered) {
+                console.log('Video terminó, activando animación');
                 showChapterEndAnimation(() => {
                     transitionToNextEpisode();
                 });
             }
         });
 
-        // Eventos de carga
+        // Eventos de carga optimizados
+        video.addEventListener('loadstart', () => {
+            console.log('Video loading started');
+        });
+        
         video.addEventListener('loadeddata', () => {
             console.log('Video data loaded');
         });
@@ -1075,15 +1124,387 @@ function showTikTokPlayer(title, startEpisode = 1) {
             console.log('Video can play');
         });
         
+        video.addEventListener('canplaythrough', () => {
+            console.log('Video can play through');
+            // Auto-iniciar si no está ya reproduciéndose
+            if (video.paused && !playControl.style.display !== 'none') {
+                startPlayback();
+            }
+        });
+        
         video.addEventListener('error', (e) => {
             console.error('Video error:', e);
-            showNotification('Error cargando video', 'error');
+            showNotification('Error cargando video, usando modo simulado', 'warning');
+            setupSimulatedPlayer();
         });
 
         // Bloquear menú contextual
         video.addEventListener('contextmenu', (e) => {
             e.preventDefault();
             return false;
+        });
+    }
+    
+    // Sistema de gestos zoom tipo Instagram
+    function setupZoomGestures(video) {
+        let initialDistance = 0;
+        let isZooming = false;
+        
+        const videoContainer = video.closest('.video-container-tiktok');
+        const controls = document.querySelector('.video-controls-tiktok');
+        const videoInfo = document.querySelector('.video-info-tiktok');
+        const closeBtn = document.querySelector('.close-player');
+        
+        // Detectar inicio de gesto pinch
+        videoContainer.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                isZooming = true;
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                initialDistance = Math.hypot(
+                    touch2.clientX - touch1.clientX,
+                    touch2.clientY - touch1.clientY
+                );
+            }
+        });
+        
+        // Detectar movimiento del gesto pinch
+        videoContainer.addEventListener('touchmove', (e) => {
+            if (isZooming && e.touches.length === 2) {
+                e.preventDefault();
+                
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                const currentDistance = Math.hypot(
+                    touch2.clientX - touch1.clientX,
+                    touch2.clientY - touch1.clientY
+                );
+                
+                const scale = currentDistance / initialDistance;
+                
+                // Si hace zoom in (acerca), ocultar controles
+                if (scale > 1.1 && controlsVisible) {
+                    hideControls();
+                }
+                // Si hace zoom out (aleja), mostrar controles
+                else if (scale < 0.9 && !controlsVisible) {
+                    showControls();
+                }
+                
+                lastScale = scale;
+            }
+        });
+        
+        // Finalizar gesto
+        videoContainer.addEventListener('touchend', () => {
+            isZooming = false;
+            initialDistance = 0;
+        });
+        
+        // Funciones para mostrar/ocultar controles
+        function hideControls() {
+            controlsVisible = false;
+            if (controls) {
+                controls.style.opacity = '0';
+                controls.style.pointerEvents = 'none';
+                controls.style.transition = 'opacity 0.3s ease';
+            }
+            if (videoInfo) {
+                videoInfo.style.opacity = '0';
+                videoInfo.style.pointerEvents = 'none';
+                videoInfo.style.transition = 'opacity 0.3s ease';
+            }
+            if (closeBtn) {
+                closeBtn.style.opacity = '0';
+                closeBtn.style.pointerEvents = 'none';
+                closeBtn.style.transition = 'opacity 0.3s ease';
+            }
+        }
+        
+        function showControls() {
+            controlsVisible = true;
+            if (controls) {
+                controls.style.opacity = '1';
+                controls.style.pointerEvents = 'auto';
+                controls.style.transition = 'opacity 0.3s ease';
+            }
+            if (videoInfo) {
+                videoInfo.style.opacity = '1';
+                videoInfo.style.pointerEvents = 'auto';
+                videoInfo.style.transition = 'opacity 0.3s ease';
+            }
+            if (closeBtn) {
+                closeBtn.style.opacity = '1';
+                closeBtn.style.pointerEvents = 'auto';
+                closeBtn.style.transition = 'opacity 0.3s ease';
+            }
+        }
+        
+        // Auto-mostrar controles después de 3 segundos sin tocar
+        let hideTimer;
+        videoContainer.addEventListener('touchstart', () => {
+            clearTimeout(hideTimer);
+            if (!controlsVisible) {
+                showControls();
+            }
+            hideTimer = setTimeout(() => {
+                if (controlsVisible) {
+                    hideControls();
+                }
+            }, 3000);
+        });
+    }
+    
+    // Sistema de anuncios interrumpidos
+    function setupAdSystem(video) {
+        // Reset array de anuncios mostrados para nuevo episodio
+        adShownAt = [];
+    }
+    
+    // Mostrar anuncio interrumpido
+    function showAdInterruption(video, timePosition) {
+        // Pausar video actual y guardar posición
+        const currentTime = video.currentTime;
+        video.pause();
+        
+        // Mostrar indicador AD prominente
+        showAdIndicator();
+        showNotification('Anuncio en 2 segundos...', 'warning');
+        
+        // Dar tiempo para que el usuario vea que se pausó
+        setTimeout(() => {
+            showInterruptedAd(() => {
+                // Callback cuando termina el anuncio
+                hideAdIndicator();
+                
+                // Reanudar video desde donde estaba exactamente
+                video.currentTime = currentTime;
+                
+                // Asegurar que el video se reanude
+                const resumePromise = video.play();
+                if (resumePromise !== undefined) {
+                    resumePromise.then(() => {
+                        showNotification('Episodio reanudado', 'success');
+                    }).catch((error) => {
+                        console.log('Error reanudando video:', error);
+                        // Intentar reanudar de nuevo
+                        setTimeout(() => {
+                            video.play();
+                        }, 500);
+                    });
+                }
+            });
+        }, 2000); // Aumentar tiempo para ver que se pausó
+    }
+    
+    // Mostrar indicador "AD"
+    function showAdIndicator() {
+        // Remover indicador anterior si existe
+        const existingIndicator = document.getElementById('adIndicator');
+        if (existingIndicator) {
+            existingIndicator.remove();
+        }
+        
+        const indicator = document.createElement('div');
+        indicator.id = 'adIndicator';
+        indicator.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+            color: white;
+            padding: 2rem 3rem;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 2rem;
+            z-index: 100000;
+            animation: adPulse 1s infinite;
+            box-shadow: 0 8px 30px rgba(255, 0, 0, 0.6);
+            border: 3px solid white;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        `;
+        indicator.innerHTML = `
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📺</div>
+            <div style="font-size: 2rem; font-weight: 800;">ANUNCIO</div>
+            <div style="font-size: 1rem; margin-top: 0.5rem; opacity: 0.9;">Video pausado</div>
+        `;
+        document.body.appendChild(indicator);
+    }
+    
+    // Ocultar indicador "AD"
+    function hideAdIndicator() {
+        const indicator = document.getElementById('adIndicator');
+        if (indicator) {
+            indicator.remove();
+        }
+    }
+    
+    // Mostrar anuncio interrumpido usando el sistema existente
+    function showInterruptedAd(callback) {
+        // Usar el modal de anuncio existente pero con callback personalizado
+        const modal = document.getElementById('adModal');
+        const timer = document.getElementById('adTimer');
+        const closeBtn = document.getElementById('adClose');
+        const progress = document.getElementById('adProgress');
+
+        // Bloquear scroll del body
+        document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+        document.body.style.height = '100%';
+        
+        modal.classList.add('active');
+        closeBtn.style.display = 'none';
+
+        // Configurar contenido del anuncio con reproducción forzada
+        const adContent = modal.querySelector('.ad-content');
+        adContent.innerHTML = `
+            <div class="netflix-ad-container-fullscreen">
+                <video 
+                    id="interruptedAdVideo" 
+                    width="100%" 
+                    height="100%" 
+                    autoplay 
+                    muted="false"
+                    playsinline
+                    webkit-playsinline
+                    controls="false"
+                    preload="auto"
+                    style="object-fit: cover; background: #000; z-index: 1;"
+                >
+                    <source src="https://www.dropbox.com/scl/fi/oa2blfwyvg84csw5w13ky/copy_0B8A47E6-5756-4AA7-A69F-FF4E6C6A3194.mov?rlkey=pxs3j8ujtrnyhpf9u7qn6iyl1&st=uy6kb9o7&raw=1" type="video/mp4">
+                    Tu navegador no soporta el elemento de video.
+                </video>
+                <div class="ad-skip-indicator">
+                    <div class="ad-timer-display" id="interruptedAdTimer">15</div>
+                    <div class="ad-label">ANUNCIO</div>
+                </div>
+                <div class="ad-play-overlay" id="adPlayOverlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 10; cursor: pointer;">
+                    <div style="text-align: center; color: white;">
+                        <div style="width: 80px; height: 80px; background: #e50914; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 2rem; cursor: pointer;">▶</div>
+                        <p style="font-size: 1.2rem; font-weight: 600;">Toca para ver anuncio</p>
+                        <p style="font-size: 1rem; opacity: 0.8;">El episodio continuará después</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const adVideo = document.getElementById('interruptedAdVideo');
+        const timerDisplay = document.getElementById('interruptedAdTimer');
+        const playOverlay = document.getElementById('adPlayOverlay');
+        
+        // Función para iniciar reproducción del anuncio
+        const startAdPlayback = async () => {
+            try {
+                // Configurar video para reproducción
+                adVideo.currentTime = 0;
+                adVideo.muted = false;
+                adVideo.volume = 1.0;
+                
+                // Intentar reproducir
+                await adVideo.play();
+                
+                // Ocultar overlay de play
+                playOverlay.style.display = 'none';
+                
+                showNotification('Reproduciendo anuncio...', 'info');
+                
+            } catch (error) {
+                console.log('Error reproduciendo anuncio, intentando con muted:', error);
+                try {
+                    // Fallback: reproducir con muted
+                    adVideo.muted = true;
+                    await adVideo.play();
+                    playOverlay.style.display = 'none';
+                    
+                    // Activar sonido después de un segundo
+                    setTimeout(() => {
+                        adVideo.muted = false;
+                    }, 1000);
+                    
+                } catch (fallbackError) {
+                    console.log('Error en fallback, usando modo simulado:', fallbackError);
+                    playOverlay.innerHTML = `
+                        <div style="text-align: center; color: white;">
+                            <h2 style="font-size: 2rem; margin-bottom: 1rem;">🎬 Anuncio Netflix</h2>
+                            <p style="font-size: 1.2rem; margin-bottom: 2rem;">Anuncio en reproducción...</p>
+                            <div style="width: 60px; height: 60px; border: 4px solid #e50914; border-top: 4px solid transparent; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                        </div>
+                    `;
+                }
+            }
+        };
+
+        // Event listeners para iniciar reproducción
+        playOverlay.addEventListener('click', startAdPlayback);
+        adVideo.addEventListener('click', startAdPlayback);
+
+        // Intentar reproducción automática
+        setTimeout(() => {
+            adVideo.play().then(() => {
+                playOverlay.style.display = 'none';
+            }).catch(() => {
+                // Si falla autoplay, mostrar overlay de play
+                playOverlay.style.display = 'flex';
+            });
+        }, 500);
+
+        let timeLeft = 15; // Anuncio de 15 segundos
+        const interval = setInterval(() => {
+            timeLeft--;
+            timer.textContent = timeLeft;
+            if (timerDisplay) {
+                timerDisplay.textContent = timeLeft;
+            }
+            progress.style.width = `${((15 - timeLeft) / 15) * 100}%`;
+
+            if (timeLeft <= 0) {
+                clearInterval(interval);
+                closeBtn.style.display = 'flex';
+                
+                // Auto-cerrar después de 1 segundo
+                setTimeout(() => {
+                    modal.classList.remove('active');
+                    timer.textContent = '30';
+                    progress.style.width = '0%';
+                    
+                    // Restaurar scroll del body
+                    document.body.style.overflow = '';
+                    document.body.style.position = '';
+                    document.body.style.width = '';
+                    document.body.style.height = '';
+                    
+                    // Ejecutar callback para continuar video
+                    if (callback) callback();
+                }, 1000);
+            }
+        }, 1000);
+        
+        // Manejar cierre manual
+        closeBtn.onclick = () => {
+            clearInterval(interval);
+            modal.classList.remove('active');
+            timer.textContent = '30';
+            progress.style.width = '0%';
+            
+            // Restaurar scroll del body
+            document.body.style.overflow = '';
+            document.body.style.position = '';
+            document.body.style.width = '';
+            document.body.style.height = '';
+            
+            // Ejecutar callback
+            if (callback) callback();
+        };
+
+        // Evento cuando termina el video del anuncio
+        adVideo.addEventListener('ended', () => {
+            if (timeLeft > 0) {
+                // Si el video termina antes del timer, acelerar el timer
+                timeLeft = 1;
+            }
         });
     }
 
@@ -1107,11 +1528,22 @@ function showTikTokPlayer(title, startEpisode = 1) {
                 addToWatchHistory(title, currentEpisode, progress);
             }
             
-            // Auto advance to next episode after 60 seconds
-            if (watchTime >= 60) {
+            // Activar animación 2 segundos antes del final
+            if (watchTime >= 58 && !animationTriggered) {
+                animationTriggered = true;
+                console.log('Activando animación simulada');
                 showChapterEndAnimation(() => {
                     transitionToNextEpisode();
                 });
+            }
+            
+            // Auto advance to next episode after 60 seconds
+            if (watchTime >= 60) {
+                if (!animationTriggered) {
+                    showChapterEndAnimation(() => {
+                        transitionToNextEpisode();
+                    });
+                }
             }
         }, 1000);
     }
