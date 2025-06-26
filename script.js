@@ -348,10 +348,18 @@ function getCurrentSeriesThumbnail(title) {
 
 function updateContinueWatchingSection() {
     const continueSection = document.querySelector('.continue-section');
+    
+    // Verificar si existe la sección antes de acceder a parentElement
+    if (!continueSection) {
+        return;
+    }
+    
     const continueCards = continueSection.parentElement;
     
-    if (Object.keys(watchHistory).length === 0) {
-        continueCards.style.display = 'none';
+    if (!continueCards || Object.keys(watchHistory).length === 0) {
+        if (continueCards) {
+            continueCards.style.display = 'none';
+        }
         return;
     }
     
@@ -493,40 +501,11 @@ function updateLikesDisplay(contentId, likesCount, likesFormatted) {
     }
 }
 
-// Inicializar likes para contenido visible
+// Inicializar likes solo para el reproductor
 async function initializeContentLikes() {
-    const contentCards = document.querySelectorAll('.content-card');
-    
-    for (const card of contentCards) {
-        const title = card.querySelector('h3')?.textContent;
-        if (title) {
-            const contentId = generateContentId(title);
-            card.setAttribute('data-content-id', contentId);
-            
-            // Agregar display de likes si no existe
-            if (!card.querySelector('.likes-display')) {
-                const cardInfo = card.querySelector('.card-info');
-                if (cardInfo) {
-                    const likesElement = document.createElement('div');
-                    likesElement.className = 'likes-display';
-                    likesElement.style.cssText = `
-                        color: #f91880;
-                        font-size: 0.8rem;
-                        margin-top: 0.25rem;
-                        display: flex;
-                        align-items: center;
-                        gap: 0.25rem;
-                    `;
-                    likesElement.innerHTML = '❤️ <span>0</span>';
-                    cardInfo.appendChild(likesElement);
-                }
-            }
-            
-            // Obtener likes actuales
-            const likesData = await getLikes(contentId);
-            updateLikesDisplay(contentId, likesData.likesCount, likesData.likesFormatted);
-        }
-    }
+    // Esta función ahora solo se ejecuta dentro del reproductor
+    // Las cards de la página principal no tendrán likes
+    return;
 }
 
 // Generar ID de contenido desde título
@@ -697,6 +676,11 @@ function showTikTokPlayer(title, startEpisode = 1) {
         const episodeDescription = document.getElementById('episodeDescription');
         const progressBar = document.getElementById('videoProgressBar');
         
+        if (!videoContent || !episodeDescription || !progressBar) {
+            console.error('Elementos del reproductor no encontrados');
+            return;
+        }
+        
         // Actualizar información del episodio
         episodeDescription.textContent = `Episodio ${episodeNumber} - "${getEpisodeTitle(title, episodeNumber)}"`;
         progressBar.style.width = '0%';
@@ -709,62 +693,35 @@ function showTikTokPlayer(title, startEpisode = 1) {
         const videoUrl = getEpisodeVideoUrl(episodeNumber);
         
         if (videoUrl) {
-            // Mostrar indicador de carga
-            videoContent.innerHTML = `
-                <div class="loading-video-container" style="width: 100vw; height: 100vh; background: #000; display: flex; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; z-index: 1;">
-                    <div style="text-align: center; color: white;">
-                        <div class="loading-spinner" style="margin: 0 auto 1rem auto;"></div>
-                        <h3>Cargando Episodio ${episodeNumber}...</h3>
-                        <p>Preparando reproductor optimizado</p>
-                    </div>
-                </div>
-            `;
-
             try {
-                // Limpiar contenido anterior
+                // Crear elemento de video HTML5 nativo
                 videoContent.innerHTML = `
-                    <div class="loading-video-container" style="width: 100vw; height: 100vh; background: #000; display: flex; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; z-index: 1;">
-                        <div style="text-align: center; color: white;">
-                            <div class="loading-spinner" style="margin: 0 auto 1rem auto;"></div>
-                            <h3>Cargando Episodio ${episodeNumber}...</h3>
-                            <p>Preparando reproductor optimizado</p>
-                        </div>
+                    <video 
+                        id="mainVideo" 
+                        width="100%" 
+                        height="100%" 
+                        autoplay 
+                        muted
+                        playsinline
+                        webkit-playsinline
+                        preload="metadata"
+                        style="width: 100vw; height: 100vh; object-fit: cover; position: fixed; top: 0; left: 0; z-index: 1; background: #000;"
+                        controls="false"
+                    >
+                        <source src="${videoUrl}" type="video/mp4">
+                        Tu navegador no soporta el elemento de video.
+                    </video>
+                    <div class="play-control-overlay" id="playControlOverlay" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2; text-align: center; color: white;">
+                        <button class="video-play-btn" id="videoPlayBtn" style="background: rgba(255,255,255,0.2); border: none; border-radius: 50%; width: 80px; height: 80px; font-size: 2rem; color: white; cursor: pointer;">
+                            ▶
+                        </button>
+                        <p style="margin-top: 1rem; font-size: 1.1rem;">Toca para reproducir</p>
                     </div>
                 `;
                 
-                // Crear reproductor completamente inmersivo
-                const playerContainer = await createStreamablePlayer(videoUrl);
-                
-                if (playerContainer) {
-                    showNotification(`Episodio ${episodeNumber} cargado correctamente`, 'success');
-                    
-                    // Configurar seguimiento básico del progreso
-                    let currentTime = 0;
-                    const duration = 60; // 1 minuto por episodio
-                    const progressBar = document.getElementById('videoProgressBar');
-                    
-                    const progressInterval = setInterval(() => {
-                        currentTime += 1;
-                        const progress = (currentTime / duration) * 100;
-                        if (progressBar) {
-                            progressBar.style.width = `${Math.min(progress, 100)}%`;
-                        }
-                        
-                        // Actualizar historial cada 10 segundos
-                        if (currentTime % 10 === 0) {
-                            addToWatchHistory(title, episodeNumber, progress);
-                        }
-                        
-                        // Auto-avanzar después de 1 minuto
-                        if (currentTime >= duration) {
-                            clearInterval(progressInterval);
-                            transitionToNextEpisode();
-                        }
-                    }, 1000);
-                    
-                } else {
-                    throw new Error('No se pudo crear el reproductor');
-                }
+                // Configurar reproductor de video
+                setupVideoPlayer();
+                showNotification(`Episodio ${episodeNumber} cargado`, 'success');
                 
             } catch (error) {
                 console.log('Error cargando video:', error);
@@ -1005,39 +962,55 @@ function showTikTokPlayer(title, startEpisode = 1) {
         const playControl = document.getElementById('playControlOverlay');
         const playBtn = document.getElementById('videoPlayBtn');
 
-        if (!video) return;
-
-        // Detectar si es iOS
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        
-        // Configurar video para iOS
-        if (isIOS) {
-            video.muted = true;
-            video.autoplay = false;
-            playControl.style.display = 'flex';
-        } else {
-            video.muted = false;
-            playControl.style.display = 'none';
+        if (!video) {
+            console.error('Video element not found');
+            return;
         }
 
-        // Función para iniciar reproducción
+        // Detectar si es iOS o dispositivo móvil
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        // Configurar video según dispositivo
+        video.muted = true; // Inicialmente muted para autoplay
+        video.autoplay = true;
+        video.playsInline = true;
+        video.controls = false;
+        
+        if (playControl) {
+            playControl.style.display = 'flex';
+        }
+
+        // Función para iniciar reproducción con sonido
         const startPlayback = async () => {
             try {
+                // Primero reproducir muted
+                video.currentTime = 0;
+                await video.play();
+                
+                // Luego activar sonido después de interacción del usuario
                 video.muted = false;
                 video.volume = 1.0;
-                await video.play();
-                playControl.style.display = 'none';
-                setTimeout(() => {
-                    video.muted = false;
-                }, 100);
+                
+                if (playControl) {
+                    playControl.style.display = 'none';
+                }
+                
+                showNotification('Reproduciendo con sonido', 'success');
+                
             } catch (error) {
                 console.log('Error al reproducir video:', error);
+                // Fallback: mantener muted
                 try {
                     video.muted = true;
                     await video.play();
-                    playControl.style.display = 'none';
+                    if (playControl) {
+                        playControl.style.display = 'none';
+                    }
+                    showNotification('Reproduciendo sin sonido', 'info');
                 } catch (fallbackError) {
                     console.log('Error en fallback:', fallbackError);
+                    showNotification('Error de reproducción', 'error');
                 }
             }
         };
@@ -1045,19 +1018,23 @@ function showTikTokPlayer(title, startEpisode = 1) {
         // Event listeners para reproducción
         if (playBtn) {
             playBtn.addEventListener('click', startPlayback);
+        }
+        
+        if (playControl) {
             playControl.addEventListener('click', startPlayback);
         }
 
-        // Intentar reproducción automática
-        if (!isIOS) {
-            video.play().catch(() => {
+        // Intentar reproducción automática muted
+        video.play().catch(() => {
+            console.log('Autoplay falló, mostrando controles');
+            if (playControl) {
                 playControl.style.display = 'flex';
-            });
-        }
+            }
+        });
 
-        // Actualizar barra de progreso
+        // Actualizar barra de progreso si existe
         video.addEventListener('timeupdate', () => {
-            if (video.duration > 0) {
+            if (video.duration > 0 && progressBar) {
                 const progress = (video.currentTime / video.duration) * 100;
                 progressBar.style.width = `${progress}%`;
                 
@@ -1066,15 +1043,16 @@ function showTikTokPlayer(title, startEpisode = 1) {
                     addToWatchHistory(title, currentEpisode, progress);
                 }
                 
-                // Activar animación 2 segundos antes del final
+                // Activar animación cerca del final
                 const timeLeft = video.duration - video.currentTime;
-                if (timeLeft <= 2 && timeLeft > 1.5 && !animationTriggered) {
+                if (timeLeft <= 3 && timeLeft > 2 && !animationTriggered) {
                     animationTriggered = true;
-                    video.pause();
                     
-                    showChapterEndAnimation(() => {
-                        transitionToNextEpisode();
-                    });
+                    setTimeout(() => {
+                        showChapterEndAnimation(() => {
+                            transitionToNextEpisode();
+                        });
+                    }, 2000);
                 }
             }
         });
@@ -1088,13 +1066,21 @@ function showTikTokPlayer(title, startEpisode = 1) {
             }
         });
 
-        // Bloquear controles nativos del video
-        video.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
+        // Eventos de carga
+        video.addEventListener('loadeddata', () => {
+            console.log('Video data loaded');
         });
         
+        video.addEventListener('canplay', () => {
+            console.log('Video can play');
+        });
+        
+        video.addEventListener('error', (e) => {
+            console.error('Video error:', e);
+            showNotification('Error cargando video', 'error');
+        });
+
+        // Bloquear menú contextual
         video.addEventListener('contextmenu', (e) => {
             e.preventDefault();
             return false;
@@ -1353,13 +1339,24 @@ function showEpisodesModal(seriesTitle, currentEpisodeNum = 1) {
         </div>
     `;
 
-    document.body.appendChild(modal);
+    // Agregar el modal dentro del reproductor activo en lugar del body
+    const activePlayer = document.querySelector('.tiktok-player');
+    if (activePlayer) {
+        activePlayer.appendChild(modal);
+    } else {
+        document.body.appendChild(modal);
+    }
     setTimeout(() => modal.classList.add('active'), 100);
 
     const closeBtn = modal.querySelector('.episodes-close');
     closeBtn.addEventListener('click', () => {
         modal.classList.remove('active');
-        setTimeout(() => document.body.removeChild(modal), 300);
+        setTimeout(() => {
+            const parent = modal.parentElement;
+            if (parent && parent.contains(modal)) {
+                parent.removeChild(modal);
+            }
+        }, 300);
     });
 
     // Episode selection with monetization
@@ -1372,8 +1369,9 @@ function showEpisodesModal(seriesTitle, currentEpisodeNum = 1) {
                 item.classList.add('current');
                 modal.classList.remove('active');
                 setTimeout(() => {
-                    if (document.body.contains(modal)) {
-                        document.body.removeChild(modal);
+                    const parent = modal.parentElement;
+                    if (parent && parent.contains(modal)) {
+                        parent.removeChild(modal);
                     }
                 }, 300);
                 
@@ -2285,10 +2283,10 @@ function showAdModal() {
                 Tu navegador no soporta el elemento de video.
             </video>
             <div class="netflix-ad-overlay-fullscreen">
-                <div class="netflix-logo-fullscreen">
+                <div class="netflix-logo-fullscreen" style="display: none;">
                     <h2 style="color: #e50914; font-weight: 800; font-size: 2.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">NETFLIX</h2>
                 </div>
-                <div class="netflix-cta-fullscreen">
+                <div class="netflix-cta-fullscreen" style="display: none;">
                     <h3 style="color: white; margin-bottom: 1.5rem; font-size: 1.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">¿Te gustó lo que viste?</h3>
                     <button class="netflix-download-btn-fullscreen" id="netflixDownloadBtn">
                         📱 Descargar Netflix Ahora
@@ -2943,11 +2941,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize expanded search with all series
     displayExpandedSearchResults(getAllSeries());
     
-    // Inicializar sistema de likes
+    // Inicializar sistema de likes solo para reproductores
     if (isAuthenticated) {
         loadSocketIO().then(() => {
             initializeLikesSystem();
-            initializeContentLikes();
+            // initializeContentLikes(); - Quitado para páginas principales
         }).catch(error => {
             console.error('Error inicializando sistema de likes:', error);
         });
