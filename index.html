@@ -613,7 +613,7 @@
             <!-- Sección de Reporte -->
             <div class="report-section active" id="reportSection">
                 <div class="report-header">
-                    <h2>🚨 Reportar Problema</h2>
+                    <h2>Reportar Problema</h2>
                     <button class="report-close" id="reportClose">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -623,14 +623,13 @@
                 
                 <div class="report-content">
                     <div class="report-intro">
-                        <div class="report-icon">⚠️</div>
                         <h3>¿Qué problema estás experimentando?</h3>
                         <p>Ayúdanos a mejorar tu experiencia reportando cualquier problema técnico</p>
                     </div>
 
                     <div class="problem-options">
                         <div class="problem-option" data-problem="video-no-load">
-                            <div class="problem-icon">📹</div>
+                            <div class="problem-icon">V</div>
                             <div class="problem-info">
                                 <h4>Video no carga</h4>
                                 <p>El video no se reproduce o se queda en negro</p>
@@ -638,7 +637,7 @@
                         </div>
                         
                         <div class="problem-option" data-problem="video-freezes">
-                            <div class="problem-icon">❄️</div>
+                            <div class="problem-icon">F</div>
                             <div class="problem-info">
                                 <h4>Video se congela</h4>
                                 <p>El video se detiene o tiene lag constante</p>
@@ -646,7 +645,7 @@
                         </div>
                         
                         <div class="problem-option" data-problem="audio-issues">
-                            <div class="problem-icon">🔇</div>
+                            <div class="problem-icon">A</div>
                             <div class="problem-info">
                                 <h4>Problemas de audio</h4>
                                 <p>Sin sonido o audio desincronizado</p>
@@ -654,7 +653,7 @@
                         </div>
                         
                         <div class="problem-option" data-problem="controls-not-working">
-                            <div class="problem-icon">🎮</div>
+                            <div class="problem-icon">C</div>
                             <div class="problem-info">
                                 <h4>Controles no funcionan</h4>
                                 <p>Los botones no responden correctamente</p>
@@ -662,7 +661,7 @@
                         </div>
                         
                         <div class="problem-option" data-problem="quality-issues">
-                            <div class="problem-icon">📺</div>
+                            <div class="problem-icon">Q</div>
                             <div class="problem-info">
                                 <h4>Calidad de video</h4>
                                 <p>Video borroso o pixelado</p>
@@ -670,7 +669,7 @@
                         </div>
                         
                         <div class="problem-option" data-problem="other">
-                            <div class="problem-icon">❓</div>
+                            <div class="problem-icon">?</div>
                             <div class="problem-info">
                                 <h4>Otro problema</h4>
                                 <p>Describe el problema en detalle</p>
@@ -721,12 +720,7 @@
             <!-- Sección de Enviando -->
             <div class="report-section" id="sendingSection">
                 <div class="sending-animation">
-                    <div class="sending-radar">
-                        <div class="radar-circle"></div>
-                        <div class="radar-circle"></div>
-                        <div class="radar-circle"></div>
-                    </div>
-                    <div class="sending-icon">📡</div>
+                    <div class="sending-spinner"></div>
                 </div>
                 
                 <div class="sending-content">
@@ -735,15 +729,15 @@
                     
                     <div class="sending-progress">
                         <div class="progress-step active">
-                            <div class="step-icon">📝</div>
+                            <div class="step-icon"></div>
                             <span>Recopilando información</span>
                         </div>
                         <div class="progress-step">
-                            <div class="step-icon">🔍</div>
+                            <div class="step-icon"></div>
                             <span>Analizando problema</span>
                         </div>
                         <div class="progress-step">
-                            <div class="step-icon">📧</div>
+                            <div class="step-icon"></div>
                             <span>Enviando confirmación</span>
                         </div>
                     </div>
@@ -753,37 +747,30 @@
             <!-- Sección de Confirmación -->
             <div class="report-section" id="confirmationSection">
                 <div class="confirmation-animation">
-                    <div class="success-checkmark">
-                        <div class="check-icon">
-                            <span class="icon-line line-tip"></span>
-                            <span class="icon-line line-long"></span>
-                            <div class="icon-circle"></div>
-                            <div class="icon-fix"></div>
-                        </div>
-                    </div>
+                    <div class="success-checkmark">✓</div>
                 </div>
                 
                 <div class="confirmation-content">
-                    <h3>¡Reporte enviado exitosamente!</h3>
+                    <h3>Reporte enviado exitosamente</h3>
                     <p>Gracias por ayudarnos a mejorar Beemo</p>
                     
                     <div class="confirmation-details">
                         <div class="detail-item">
-                            <span class="detail-icon">🎫</span>
+                            <span class="detail-icon">#</span>
                             <div class="detail-info">
                                 <strong>ID del reporte:</strong>
                                 <span id="reportId">BM-2024-001</span>
                             </div>
                         </div>
                         <div class="detail-item">
-                            <span class="detail-icon">📧</span>
+                            <span class="detail-icon">@</span>
                             <div class="detail-info">
                                 <strong>Confirmación enviada a:</strong>
                                 <span id="confirmationEmail">tu@email.com</span>
                             </div>
                         </div>
                         <div class="detail-item">
-                            <span class="detail-icon">⏱️</span>
+                            <span class="detail-icon">T</span>
                             <div class="detail-info">
                                 <strong>Tiempo de respuesta estimado:</strong>
                                 <span>24-48 horas</span>
@@ -792,7 +779,7 @@
                     </div>
 
                     <div class="auto-detection-info">
-                        <h4>🤖 Detección automática activada</h4>
+                        <h4>Detección automática activada</h4>
                         <p>Nuestro sistema monitoreará este problema en tiempo real y te notificará automáticamente cuando esté resuelto.</p>
                     </div>
 
