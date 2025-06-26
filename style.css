@@ -1721,7 +1721,7 @@ body.video-playing .tiktok-player * {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+    background: #000000;
     z-index: 9999;
     opacity: 0;
     visibility: hidden;
@@ -1734,7 +1734,7 @@ body.video-playing .tiktok-player * {
 }
 
 .monetization-modal-container-fullscreen {
-    background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+    background: #000000;
     width: 100vw;
     height: 100vh;
     overflow-y: auto;
@@ -1746,91 +1746,88 @@ body.video-playing .tiktok-player * {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 2rem;
-    border-bottom: 2px solid transparent;
-    background: linear-gradient(135deg, #1d9bf0, #9333ea, #ffd700);
-    background-clip: padding-box;
-    border-image: linear-gradient(90deg, #1d9bf0, #9333ea, #ffd700) 1;
-    color: white;
-    position: relative;
-}
-
-.monetization-header::before {
-    content: '';
-    position: absolute;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #2f3336;
+    background: #000000;
+    position: sticky;
     top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, #1d9bf0, #9333ea, #ffd700);
-    z-index: -1;
+    z-index: 10;
 }
 
 .monetization-header h2 {
-    font-size: 1.8rem;
-    font-weight: 800;
+    font-size: 1.25rem;
+    font-weight: 700;
     margin: 0;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    color: #e7e9ea;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
 }
 
 .monetization-close {
-    background: rgba(255, 255, 255, 0.2);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    color: white;
+    background: #16181c;
+    border: 1px solid #2f3336;
+    color: #e7e9ea;
     cursor: pointer;
-    padding: 0.75rem;
+    padding: 0.5rem;
     border-radius: 50%;
     transition: all 0.2s ease;
-    width: 44px;
-    height: 44px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
-    backdrop-filter: blur(10px);
 }
 
 .monetization-close:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: scale(1.1);
+    background: #1d9bf0;
+    border-color: #1d9bf0;
+    color: white;
 }
 
 /* Tabs de Membresías */
 .membership-tabs {
     display: flex;
-    background: #16181c;
+    background: #000000;
     border-bottom: 1px solid #2f3336;
-    padding: 0 2rem;
+    padding: 0 1rem;
+    position: sticky;
+    top: 61px;
+    z-index: 9;
 }
 
 .tab-btn {
     background: transparent;
     border: none;
     color: #71767b;
-    padding: 1.5rem 2rem;
+    padding: 1rem 1.5rem;
     cursor: pointer;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     font-weight: 600;
-    transition: all 0.3s ease;
-    border-bottom: 3px solid transparent;
+    transition: all 0.2s ease;
+    border-bottom: 2px solid transparent;
     position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .tab-btn.active {
     color: #1d9bf0;
     border-bottom-color: #1d9bf0;
-    background: linear-gradient(135deg, rgba(29, 155, 240, 0.1), rgba(147, 51, 234, 0.1));
 }
 
 .tab-btn:hover:not(.active) {
     color: #e7e9ea;
-    background: rgba(29, 155, 240, 0.05);
+    background: rgba(29, 155, 240, 0.1);
+    border-radius: 8px 8px 0 0;
 }
 
 .monetization-content {
-    padding: 2rem;
+    padding: 1.5rem;
     flex: 1;
     overflow-y: auto;
-    max-width: 1400px;
+    max-width: 600px;
     margin: 0 auto;
     width: 100%;
 }
@@ -2084,75 +2081,75 @@ body.video-playing .tiktok-player * {
 .coin-balance {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
-    background: linear-gradient(135deg, #1d9bf0, #1a8cd8);
-    padding: 2rem;
-    border-radius: 20px;
-    margin-bottom: 2rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    gap: 1rem;
+    background: #16181c;
+    padding: 1.5rem;
+    border-radius: 16px;
+    margin-bottom: 1.5rem;
+    border: 1px solid #2f3336;
 }
 
 .coin-icon {
-    width: 60px;
-    height: 60px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    background: #1d9bf0;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
-    font-weight: bold;
-    color: white;
+    flex-shrink: 0;
 }
 
 .balance-info h3 {
-    color: white;
-    font-size: 1.8rem;
+    color: #e7e9ea;
+    font-size: 1.25rem;
     font-weight: 700;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
 }
 
 .balance-info p {
-    color: rgba(255, 255, 255, 0.9);
+    color: #71767b;
     margin: 0;
-    font-size: 1rem;
+    font-size: 0.9rem;
 }
 
 .earn-methods h3,
 .unlock-episodes h3 {
     color: #e7e9ea;
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     font-weight: 700;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .earn-option {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 1rem;
     background: #16181c;
-    padding: 1.5rem;
-    border-radius: 16px;
-    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 0.75rem;
     border: 1px solid #2f3336;
     transition: all 0.2s ease;
 }
 
 .earn-option:hover {
     border-color: #1d9bf0;
-    transform: translateY(-2px);
+    background: rgba(29, 155, 240, 0.05);
 }
 
 .earn-icon {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
     background: #1d9bf0;
-    border-radius: 12px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-weight: bold;
     flex-shrink: 0;
 }
 
@@ -2164,28 +2161,31 @@ body.video-playing .tiktok-player * {
     color: #e7e9ea;
     font-weight: 600;
     margin-bottom: 0.25rem;
+    font-size: 0.95rem;
 }
 
 .earn-info p {
     color: #71767b;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     margin: 0;
+    line-height: 1.4;
 }
 
 .earn-btn {
     background: #1d9bf0;
     color: white;
     border: none;
-    padding: 0.75rem 1.5rem;
+    padding: 0.6rem 1.25rem;
     border-radius: 20px;
     cursor: pointer;
     font-weight: 600;
+    font-size: 0.85rem;
     transition: all 0.2s ease;
+    flex-shrink: 0;
 }
 
 .earn-btn:hover {
     background: #1a8cd8;
-    transform: scale(1.05);
 }
 
 .unlock-episodes {
@@ -2199,6 +2199,7 @@ body.video-playing .tiktok-player * {
 .unlock-episodes p {
     color: #71767b;
     margin: 0.5rem 0;
+    font-size: 0.9rem;
 }
 
 .monetization-sections {
@@ -2211,116 +2212,113 @@ body.video-playing .tiktok-player * {
 
 .purchase-methods h3 {
     color: #e7e9ea;
-    font-size: 1.2rem;
-    font-weight: 600;
+    font-size: 1.1rem;
+    font-weight: 700;
     margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .purchase-subtitle {
     color: #71767b;
-    font-size: 0.9rem;
-    margin-bottom: 1.5rem;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
 }
 
 .purchase-options {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1.5rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
 }
 
 .purchase-option {
-    background: linear-gradient(135deg, #16181c, #1a1d23);
-    border: 2px solid #2f3336;
-    border-radius: 20px;
-    padding: 2rem 1.5rem;
+    background: #16181c;
+    border: 1px solid #2f3336;
+    border-radius: 12px;
+    padding: 1rem;
     text-align: center;
     position: relative;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     cursor: pointer;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .purchase-option:hover {
     border-color: #1d9bf0;
-    transform: translateY(-4px);
-    box-shadow: 0 8px 30px rgba(29, 155, 240, 0.2);
+    background: rgba(29, 155, 240, 0.05);
 }
 
 .purchase-option.popular {
-    border-color: #ffd700;
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 179, 71, 0.15));
-    box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2);
+    border-color: #1d9bf0;
+    background: rgba(29, 155, 240, 0.1);
 }
 
 .purchase-option.premium {
     border-color: #9333ea;
-    background: linear-gradient(135deg, rgba(147, 51, 234, 0.15), rgba(168, 85, 247, 0.15));
-    box-shadow: 0 4px 20px rgba(147, 51, 234, 0.2);
+    background: rgba(147, 51, 234, 0.1);
 }
 
 .popular-badge, .premium-badge {
     position: absolute;
-    top: -8px;
+    top: -6px;
     left: 50%;
     transform: translateX(-50%);
-    background: #ffd700;
-    color: #000;
-    padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    font-size: 0.7rem;
-    font-weight: 700;
+    background: #1d9bf0;
+    color: white;
+    padding: 0.15rem 0.5rem;
+    border-radius: 8px;
+    font-size: 0.65rem;
+    font-weight: 600;
     text-transform: uppercase;
 }
 
 .premium-badge {
     background: #9333ea;
-    color: white;
 }
 
 .purchase-coins {
-    font-size: 2rem;
-    font-weight: 800;
+    font-size: 1.5rem;
+    font-weight: 700;
     color: #e7e9ea;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
 }
 
 .purchase-coins::after {
     content: " monedas";
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     font-weight: 500;
     color: #71767b;
 }
 
 .purchase-price {
-    font-size: 1.3rem;
-    font-weight: 700;
+    font-size: 1.1rem;
+    font-weight: 600;
     color: #1d9bf0;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
 }
 
 .purchase-savings {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     color: #22c55e;
-    font-weight: 600;
-    margin-bottom: 1rem;
+    font-weight: 500;
+    margin-bottom: 0.75rem;
 }
 
 .purchase-btn {
-    background: linear-gradient(135deg, #1d9bf0, #1a8cd8);
+    background: #1d9bf0;
     color: white;
     border: none;
-    padding: 0.75rem 1.25rem;
+    padding: 0.6rem 1rem;
     border-radius: 20px;
     cursor: pointer;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     transition: all 0.2s ease;
     width: 100%;
 }
 
 .purchase-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(29, 155, 240, 0.4);
+    background: #1a8cd8;
 }
 
 .auto-unlock-status {
@@ -3121,6 +3119,86 @@ video::-ms-media-controls {
         width: 50px;
         height: 50px;
         font-size: 1.2rem;
+    }
+
+    /* Monetization modal mobile styles */
+    .monetization-header {
+        padding: 1rem;
+    }
+
+    .monetization-header h2 {
+        font-size: 1.1rem;
+    }
+
+    .membership-tabs {
+        padding: 0 0.5rem;
+    }
+
+    .tab-btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    .monetization-content {
+        padding: 1rem;
+    }
+
+    .coin-balance {
+        padding: 1rem;
+        gap: 0.75rem;
+    }
+
+    .coin-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .balance-info h3 {
+        font-size: 1.1rem;
+    }
+
+    .balance-info p {
+        font-size: 0.8rem;
+    }
+
+    .earn-option {
+        padding: 0.75rem;
+        gap: 0.75rem;
+    }
+
+    .earn-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .earn-info h4 {
+        font-size: 0.9rem;
+    }
+
+    .earn-info p {
+        font-size: 0.8rem;
+    }
+
+    .earn-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+
+    .purchase-options {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .purchase-option {
+        padding: 0.75rem;
+    }
+
+    .purchase-coins {
+        font-size: 1.25rem;
+    }
+
+    .purchase-price {
+        font-size: 1rem;
     }
 }
 
