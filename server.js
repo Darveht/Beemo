@@ -265,16 +265,23 @@ const io = new Server(server, {
     pingInterval: 25000
 });
 
-// Función para transmitir actualizaciones de likes
+// Función para transmitir actualizaciones de likes optimizada
 function broadcastLikeUpdate(contentId, likesCount) {
-    io.emit('likeUpdate', {
+    const updateData = {
         contentId,
         likesCount,
-        likesFormatted: formatLikesCount(likesCount)
-    });
+        likesFormatted: formatLikesCount(likesCount),
+        timestamp: Date.now()
+    };
+    
+    // Enviar a todos los clientes conectados
+    io.emit('likeUpdate', updateData);
+    
+    // También enviar a la sala específica del contenido
+    io.to(contentId).emit('contentLikeUpdate', updateData);
 }
 
-// Conexiones WebSocket
+// Conexiones WebSocket optimizadas
 io.on('connection', (socket) => {
     console.log('Usuario conectado:', socket.id);
     
@@ -282,10 +289,22 @@ io.on('connection', (socket) => {
         console.log('Usuario desconectado:', socket.id);
     });
     
-    // Permitir que los clientes se unan a salas específicas de contenido
+    // Unirse a sala de contenido específico
     socket.on('joinContent', (contentId) => {
         socket.join(contentId);
         console.log(`Usuario ${socket.id} se unió a ${contentId}`);
+    });
+    
+    // Manejar broadcast de likes desde cliente
+    socket.on('broadcastLike', (data) => {
+        console.log('📡 Broadcasting like update:', data.contentId, data.likesCount);
+        socket.broadcast.emit('likeUpdate', data);
+        socket.broadcast.to(data.contentId).emit('contentLikeUpdate', data);
+    });
+    
+    // Heartbeat para mantener conexión activa
+    socket.on('ping', () => {
+        socket.emit('pong');
     });
 });
 
