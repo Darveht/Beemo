@@ -248,6 +248,110 @@ app.get('/api/stats', (req, res) => {
     });
 });
 
+// Sistema de Reportes
+app.post('/api/reports', (req, res) => {
+    const {
+        reportId,
+        problemType,
+        problemTitle,
+        description,
+        email,
+        technicalInfo,
+        detectedProblems,
+        performanceIssues,
+        networkIssues
+    } = req.body;
+    
+    const userId = generateUserId(req);
+    
+    console.log('📝 Nuevo reporte recibido:', {
+        reportId,
+        problemType,
+        email: email.substring(0, 3) + '***' // Log parcial por privacidad
+    });
+    
+    // En una implementación real, guardarías en base de datos
+    // y enviarías email real
+    
+    const reportData = {
+        reportId,
+        userId,
+        problemType,
+        problemTitle,
+        description,
+        email,
+        technicalInfo,
+        detectedProblems,
+        performanceIssues,
+        networkIssues,
+        status: 'received',
+        createdAt: new Date().toISOString(),
+        estimatedResolution: '24-48 horas'
+    };
+    
+    // Simular procesamiento del reporte
+    setTimeout(() => {
+        console.log('✅ Reporte procesado exitosamente:', reportId);
+        
+        // Simular envío de email de confirmación
+        console.log('📧 Enviando confirmación por email a:', email);
+        
+        // En tiempo real, aquí iniciarías monitoreo automático
+        startReportMonitoring(reportId, problemType);
+        
+    }, 1000);
+    
+    res.json({
+        success: true,
+        reportId,
+        status: 'received',
+        message: 'Reporte recibido exitosamente',
+        estimatedResolution: '24-48 horas',
+        emailSent: true
+    });
+});
+
+// Obtener estado de un reporte
+app.get('/api/reports/:reportId', (req, res) => {
+    const { reportId } = req.params;
+    
+    // Simular búsqueda en base de datos
+    const reportStatus = {
+        reportId,
+        status: 'in_progress',
+        createdAt: new Date().toISOString(),
+        estimatedResolution: '24-48 horas',
+        updates: [
+            {
+                timestamp: new Date().toISOString(),
+                status: 'received',
+                message: 'Reporte recibido y en cola de procesamiento'
+            }
+        ]
+    };
+    
+    res.json(reportStatus);
+});
+
+// Función para iniciar monitoreo automático de reportes
+function startReportMonitoring(reportId, problemType) {
+    console.log(`🤖 Iniciando monitoreo automático para ${reportId} (${problemType})`);
+    
+    // Simular detección y resolución automática después de 20 segundos
+    setTimeout(() => {
+        console.log(`🎉 Problema ${reportId} resuelto automáticamente`);
+        
+        // Emitir resolución en tiempo real
+        io.emit('reportResolved', {
+            reportId,
+            status: 'resolved',
+            message: 'Problema resuelto automáticamente',
+            resolvedAt: new Date().toISOString()
+        });
+        
+    }, 20000);
+}
+
 // WebSocket para actualizaciones en tiempo real
 const http = require('http');
 const server = http.createServer(app);
