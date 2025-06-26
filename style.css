@@ -787,7 +787,7 @@ body {
     border: 1px solid #2f3336;
     position: relative;
     width: 180px;
-    height: 260px;
+    height: 270px;
     opacity: 1;
     visibility: visible;
     justify-self: start;
@@ -802,7 +802,7 @@ body {
 
 .content-card img {
     width: 100%;
-    height: 180px;
+    height: 175px;
     object-fit: cover;
 }
 
@@ -811,20 +811,30 @@ body {
     height: 80px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
+    position: relative;
+    z-index: 3;
 }
 
 .card-info h3 {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 600;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
     color: #e7e9ea;
-    line-height: 1.3;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
 .card-info p {
     color: #71767b;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    margin: 0;
+    padding: 0;
+    line-height: 1.2;
 }
 
 .play-btn {
@@ -897,15 +907,17 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 4px;
+    height: 3px;
     background: rgba(255, 255, 255, 0.2);
-    z-index: 2;
+    z-index: 1;
+    border-radius: 0 0 8px 8px;
 }
 
 .progress-fill {
     height: 100%;
     background: #1d9bf0;
     transition: width 0.3s ease;
+    border-radius: 0 0 8px 8px;
 }
 
 /* TikTok Style Video Player - Pantalla Completa */
@@ -3598,11 +3610,11 @@ video::-ms-media-controls {
 
     .content-card {
         width: 180px;
-        height: 300px;
+        height: 310px;
     }
 
     .content-card img {
-        height: 220px;
+        height: 215px;
     }
 
     .categories-section {
