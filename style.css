@@ -1714,14 +1714,14 @@ body.video-playing .tiktok-player * {
     transform: scale(1.05);
 }
 
-/* Monetization Modal - Fullscreen App */
+/* Monetization Modal - Sistema de Membresías Moderno */
 .monetization-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: #000000;
+    background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
     z-index: 9999;
     opacity: 0;
     visibility: hidden;
@@ -1734,10 +1734,10 @@ body.video-playing .tiktok-player * {
 }
 
 .monetization-modal-container-fullscreen {
-    background: #000000;
+    background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
     width: 100vw;
     height: 100vh;
-    overflow: hidden;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
 }
@@ -1746,44 +1746,339 @@ body.video-playing .tiktok-player * {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.5rem;
-    border-bottom: 1px solid #2f3336;
-    background: linear-gradient(135deg, #ffd700, #ffb347);
-    color: #000;
+    padding: 2rem;
+    border-bottom: 2px solid transparent;
+    background: linear-gradient(135deg, #1d9bf0, #9333ea, #ffd700);
+    background-clip: padding-box;
+    border-image: linear-gradient(90deg, #1d9bf0, #9333ea, #ffd700) 1;
+    color: white;
+    position: relative;
+}
+
+.monetization-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #1d9bf0, #9333ea, #ffd700);
+    z-index: -1;
 }
 
 .monetization-header h2 {
-    font-size: 1.4rem;
-    font-weight: 700;
+    font-size: 1.8rem;
+    font-weight: 800;
     margin: 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .monetization-close {
-    background: rgba(0, 0, 0, 0.2);
-    border: none;
-    color: #000;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
     cursor: pointer;
-    padding: 0.5rem;
+    padding: 0.75rem;
     border-radius: 50%;
     transition: all 0.2s ease;
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
+    backdrop-filter: blur(10px);
 }
 
 .monetization-close:hover {
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+/* Tabs de Membresías */
+.membership-tabs {
+    display: flex;
+    background: #16181c;
+    border-bottom: 1px solid #2f3336;
+    padding: 0 2rem;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    color: #71767b;
+    padding: 1.5rem 2rem;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border-bottom: 3px solid transparent;
+    position: relative;
+}
+
+.tab-btn.active {
+    color: #1d9bf0;
+    border-bottom-color: #1d9bf0;
+    background: linear-gradient(135deg, rgba(29, 155, 240, 0.1), rgba(147, 51, 234, 0.1));
+}
+
+.tab-btn:hover:not(.active) {
+    color: #e7e9ea;
+    background: rgba(29, 155, 240, 0.05);
 }
 
 .monetization-content {
     padding: 2rem;
     flex: 1;
     overflow-y: auto;
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     width: 100%;
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Sección de Suscripciones */
+.subscription-hero {
+    text-align: center;
+    padding: 3rem 0;
+    background: linear-gradient(135deg, rgba(29, 155, 240, 0.1), rgba(147, 51, 234, 0.1));
+    border-radius: 20px;
+    margin-bottom: 3rem;
+    border: 1px solid rgba(29, 155, 240, 0.2);
+}
+
+.subscription-hero h2 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #e7e9ea;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #1d9bf0, #9333ea);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subscription-hero p {
+    font-size: 1.2rem;
+    color: #71767b;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Planes de Membresía */
+.membership-plans {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.membership-plan {
+    background: #16181c;
+    border: 2px solid #2f3336;
+    border-radius: 20px;
+    padding: 2rem;
+    position: relative;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.membership-plan::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #1d9bf0, #9333ea);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.membership-plan:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(29, 155, 240, 0.2);
+}
+
+.membership-plan:hover::before {
+    opacity: 1;
+}
+
+.membership-plan.popular {
+    border-color: #ffd700;
+    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
+}
+
+.membership-plan.bestseller {
+    border-color: #1d9bf0;
+    box-shadow: 0 8px 25px rgba(29, 155, 240, 0.3);
+    transform: scale(1.05);
+}
+
+.plan-badge {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #ffd700, #ffb347);
+    color: #000;
+    padding: 0.5rem 1rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+}
+
+.plan-badge.bestseller {
+    background: linear-gradient(135deg, #1d9bf0, #1a8cd8);
+    color: white;
+}
+
+.plan-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.plan-header h3 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #e7e9ea;
+    margin-bottom: 1rem;
+}
+
+.plan-price {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1d9bf0;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.plan-price span {
+    font-size: 1rem;
+    color: #71767b;
+    font-weight: 500;
+}
+
+.plan-features {
+    margin-bottom: 2rem;
+}
+
+.feature {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    color: #e7e9ea;
+    font-weight: 500;
+}
+
+.feature.included {
+    color: #22c55e;
+}
+
+.feature.limited {
+    color: #71767b;
+}
+
+.plan-btn {
+    width: 100%;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 15px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.plan-btn.primary {
+    background: linear-gradient(135deg, #1d9bf0, #1a8cd8);
+    color: white;
+    box-shadow: 0 4px 15px rgba(29, 155, 240, 0.4);
+}
+
+.plan-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(29, 155, 240, 0.5);
+}
+
+.plan-btn.secondary {
+    background: transparent;
+    color: #71767b;
+    border: 2px solid #2f3336;
+}
+
+.plan-note {
+    text-align: center;
+    color: #71767b;
+    font-size: 0.8rem;
+    margin-top: 1rem;
+}
+
+/* Beneficios Premium */
+.subscription-benefits {
+    background: #16181c;
+    border-radius: 20px;
+    padding: 3rem;
+    border: 1px solid #2f3336;
+}
+
+.subscription-benefits h3 {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #e7e9ea;
+    margin-bottom: 2rem;
+}
+
+.benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.benefit-item {
+    text-align: center;
+    padding: 1.5rem;
+    background: rgba(29, 155, 240, 0.05);
+    border-radius: 15px;
+    border: 1px solid rgba(29, 155, 240, 0.1);
+    transition: all 0.3s ease;
+}
+
+.benefit-item:hover {
+    transform: translateY(-3px);
+    background: rgba(29, 155, 240, 0.1);
+}
+
+.benefit-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.benefit-item h4 {
+    color: #e7e9ea;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.benefit-item p {
+    color: #71767b;
+    font-size: 0.9rem;
 }
 
 .coin-balance {
