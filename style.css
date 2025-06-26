@@ -955,6 +955,10 @@ body.video-playing .tiktok-player * {
     overflow: hidden;
     z-index: 1;
     pointer-events: none;
+    touch-action: pan-x pan-y pinch-zoom;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 /* Video como fondo con controles visibles encima */
@@ -970,6 +974,9 @@ body.video-playing .tiktok-player * {
     border: none !important;
     outline: none !important;
     cursor: default;
+    will-change: transform;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
 }
 
 /* Bloquear controles nativos del video */
@@ -1051,26 +1058,31 @@ body.video-playing .tiktok-player * {
     gap: 1.5rem;
     z-index: 100;
     pointer-events: auto;
+    transition: opacity 0.3s ease, pointer-events 0.3s ease;
 }
 
 .tiktok-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
     background: rgba(0, 0, 0, 0.6);
     border: none;
-    color: white;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    color: white,
+    padding: 1rem 0.5rem;
+    border-radius: 20px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    width: 60px;
+    height: auto;
+    min-height: 80px;
 }
 
 .tiktok-btn:hover {
     background: rgba(29, 155, 240, 0.8);
-    transform: scale(1.1);
+    transform: scale(1.05);
 }
 
 .like-btn.liked {
@@ -1091,6 +1103,7 @@ body.video-playing .tiktok-player * {
     padding: 1rem;
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: opacity 0.3s ease, pointer-events 0.3s ease;
 }
 
 .close-player {
@@ -1111,6 +1124,7 @@ body.video-playing .tiktok-player * {
     backdrop-filter: blur(10px);
     transition: all 0.2s ease;
     pointer-events: auto;
+    transition: opacity 0.3s ease, pointer-events 0.3s ease;
 }
 
 .episodes-modal {
@@ -2075,7 +2089,8 @@ body.video-playing .tiktok-player * {
     text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
 }
 
-.ad-close {
+.ad-close```text
+ {
     background: rgba(0, 0, 0, 0.8);
     border: 2px solid #1d9bf0;
     color: #1d9bf0;
@@ -2099,7 +2114,6 @@ body.video-playing .tiktok-player * {
 
 .ad-content {
     width: 100%;
-```text
     height: 100%;
     padding: 0;
     text-align: center;
@@ -2154,28 +2168,32 @@ body.video-playing .tiktok-player * {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.9);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    z-index: 50;
+    z-index: 1000;
     cursor: pointer;
     pointer-events: auto;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .video-play-btn {
-    background: rgba(229, 9, 20, 0.9);
+    background: linear-gradient(135deg, #1d9bf0, #1a8cd8);
     border: 3px solid white;
     border-radius: 50%;
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 8px 30px rgba(29, 155, 240, 0.5);
+    color: white;
+    font-size: 2rem;
 }
 
 .video-play-btn:hover {
@@ -2286,9 +2304,14 @@ body.video-playing .tiktok-player * {
 }
 
 @keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(29, 155, 240, 0.7); }
-    70% { box-shadow: 0 0 0 10px rgba(29, 155, 240, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(29, 155, 240, 0); }
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(1.2);
+    }
 }
 
 @keyframes slideUpFromBottom {
@@ -3336,6 +3359,357 @@ video::-ms-media-controls {
     }
 }
 
+/* Indicador AD para anuncios interrumpidos */
+#adIndicator {
+    animation: adPulse 1s infinite !important;
+}
+
+@keyframes adPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 4px 12px rgba(255, 0, 0, 0.4);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(255, 0, 0, 0.8);
+    }
+}
+
+/* Estilos para anuncios interrumpidos */
+.ad-skip-indicator {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    z-index: 100;
+}
+
+.ad-timer-display {
+    background: rgba(0, 0, 0, 0.9);
+    color: #1d9bf0;
+    padding: 0.75rem 1rem;
+    border-radius: 25px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    border: 2px solid #1d9bf0;
+    backdrop-filter: blur(10px);
+    animation: adTimerPulse 1s infinite;
+}
+
+.ad-label {
+    background: #ff0000;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1rem;
+    animation: adLabelBlink 0.8s infinite;
+}
+
+@keyframes adTimerPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(29, 155, 240, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(29, 155, 240, 0);
+    }
+}
+
+@keyframes adLabelBlink {
+    0%, 50% {
+        opacity: 1;
+    }
+    51%, 100% {
+        opacity: 0.7;
+    }
+}
+
+/* Optimización para gestos zoom */
+/* Indicador AD para anuncios interrumpidos */
+#adIndicator {
+    animation: adPulse 1s infinite !important;
+}
+
+@keyframes adPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 4px 12px rgba(255, 0, 0, 0.4);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(255, 0, 0, 0.8);
+    }
+}
+
+/* Estilos para anuncios interrumpidos */
+.ad-skip-indicator {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    z-index: 100;
+}
+
+.ad-timer-display {
+    background: rgba(0, 0, 0, 0.9);
+    color: #1d9bf0;
+    padding: 0.75rem 1rem;
+    border-radius: 25px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    border: 2px solid #1d9bf0;
+    backdrop-filter: blur(10px);
+    animation: adTimerPulse 1s infinite;
+}
+
+.ad-label {
+    background: #ff0000;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1rem;
+    animation: adLabelBlink 0.8s infinite;
+}
+
+@keyframes adTimerPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(29, 155, 240, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(29, 155, 240, 0);
+    }
+}
+
+@keyframes adLabelBlink {
+    0%, 50% {
+        opacity: 1;
+    }
+    51%, 100% {
+        opacity: 0.7;
+    }
+}
+
+/* Optimización para gestos zoom */
+.video-container-tiktok {
+    touch-action: pan-x pan-y pinch-zoom;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.video-controls-tiktok,
+.video-info-tiktok,
+.close-player {
+    transition: opacity 0.3s ease, pointer-events 0.3s ease;
+}
+
+/* Mejoras de performance para video */
+#mainVideo {
+    will-change: transform;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+}
+
+/* Indicador de carga rápida */
+.fast-loading-indicator {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: #1d9bf0;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    z-index: 10000;
+    backdrop-filter: blur(10px);
+    border: 1px solid #1d9bf0;
+}
+
+.fast-loading-indicator::before {
+    content: '⚡';
+    margin-right: 0.5rem;
+    font-size: 1.2rem;
+}
+/* Indicador AD para anuncios interrumpidos */
+#adIndicator {
+    animation: adPulse 1s infinite !important;
+}
+
+/* Indicador AD para anuncios interrumpidos */
+#adIndicator {
+    animation: adPulse 1s infinite !important;
+}
+
+/* Indicador AD para anuncios interrumpidos */
+#adIndicator {
+    animation: adPulse 1s infinite !important;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(1.2);
+    }
+}
+
+/* Indicador AD para anuncios interrumpidos */
+#adIndicator {
+    animation: adPulse 1s infinite !important;
+}
+
+@keyframes adPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 4px 12px rgba(255, 0, 0, 0.4);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(255, 0, 0, 0.8);
+    }
+}
+
+/* Estilos para anuncios interrumpidos */
+.ad-skip-indicator {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    z-index: 100;
+}
+
+.ad-timer-display {
+    background: rgba(0, 0, 0, 0.9);
+    color: #1d9bf0;
+    padding: 0.75rem 1rem;
+    border-radius: 25px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    border: 2px solid #1d9bf0;
+    backdrop-filter: blur(10px);
+    animation: adTimerPulse 1s infinite;
+}
+
+.ad-label {
+    background: #ff0000;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1rem;
+    animation: adLabelBlink 0.8s infinite;
+}
+
+@keyframes adTimerPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(29, 155, 240, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(29, 155, 240, 0);
+    }
+}
+
+@keyframes adLabelBlink {
+    0%, 50% {
+        opacity: 1;
+    }
+    51%, 100% {
+        opacity: 0.7;
+    }
+}
+
+/* Optimización para gestos zoom */
+.video-container-tiktok {
+    touch-action: pan-x pan-y pinch-zoom;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.video-controls-tiktok,
+.video-info-tiktok,
+.close-player {
+    transition: opacity 0.3s ease, pointer-events 0.3s ease;
+}
+
+/* Mejoras de performance para video */
+#mainVideo {
+    will-change: transform;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+}
+
+/* Indicador de carga rápida */
+.fast-loading-indicator {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: #1d9bf0;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    z-index: 10000;
+    backdrop-filter: blur(10px);
+    border: 1px solid #1d9bf0;
+}
+
+.fast-loading-indicator::before {
+    content: '⚡';
+    margin-right: 0.5rem;
+    font-size: 1.2rem;
+}
+
+/* Video progress bar */
+.video-progress-tiktok {
+    position: fixed;
+    bottom: 6rem;
+    left: 1rem;
+    right: 5rem;
+    height: 6px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 3px;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.video-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #1d9bf0, #00d4ff);
+    border-radius: 3px;
+    transition: width 0.1s linear;
+    box-shadow: 0 0 8px rgba(29, 155, 240, 0.6);
+    position: relative;
+}
+
+.video-progress-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background: #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    border: 2px solid #1d9bf0;
+}
+
 @keyframes pulse {
     0% {
         transform: scale(1);
@@ -3348,124 +3722,112 @@ video::-ms-media-controls {
     }
 }
 
-/* Efectos de tiempo real */
-.likes-update {
-    animation: likeUpdate 0.6s ease;
+/* Indicador AD para anuncios interrumpidos */
+#adIndicator {
+    animation: adPulse 1s infinite !important;
 }
 
-@keyframes likeUpdate {
-    0% {
-        background: rgba(249, 24, 128, 0.1);
+@keyframes adPulse {
+    0%, 100% {
         transform: scale(1);
+        box-shadow: 0 4px 12px rgba(255, 0, 0, 0.4);
     }
     50% {
-        background: rgba(249, 24, 128, 0.3);
-        transform: scale(1.02);
-    }
-    100% {
-        background: transparent;
-        transform: scale(1);
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(255, 0, 0, 0.8);
     }
 }
 
-/* Indicadores de estado en tiempo real */
-.real-time-indicator {
-    position: fixed;
-    top: 80px;
-    right: 20px;
-    background: rgba(29, 155, 240, 0.9);
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    z-index: 1000;
+/* Estilos para anuncios interrumpidos */
+.ad-skip-indicator {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    gap: 1rem;
+    z-index: 100;
+}
+
+.ad-timer-display {
+    background: rgba(0, 0, 0, 0.9);
+    color: #1d9bf0;
+    padding: 0.75rem 1rem;
+    border-radius: 25px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    border: 2px solid #1d9bf0;
     backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    animation: adTimerPulse 1s infinite;
 }
 
-.real-time-indicator.active {
-    opacity: 1;
+.ad-label {
+    background: #ff0000;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1rem;
+    animation: adLabelBlink 0.8s infinite;
 }
 
-.real-time-indicator .pulse-dot {
-    width: 8px;
-    height: 8px;
-    background: #00ff00;
-    border-radius: 50%;
-    animation: pulseGreen 1.5s infinite;
-}
-
-@keyframes pulseGreen {
+@keyframes adTimerPulse {
     0%, 100% {
-        opacity: 1;
-        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(29, 155, 240, 0.7);
     }
-    50% {
-        opacity: 0.5;
-        transform: scale(1.2);
+    70% {
+        box-shadow: 0 0 0 10px rgba(29, 155, 240, 0);
     }
 }
 
-@media (max-width: 480px) {
-    .content-grid {
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+@keyframes adLabelBlink {
+    0%, 50% {
+        opacity: 1;
     }
+    51%, 100% {
+        opacity: 0.7;
+    }
+}
 
-    .content-card {
-        width: 160px;
-        height: 280px;
-    }
+/* Optimización para gestos zoom */
+.video-container-tiktok {
+    touch-action: pan-x pan-y pinch-zoom;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
 
-    .content-card img {
-        height: 200px;
-    }
+.video-controls-tiktok,
+.video-info-tiktok,
+.close-player {
+    transition: opacity 0.3s ease, pointer-events 0.3s ease;
+}
 
-    .video-container-tiktok {
-        width: 100vw;
-        height: 100vh;
-    }
+/* Mejoras de performance para video */
+#mainVideo {
+    will-change: transform;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+}
 
-    .monetization-sections {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
+/* Indicador de carga rápida */
+.fast-loading-indicator {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: #1d9bf0;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    z-index: 10000;
+    backdrop-filter: blur(10px);
+    border: 1px solid #1d9bf0;
+}
 
-    .purchase-options {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.75rem;
-    }
-
-    .expanded-search-header {
-        padding: 1rem;
-    }
-
-    .expanded-search-categories {
-        padding: 0.75rem 1rem;
-        gap: 0.5rem;
-    }
-
-    .expanded-search-results {
-        padding: 1rem;
-        grid-template-columns: 1fr;
-    }
-
-    .expanded-result-card {
-        flex-direction: column;
-        height: auto;
-        max-width: none;
-    }
-
-    .expanded-result-image {
-        width: 100%;
-        height: 200px;
-    }
-
-    .monetization-content {
-        padding: 1rem;
-    }
+.fast-loading-indicator::before {
+    content: '⚡';
+    margin-right: 0.5rem;
+    font-size: 1.2rem;
 }
