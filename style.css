@@ -841,7 +841,7 @@ body {
     position: absolute;
     top: 1rem;
     right: 1rem;
-    background: rgba(0, 0, 0, 0.85);
+    background: transparent;
     color: white;
     border: 1px solid rgba(255, 255, 255, 0.2);
     padding: 0.75rem;
@@ -854,8 +854,7 @@ body {
     justify-content: center;
     transition: all 0.2s ease;
     opacity: 0;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
 }
 
 .content-card:hover .play-btn {
@@ -1078,22 +1077,20 @@ body.video-playing .tiktok-player * {
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
-    background: rgba(0, 0, 0, 0.6);
+    background: transparent;
     border: none;
-    color: white,
+    color: white;
     padding: 1rem 0.5rem;
     border-radius: 20px;
     cursor: pointer;
     transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
     width: 60px;
     height: auto;
     min-height: 80px;
 }
 
 .tiktok-btn:hover {
-    background: rgba(29, 155, 240, 0.8);
+    background: rgba(255, 255, 255, 0.1);
     transform: scale(1.05);
 }
 
@@ -1110,11 +1107,9 @@ body.video-playing .tiktok-player * {
     color: white;
     z-index: 1000;
     pointer-events: auto;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(10px);
+    background: transparent;
     padding: 1rem;
     border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
     transition: opacity 0.3s ease, pointer-events 0.3s ease;
 }
 
@@ -1122,7 +1117,7 @@ body.video-playing .tiktok-player * {
     position: fixed;
     top: 1rem;
     left: 1rem;
-    background: rgba(0, 0, 0, 0.8);
+    background: transparent;
     border: none;
     color: white;
     width: 44px;
@@ -1133,10 +1128,12 @@ body.video-playing .tiktok-player * {
     justify-content: center;
     cursor: pointer;
     z-index: 1000;
-    backdrop-filter: blur(10px);
     transition: all 0.2s ease;
     pointer-events: auto;
-    transition: opacity 0.3s ease, pointer-events 0.3s ease;
+}
+
+.close-player:hover {
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .episodes-modal {
@@ -3679,22 +3676,20 @@ video::-ms-media-controls {
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
-    background: rgba(0, 0, 0, 0.6);
+    background: transparent;
     border: none;
     color: white;
     padding: 1rem 0.5rem;
     border-radius: 20px;
     cursor: pointer;
     transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
     width: 60px;
     height: auto;
     min-height: 80px;
 }
 
 .tiktok-btn:hover {
-    background: rgba(29, 155, 240, 0.8);
+    background: rgba(255, 255, 255, 0.1);
     transform: scale(1.05);
 }
 
@@ -4057,6 +4052,43 @@ video::-ms-media-controls {
     font-size: 1.2rem;
 }
 
+/* Marca de agua Beemo estilo Netflix */
+.beemo-watermark {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    z-index: 10000;
+    pointer-events: none;
+    font-family: 'Inter', sans-serif;
+    font-weight: 800;
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    background: linear-gradient(135deg, #1d9bf0, #ffd700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 1px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    background-color: rgba(0, 0, 0, 0.3);
+    animation: watermarkPulse 3s ease-in-out infinite;
+}
+
+@keyframes watermarkPulse {
+    0%, 100% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.02);
+    }
+}
+
 /* Video progress bar */
 .video-progress-tiktok {
     position: fixed;
@@ -4064,12 +4096,11 @@ video::-ms-media-controls {
     left: 1rem;
     right: 5rem;
     height: 6px;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(255, 255, 255, 0.2);
     border-radius: 3px;
     z-index: 1000;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .video-progress-fill {
