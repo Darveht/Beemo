@@ -955,9 +955,7 @@ function showTikTokPlayer(title, startEpisode = 1) {
         }
     }
 
-    // Variables para el sistema de zoom y anuncios
-    let controlsVisible = true;
-    let lastScale = 1;
+    // Variables para el sistema de anuncios
     let adScheduled = false;
     let adShownAt = [];
     
@@ -1145,114 +1143,10 @@ function showTikTokPlayer(title, startEpisode = 1) {
         });
     }
     
-    // Sistema de gestos zoom tipo Instagram
+    // Función de gestos eliminada - herramientas siempre visibles
     function setupZoomGestures(video) {
-        let initialDistance = 0;
-        let isZooming = false;
-        
-        const videoContainer = video.closest('.video-container-tiktok');
-        const controls = document.querySelector('.video-controls-tiktok');
-        const videoInfo = document.querySelector('.video-info-tiktok');
-        const closeBtn = document.querySelector('.close-player');
-        
-        // Detectar inicio de gesto pinch
-        videoContainer.addEventListener('touchstart', (e) => {
-            if (e.touches.length === 2) {
-                isZooming = true;
-                const touch1 = e.touches[0];
-                const touch2 = e.touches[1];
-                initialDistance = Math.hypot(
-                    touch2.clientX - touch1.clientX,
-                    touch2.clientY - touch1.clientY
-                );
-            }
-        });
-        
-        // Detectar movimiento del gesto pinch
-        videoContainer.addEventListener('touchmove', (e) => {
-            if (isZooming && e.touches.length === 2) {
-                e.preventDefault();
-                
-                const touch1 = e.touches[0];
-                const touch2 = e.touches[1];
-                const currentDistance = Math.hypot(
-                    touch2.clientX - touch1.clientX,
-                    touch2.clientY - touch1.clientY
-                );
-                
-                const scale = currentDistance / initialDistance;
-                
-                // Si hace zoom in (acerca), ocultar controles
-                if (scale > 1.1 && controlsVisible) {
-                    hideControls();
-                }
-                // Si hace zoom out (aleja), mostrar controles
-                else if (scale < 0.9 && !controlsVisible) {
-                    showControls();
-                }
-                
-                lastScale = scale;
-            }
-        });
-        
-        // Finalizar gesto
-        videoContainer.addEventListener('touchend', () => {
-            isZooming = false;
-            initialDistance = 0;
-        });
-        
-        // Funciones para mostrar/ocultar controles
-        function hideControls() {
-            controlsVisible = false;
-            if (controls) {
-                controls.style.opacity = '0';
-                controls.style.pointerEvents = 'none';
-                controls.style.transition = 'opacity 0.3s ease';
-            }
-            if (videoInfo) {
-                videoInfo.style.opacity = '0';
-                videoInfo.style.pointerEvents = 'none';
-                videoInfo.style.transition = 'opacity 0.3s ease';
-            }
-            if (closeBtn) {
-                closeBtn.style.opacity = '0';
-                closeBtn.style.pointerEvents = 'none';
-                closeBtn.style.transition = 'opacity 0.3s ease';
-            }
-        }
-        
-        function showControls() {
-            controlsVisible = true;
-            if (controls) {
-                controls.style.opacity = '1';
-                controls.style.pointerEvents = 'auto';
-                controls.style.transition = 'opacity 0.3s ease';
-            }
-            if (videoInfo) {
-                videoInfo.style.opacity = '1';
-                videoInfo.style.pointerEvents = 'auto';
-                videoInfo.style.transition = 'opacity 0.3s ease';
-            }
-            if (closeBtn) {
-                closeBtn.style.opacity = '1';
-                closeBtn.style.pointerEvents = 'auto';
-                closeBtn.style.transition = 'opacity 0.3s ease';
-            }
-        }
-        
-        // Auto-mostrar controles después de 3 segundos sin tocar
-        let hideTimer;
-        videoContainer.addEventListener('touchstart', () => {
-            clearTimeout(hideTimer);
-            if (!controlsVisible) {
-                showControls();
-            }
-            hideTimer = setTimeout(() => {
-                if (controlsVisible) {
-                    hideControls();
-                }
-            }, 3000);
-        });
+        // Esta función ahora está vacía - las herramientas permanecen siempre visibles
+        console.log('Gestos de zoom desactivados - herramientas siempre visibles');
     }
     
     // Sistema de anuncios interrumpidos
