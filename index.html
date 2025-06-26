@@ -281,11 +281,11 @@
         </div>
     </div>
 
-    <!-- Monetization Modal -->
+    <!-- Monetization Modal - Rediseñado como Centro de Membresías -->
     <div class="monetization-modal-overlay" id="monetizationModal">
         <div class="monetization-modal-container-fullscreen">
             <div class="monetization-header">
-                <h2>Centro de Recompensas</h2>
+                <h2>🎬 Centro de Membresías Beemo</h2>
                 <button class="monetization-close" id="monetizationClose">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -293,77 +293,214 @@
                 </button>
             </div>
 
+            <div class="membership-tabs">
+                <button class="tab-btn active" data-tab="subscriptions">💎 Suscripciones</button>
+                <button class="tab-btn" data-tab="coins">🪙 Monedas</button>
+            </div>
+
             <div class="monetization-content">
-                <div class="coin-balance">
-                    <div class="coin-icon">C</div>
-                    <div class="balance-info">
-                        <h3 id="modalCoinCount">0 Monedas</h3>
-                        <p>Usa tus monedas para desbloquear episodios premium</p>
+                <!-- Sección de Suscripciones -->
+                <div class="tab-content active" id="subscriptions-tab">
+                    <div class="subscription-hero">
+                        <h2>Disfruta Beemo Sin Límites</h2>
+                        <p>Acceso ilimitado a todo el contenido premium sin anuncios</p>
+                    </div>
+
+                    <div class="membership-plans">
+                        <!-- Plan Gratuito -->
+                        <div class="membership-plan free-plan">
+                            <div class="plan-header">
+                                <h3>Gratuito</h3>
+                                <div class="plan-price">$0<span>/siempre</span></div>
+                            </div>
+                            <div class="plan-features">
+                                <div class="feature included">✓ Episodios 1-8 gratis</div>
+                                <div class="feature limited">⚡ Con anuncios</div>
+                                <div class="feature limited">🔒 Contenido limitado</div>
+                                <div class="feature limited">📱 Calidad estándar</div>
+                            </div>
+                            <button class="plan-btn secondary" id="currentPlanBtn">Plan Actual</button>
+                        </div>
+
+                        <!-- Plan Prueba Gratuita -->
+                        <div class="membership-plan trial-plan popular">
+                            <div class="plan-badge">🎁 Prueba Gratis</div>
+                            <div class="plan-header">
+                                <h3>Prueba Premium</h3>
+                                <div class="plan-price">Gratis<span>/3 días</span></div>
+                            </div>
+                            <div class="plan-features">
+                                <div class="feature included">✓ Todo el contenido</div>
+                                <div class="feature included">🚫 Sin anuncios</div>
+                                <div class="feature included">🔓 Episodios premium</div>
+                                <div class="feature included">📱 HD y 4K</div>
+                                <div class="feature included">⬇️ Descargas offline</div>
+                            </div>
+                            <button class="plan-btn primary" id="startTrialBtn">
+                                <span id="authIcon">🔐</span> Iniciar Prueba
+                            </button>
+                            <p class="plan-note">Se requiere verificación con Apple ID/Google</p>
+                        </div>
+
+                        <!-- Plan Semanal -->
+                        <div class="membership-plan weekly-plan">
+                            <div class="plan-header">
+                                <h3>Semanal</h3>
+                                <div class="plan-price">$4<span>/semana</span></div>
+                            </div>
+                            <div class="plan-features">
+                                <div class="feature included">✓ Todo el contenido</div>
+                                <div class="feature included">🚫 Sin anuncios</div>
+                                <div class="feature included">🔓 Episodios premium</div>
+                                <div class="feature included">📱 HD y 4K</div>
+                                <div class="feature included">⬇️ Descargas offline</div>
+                            </div>
+                            <button class="plan-btn primary" data-plan="weekly" data-amount="400" data-period="7">
+                                Suscribirse
+                            </button>
+                            <p class="plan-note">Renovación automática</p>
+                        </div>
+
+                        <!-- Plan Mensual -->
+                        <div class="membership-plan monthly-plan bestseller">
+                            <div class="plan-badge">🔥 Más Popular</div>
+                            <div class="plan-header">
+                                <h3>Mensual</h3>
+                                <div class="plan-price">$8<span>/mes</span></div>
+                            </div>
+                            <div class="plan-features">
+                                <div class="feature included">✓ Todo el contenido</div>
+                                <div class="feature included">🚫 Sin anuncios</div>
+                                <div class="feature included">🔓 Episodios premium</div>
+                                <div class="feature included">📱 HD y 4K</div>
+                                <div class="feature included">⬇️ Descargas offline</div>
+                                <div class="feature included">🎯 Acceso prioritario</div>
+                            </div>
+                            <button class="plan-btn primary" data-plan="monthly" data-amount="800" data-period="30">
+                                Suscribirse
+                            </button>
+                            <p class="plan-note">Ahorra 50% vs plan semanal</p>
+                        </div>
+
+                        <!-- Plan de 2 Días -->
+                        <div class="membership-plan daily-plan">
+                            <div class="plan-header">
+                                <h3>2 Días</h3>
+                                <div class="plan-price">$1.99<span>/2 días</span></div>
+                            </div>
+                            <div class="plan-features">
+                                <div class="feature included">✓ Todo el contenido</div>
+                                <div class="feature included">🚫 Sin anuncios</div>
+                                <div class="feature included">🔓 Episodios premium</div>
+                                <div class="feature included">📱 HD y 4K</div>
+                            </div>
+                            <button class="plan-btn primary" data-plan="daily" data-amount="199" data-period="2">
+                                Prueba Rápida
+                            </button>
+                            <p class="plan-note">Perfecto para maratones</p>
+                        </div>
+                    </div>
+
+                    <div class="subscription-benefits">
+                        <h3>✨ Beneficios Premium</h3>
+                        <div class="benefits-grid">
+                            <div class="benefit-item">
+                                <div class="benefit-icon">🚫</div>
+                                <h4>Sin Anuncios</h4>
+                                <p>Disfruta tus series sin interrupciones</p>
+                            </div>
+                            <div class="benefit-item">
+                                <div class="benefit-icon">🔓</div>
+                                <h4>Todo Desbloqueado</h4>
+                                <p>Acceso completo a todos los episodios</p>
+                            </div>
+                            <div class="benefit-item">
+                                <div class="benefit-icon">📱</div>
+                                <h4>4K Ultra HD</h4>
+                                <p>Máxima calidad de video disponible</p>
+                            </div>
+                            <div class="benefit-item">
+                                <div class="benefit-icon">⬇️</div>
+                                <h4>Descargas</h4>
+                                <p>Ve offline cuando quieras</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="monetization-sections">
-                    <div class="earn-methods">
-                        <h3>Gana Monedas Gratis</h3>
-
-                        <div class="earn-option">
-                            <div class="earn-icon">AD</div>
-                            <div class="earn-info">
-                                <h4>Ver Anuncio</h4>
-                                <p>Gana 20 monedas por cada anuncio de 30 segundos</p>
-                            </div>
-                            <button class="earn-btn" id="watchAdBtn">Ver Anuncio</button>
-                        </div>
-
-                        <div class="earn-option">
-                            <div class="earn-icon">SH</div>
-                            <div class="earn-info">
-                                <h4>Compartir con Amigos</h4>
-                                <p>Gana 50 monedas cuando un amigo abra tu enlace</p>
-                            </div>
-                            <button class="earn-btn" id="shareBtn">Compartir</button>
+                <!-- Sección de Monedas -->
+                <div class="tab-content" id="coins-tab">
+                    <div class="coin-balance">
+                        <div class="coin-icon">🪙</div>
+                        <div class="balance-info">
+                            <h3 id="modalCoinCount">0 Monedas</h3>
+                            <p>Usa monedas para desbloquear episodios individuales</p>
                         </div>
                     </div>
 
-                    <div class="purchase-methods">
-                        <h3>Comprar Monedas</h3>
-                        <p class="purchase-subtitle">Compra monedas con dinero real y desbloquea todo al instante</p>
+                    <div class="monetization-sections">
+                        <div class="earn-methods">
+                            <h3>Gana Monedas Gratis</h3>
 
-                        <div class="purchase-options">
-                            <div class="purchase-option">
-                                <div class="purchase-coins">100</div>
-                                <div class="purchase-price">$0.99</div>
-                                <button class="purchase-btn" data-amount="99" data-coins="100">Comprar</button>
+                            <div class="earn-option">
+                                <div class="earn-icon">📺</div>
+                                <div class="earn-info">
+                                    <h4>Ver Anuncio</h4>
+                                    <p>Gana 20 monedas por cada anuncio de 30 segundos</p>
+                                </div>
+                                <button class="earn-btn" id="watchAdBtn">Ver Anuncio</button>
                             </div>
-                            <div class="purchase-option popular">
-                                <div class="popular-badge">Más Popular</div>
-                                <div class="purchase-coins">500</div>
-                                <div class="purchase-price">$3.99</div>
-                                <div class="purchase-savings">¡Ahorras $0.96!</div>
-                                <button class="purchase-btn" data-amount="399" data-coins="500">Comprar</button>
-                            </div>
-                            <div class="purchase-option">
-                                <div class="purchase-coins">1000</div>
-                                <div class="purchase-price">$6.99</div>
-                                <div class="purchase-savings">¡Ahorras $2.91!</div>
-                                <button class="purchase-btn" data-amount="699" data-coins="1000">Comprar</button>
-                            </div>
-                            <div class="purchase-option premium">
-                                <div class="premium-badge">Mejor Valor</div>
-                                <div class="purchase-coins">2500</div>
-                                <div class="purchase-price">$14.99</div>
-                                <div class="purchase-savings">¡Ahorras $9.76!</div>
-                                <button class="purchase-btn" data-amount="1499" data-coins="2500">Comprar</button>
+
+                            <div class="earn-option">
+                                <div class="earn-icon">📤</div>
+                                <div class="earn-info">
+                                    <h4>Compartir con Amigos</h4>
+                                    <p>Gana 50 monedas cuando un amigo abra tu enlace</p>
+                                </div>
+                                <button class="earn-btn" id="shareBtn">Compartir</button>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="unlock-episodes">
-                        <h3>Desbloquear Episodios</h3>
-                        <p>Episodios 1-8: Gratis</p>
-                        <p>Episodios 9+: 30 monedas cada uno</p>
-                        <div id="autoUnlockStatus" class="auto-unlock-status" style="display: none;">
-                            <p class="auto-unlock-text">Tienes suficientes monedas para desbloquear más episodios automáticamente</p>
+                        <div class="purchase-methods">
+                            <h3>Comprar Monedas</h3>
+                            <p class="purchase-subtitle">Compra monedas para desbloquear episodios específicos</p>
+
+                            <div class="purchase-options">
+                                <div class="purchase-option">
+                                    <div class="purchase-coins">100</div>
+                                    <div class="purchase-price">$0.99</div>
+                                    <button class="purchase-btn" data-amount="99" data-coins="100">Comprar</button>
+                                </div>
+                                <div class="purchase-option popular">
+                                    <div class="popular-badge">Más Popular</div>
+                                    <div class="purchase-coins">500</div>
+                                    <div class="purchase-price">$3.99</div>
+                                    <div class="purchase-savings">¡Ahorras $0.96!</div>
+                                    <button class="purchase-btn" data-amount="399" data-coins="500">Comprar</button>
+                                </div>
+                                <div class="purchase-option">
+                                    <div class="purchase-coins">1000</div>
+                                    <div class="purchase-price">$6.99</div>
+                                    <div class="purchase-savings">¡Ahorras $2.91!</div>
+                                    <button class="purchase-btn" data-amount="699" data-coins="1000">Comprar</button>
+                                </div>
+                                <div class="purchase-option premium">
+                                    <div class="premium-badge">Mejor Valor</div>
+                                    <div class="purchase-coins">2500</div>
+                                    <div class="purchase-price">$14.99</div>
+                                    <div class="purchase-savings">¡Ahorras $9.76!</div>
+                                    <button class="purchase-btn" data-amount="1499" data-coins="2500">Comprar</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="unlock-episodes">
+                            <h3>🔓 Desbloquear Episodios</h3>
+                            <p>Episodios 1-8: Gratis</p>
+                            <p>Episodios 9+: 30 monedas cada uno</p>
+                            <div id="autoUnlockStatus" class="auto-unlock-status" style="display: none;">
+                                <p class="auto-unlock-text">Tienes suficientes monedas para desbloquear más episodios automáticamente</p>
+                            </div>
                         </div>
                     </div>
                 </div>
