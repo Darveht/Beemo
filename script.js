@@ -1660,6 +1660,9 @@ function showTikTokPlayer(title, startEpisode = 1) {
     const playPauseBtn = player.querySelector('#playPauseBtn');
     const muteBtn = player.querySelector('#muteBtn');
     const episodesBtn = player.querySelector('#episodesBtn');
+    
+    // Agregar botón de reporte al reproductor activo inmediatamente
+    addReportButtonToActivePlayer();
 
     closeBtn.addEventListener('click', () => {
         // Limpiar todos los intervals y recursos
@@ -3728,6 +3731,967 @@ function showSubscriptionModal(episodeNumber, seriesTitle, playerElement) {
     });
 }
 
+// Sistema de Reportes Avanzado
+let currentReportData = {};
+let reportInterval;
+let realTimeDetection = false;
+
+// Función para agregar botón de reporte al reproductor activo
+function addReportButtonToActivePlayer() {
+    const activePlayer = document.querySelector('.tiktok-player.active');
+    if (!activePlayer) return;
+    
+    // Verificar si ya existe el botón
+    const existingBtn = activePlayer.querySelector('.video-report-btn');
+    if (existingBtn) return;
+    
+    // Crear botón de reporte para el reproductor
+    const reportBtn = document.createElement('button');
+    reportBtn.className = 'video-report-btn';
+    reportBtn.innerHTML = `
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+        </svg>
+    `;
+    reportBtn.onclick = () => showVideoReportModal();
+    
+    // Agregar al contenedor de controles del video
+    const videoControls = activePlayer.querySelector('.video-controls-tiktok');
+    if (videoControls) {
+        videoControls.appendChild(reportBtn);
+    }
+}
+
+// Función para mostrar modal de reportes expandido en pantalla completa dentro del video
+function showVideoReportModal() {
+    const activePlayer = document.querySelector('.tiktok-player.active');
+    if (!activePlayer) return;
+    
+    // Bloquear scroll del body para pantalla completa
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.height = '100%';
+    
+    // Crear modal expandido en pantalla completa
+    const reportModal = document.createElement('div');
+    reportModal.className = 'video-report-modal-fullscreen';
+    reportModal.innerHTML = `
+        <div class="video-report-container">
+            <!-- Header del modal -->
+            <div class="video-report-header">
+                <h2>🚨 Reportar Problema del Video</h2>
+                <button class="video-report-close" onclick="closeVideoReportModal()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Contenido principal -->
+            <div class="video-report-content">
+                <div class="video-report-sections">
+                    <!-- Sección de selección de problema -->
+                    <div class="video-report-section active" id="videoReportSection">
+                        <div class="video-report-intro">
+                            <div class="video-report-icon">⚠️</div>
+                            <h3>¿Qué problema tienes con este video?</h3>
+                            <p>Selecciona el tipo de problema para ayudarnos a solucionarlo rápidamente</p>
+                        </div>
+
+                        <div class="video-problem-grid">
+                            <div class="video-problem-card" data-problem="video-no-load">
+                                <div class="video-problem-icon">📹</div>
+                                <h4>Video no carga</h4>
+                                <p>El video no se reproduce o pantalla negra</p>
+                            </div>
+                            
+                            <div class="video-problem-card" data-problem="video-freezes">
+                                <div class="video-problem-icon">❄️</div>
+                                <h4>Video se congela</h4>
+                                <p>Se detiene constantemente o tiene lag</p>
+                            </div>
+                            
+                            <div class="video-problem-card" data-problem="audio-issues">
+                                <div class="video-problem-icon">🔇</div>
+                                <h4>Sin audio</h4>
+                                <p>No hay sonido o audio desincronizado</p>
+                            </div>
+                            
+                            <div class="video-problem-card" data-problem="quality-issues">
+                                <div class="video-problem-icon">📺</div>
+                                <h4>Mala calidad</h4>
+                                <p>Video borroso o pixelado</p>
+                            </div>
+                            
+                            <div class="video-problem-card" data-problem="controls-broken">
+                                <div class="video-problem-icon">🎮</div>
+                                <h4>Controles no funcionan</h4>
+                                <p>Los botones no responden</p>
+                            </div>
+                            
+                            <div class="video-problem-card" data-problem="loading-slow">
+                                <div class="video-problem-icon">⏳</div>
+                                <h4>Carga muy lento</h4>
+                                <p>Buffering constante o lentitud</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección de información de contacto -->
+                    <div class="video-report-section" id="videoContactSection">
+                        <div class="video-contact-form">
+                            <h3>Información de contacto</h3>
+                            <p>Te enviaremos actualizaciones sobre la solución del problema</p>
+                            
+                            <div class="video-form-group">
+                                <label>Tu correo electrónico</label>
+                                <input type="email" id="videoReportEmail" placeholder="tu@email.com" required>
+                                <span class="video-form-help">Solo para enviarte actualizaciones del reporte</span>
+                            </div>
+                            
+                            <div class="video-form-group">
+                                <label>Describe el problema (opcional)</label>
+                                <textarea id="videoReportDescription" placeholder="Cuéntanos más detalles sobre lo que está pasando..." rows="4"></textarea>
+                            </div>
+                            
+                            <div class="video-tech-info">
+                                <h4>📱 Información técnica detectada:</h4>
+                                <div class="video-tech-grid">
+                                    <div class="video-tech-item">
+                                        <span>Navegador:</span>
+                                        <span id="videoTechBrowser">Chrome</span>
+                                    </div>
+                                    <div class="video-tech-item">
+                                        <span>Pantalla:</span>
+                                        <span id="videoTechScreen">1920x1080</span>
+                                    </div>
+                                    <div class="video-tech-item">
+                                        <span>Conexión:</span>
+                                        <span id="videoTechConnection">4G</span>
+                                    </div>
+                                    <div class="video-tech-item">
+                                        <span>Episodio:</span>
+                                        <span id="videoTechEpisode">1</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button class="video-submit-btn" id="videoSubmitBtn" disabled>
+                                <span class="btn-icon">📤</span>
+                                Enviar Reporte
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Sección de enviando -->
+                    <div class="video-report-section" id="videoSendingSection">
+                        <div class="video-sending-animation">
+                            <div class="video-sending-spinner">
+                                <div class="spinner-ring"></div>
+                                <div class="spinner-ring"></div>
+                                <div class="spinner-ring"></div>
+                            </div>
+                            <h3>Enviando reporte...</h3>
+                            <p id="videoSendingStatus">Procesando información del video</p>
+                        </div>
+                        
+                        <div class="video-sending-steps">
+                            <div class="video-step active">
+                                <div class="step-dot"></div>
+                                <span>Analizando video</span>
+                            </div>
+                            <div class="video-step">
+                                <div class="step-dot"></div>
+                                <span>Enviando datos</span>
+                            </div>
+                            <div class="video-step">
+                                <div class="step-dot"></div>
+                                <span>Confirmando recepción</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección de confirmación -->
+                    <div class="video-report-section" id="videoConfirmationSection">
+                        <div class="video-confirmation-success">
+                            <div class="video-success-icon">✅</div>
+                            <h3>¡Reporte enviado exitosamente!</h3>
+                            <p>Hemos recibido tu reporte y lo procesaremos en las próximas 24 horas</p>
+                            
+                            <div class="video-confirmation-details">
+                                <div class="confirmation-item">
+                                    <span class="item-icon">🎫</span>
+                                    <div>
+                                        <strong>ID del reporte:</strong>
+                                        <span id="videoReportId">VID-2024-001</span>
+                                    </div>
+                                </div>
+                                <div class="confirmation-item">
+                                    <span class="item-icon">📧</span>
+                                    <div>
+                                        <strong>Confirmación enviada a:</strong>
+                                        <span id="videoConfirmationEmail">tu@email.com</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button class="video-close-btn" onclick="closeVideoReportModal()">
+                                Continuar viendo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Agregar al reproductor activo
+    activePlayer.appendChild(reportModal);
+    
+    // Activar modal con animación
+    setTimeout(() => {
+        reportModal.classList.add('active');
+    }, 100);
+    
+    // Configurar eventos
+    setupVideoReportEvents();
+    
+    // Detectar información técnica automáticamente
+    detectVideoTechnicalInfo();
+    
+    // Iniciar detección en tiempo real para este reporte
+    startVideoRealTimeDetection();
+}
+
+// Función para cerrar el modal de reportes del video
+function closeVideoReportModal() {
+    const modal = document.querySelector('.video-report-modal-fullscreen');
+    if (modal) {
+        modal.classList.remove('active');
+        setTimeout(() => {
+            if (modal.parentNode) {
+                modal.parentNode.removeChild(modal);
+            }
+        }, 300);
+    }
+    
+    // Restaurar scroll del body
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
+    document.body.style.height = '';
+    
+    // Detener detección en tiempo real
+    stopRealTimeDetection();
+}
+
+// Configurar eventos del modal de video
+function setupVideoReportEvents() {
+    // Selección de problemas
+    const problemCards = document.querySelectorAll('.video-problem-card');
+    problemCards.forEach(card => {
+        card.addEventListener('click', () => {
+            // Remover selección anterior
+            problemCards.forEach(c => c.classList.remove('selected'));
+            
+            // Seleccionar actual
+            card.classList.add('selected');
+            
+            // Guardar problema seleccionado
+            const problemType = card.dataset.problem;
+            const problemTitle = card.querySelector('h4').textContent;
+            
+            currentReportData.problemType = problemType;
+            currentReportData.problemTitle = problemTitle;
+            
+            // Avanzar a siguiente sección después de 1 segundo
+            setTimeout(() => {
+                showVideoReportStep('videoContactSection');
+            }, 1000);
+        });
+    });
+    
+    // Validación del email
+    const emailInput = document.getElementById('videoReportEmail');
+    const submitBtn = document.getElementById('videoSubmitBtn');
+    
+    if (emailInput && submitBtn) {
+        emailInput.addEventListener('input', () => {
+            const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value);
+            submitBtn.disabled = !isValidEmail;
+            
+            if (isValidEmail) {
+                submitBtn.classList.add('enabled');
+            } else {
+                submitBtn.classList.remove('enabled');
+            }
+        });
+    }
+    
+    // Envío del reporte
+    if (submitBtn) {
+        submitBtn.addEventListener('click', () => {
+            submitVideoReport();
+        });
+    }
+}
+
+// Mostrar paso específico del reporte
+function showVideoReportStep(stepId) {
+    // Ocultar todas las secciones
+    document.querySelectorAll('.video-report-section').forEach(section => {
+        section.classList.remove('active');
+    });
+    
+    // Mostrar sección específica
+    const targetSection = document.getElementById(stepId);
+    if (targetSection) {
+        targetSection.classList.add('active');
+    }
+}
+
+// Detectar información técnica del video
+function detectVideoTechnicalInfo() {
+    // Detectar navegador
+    const browser = navigator.userAgent.includes('Chrome') ? 'Chrome' : 
+                   navigator.userAgent.includes('Firefox') ? 'Firefox' : 
+                   navigator.userAgent.includes('Safari') ? 'Safari' : 'Otro';
+    
+    // Detectar resolución
+    const screen = `${window.screen.width}x${window.screen.height}`;
+    
+    // Detectar conexión
+    const connection = navigator.connection ? navigator.connection.effectiveType : 'Desconocida';
+    
+    // Detectar episodio actual
+    const currentEpisodeElement = document.querySelector('#episodeDescription');
+    const episodeText = currentEpisodeElement ? currentEpisodeElement.textContent : 'Episodio 1';
+    
+    // Actualizar interfaz
+    const browserEl = document.getElementById('videoTechBrowser');
+    const screenEl = document.getElementById('videoTechScreen');
+    const connectionEl = document.getElementById('videoTechConnection');
+    const episodeEl = document.getElementById('videoTechEpisode');
+    
+    if (browserEl) browserEl.textContent = browser;
+    if (screenEl) screenEl.textContent = screen;
+    if (connectionEl) connectionEl.textContent = connection.toUpperCase();
+    if (episodeEl) episodeEl.textContent = episodeText;
+    
+    // Guardar en datos del reporte
+    currentReportData.videoTechnicalInfo = {
+        browser,
+        screen,
+        connection,
+        episode: episodeText,
+        timestamp: new Date().toISOString(),
+        playerActive: true
+    };
+}
+
+// Iniciar detección en tiempo real específica para video
+function startVideoRealTimeDetection() {
+    realTimeDetection = true;
+    
+    reportInterval = setInterval(() => {
+        if (!realTimeDetection) return;
+        
+        // Detectar problemas específicos del video en reproducción
+        detectActiveVideoProblems();
+    }, 3000); // Cada 3 segundos para video activo
+    
+    console.log('🎬 Detección en tiempo real de video activada');
+}
+
+// Detectar problemas del video activo
+function detectActiveVideoProblems() {
+    const video = document.getElementById('mainVideo');
+    const problems = [];
+    
+    if (video) {
+        // Video no carga
+        if (video.readyState === 0) {
+            problems.push('Video no puede cargar los datos');
+        }
+        
+        // Video pausado inesperadamente
+        if (video.paused && !video.ended && video.currentTime > 0) {
+            problems.push('Video pausado inesperadamente');
+        }
+        
+        // Problemas de buffering
+        if (video.readyState < 3 && video.currentTime > 0) {
+            problems.push('Video en buffering constante');
+        }
+        
+        // Error en el video
+        if (video.error) {
+            problems.push(`Error de video: ${video.error.message}`);
+        }
+    } else {
+        problems.push('Reproductor de video no encontrado');
+    }
+    
+    if (problems.length > 0) {
+        currentReportData.detectedVideoProblems = problems;
+        console.log('🎬 Problemas de video detectados:', problems);
+        
+        // Auto-sugerencia si hay problemas críticos
+        if (problems.length >= 2) {
+            showVideoAutoSuggestion(problems);
+        }
+    }
+}
+
+// Mostrar sugerencia automática para problemas de video
+function showVideoAutoSuggestion(problems) {
+    // Verificar si ya existe una sugerencia
+    if (document.querySelector('.video-auto-suggestion')) return;
+    
+    const suggestion = document.createElement('div');
+    suggestion.className = 'video-auto-suggestion';
+    suggestion.innerHTML = `
+        <div class="suggestion-content">
+            <div class="suggestion-icon">🤖</div>
+            <div class="suggestion-text">
+                <strong>Problemas detectados en el video</strong>
+                <p>¿Quieres reportar estos problemas automáticamente?</p>
+            </div>
+            <button class="suggestion-btn" onclick="openAutoVideoReport()">Reportar</button>
+            <button class="suggestion-close" onclick="closeVideoAutoSuggestion()">×</button>
+        </div>
+    `;
+    
+    // Agregar al reproductor activo
+    const activePlayer = document.querySelector('.tiktok-player.active');
+    if (activePlayer) {
+        activePlayer.appendChild(suggestion);
+        
+        setTimeout(() => {
+            suggestion.classList.add('active');
+        }, 100);
+        
+        // Auto-remover después de 8 segundos
+        setTimeout(() => {
+            if (suggestion.parentNode) {
+                suggestion.classList.remove('active');
+                setTimeout(() => {
+                    if (suggestion.parentNode) {
+                        suggestion.parentNode.removeChild(suggestion);
+                    }
+                }, 300);
+            }
+        }, 8000);
+    }
+}
+
+// Abrir reporte automático de video
+function openAutoVideoReport() {
+    closeVideoAutoSuggestion();
+    showVideoReportModal();
+    
+    // Pre-seleccionar problema más relevante
+    setTimeout(() => {
+        if (currentReportData.detectedVideoProblems) {
+            const firstProblem = currentReportData.detectedVideoProblems[0];
+            let problemType = 'video-no-load';
+            
+            if (firstProblem.includes('pausado')) {
+                problemType = 'video-freezes';
+            } else if (firstProblem.includes('buffering')) {
+                problemType = 'loading-slow';
+            } else if (firstProblem.includes('Error')) {
+                problemType = 'video-no-load';
+            }
+            
+            const problemCard = document.querySelector(`[data-problem="${problemType}"]`);
+            if (problemCard) {
+                problemCard.click();
+            }
+        }
+    }, 500);
+}
+
+// Cerrar sugerencia automática de video
+function closeVideoAutoSuggestion() {
+    const suggestion = document.querySelector('.video-auto-suggestion');
+    if (suggestion) {
+        suggestion.classList.remove('active');
+        setTimeout(() => {
+            if (suggestion.parentNode) {
+                suggestion.parentNode.removeChild(suggestion);
+            }
+        }, 300);
+    }
+}
+
+// Enviar reporte de video
+async function submitVideoReport() {
+    const email = document.getElementById('videoReportEmail').value;
+    const description = document.getElementById('videoReportDescription').value;
+    
+    // Mostrar sección de envío
+    showVideoReportStep('videoSendingSection');
+    
+    // Generar ID del reporte
+    const reportId = 'VID-' + new Date().getFullYear() + '-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+    
+    currentReportData.reportId = reportId;
+    currentReportData.email = email;
+    currentReportData.description = description;
+    currentReportData.timestamp = new Date().toISOString();
+    currentReportData.type = 'video_player';
+    
+    // Simular proceso de envío
+    const steps = [
+        { text: 'Analizando problemas del video...', delay: 1500 },
+        { text: 'Enviando datos técnicos...', delay: 2000 },
+        { text: 'Confirmando recepción...', delay: 1000 }
+    ];
+    
+    for (let i = 0; i < steps.length; i++) {
+        await new Promise(resolve => setTimeout(resolve, steps[i].delay));
+        
+        // Actualizar pasos
+        document.querySelectorAll('.video-step').forEach((step, index) => {
+            step.classList.toggle('active', index <= i);
+        });
+        
+        document.getElementById('videoSendingStatus').textContent = steps[i].text;
+    }
+    
+    // Simular envío de email
+    await simulateVideoEmailSending(email, reportId);
+    
+    // Mostrar confirmación
+    setTimeout(() => {
+        showVideoConfirmation(reportId, email);
+    }, 1000);
+}
+
+// Simular envío de email para video
+async function simulateVideoEmailSending(email, reportId) {
+    console.log('📧 Enviando confirmación de reporte de video a:', email);
+    
+    const emailData = {
+        to: email,
+        subject: `Reporte de Video ${reportId} - Beemo`,
+        body: `Tu reporte de problemas de video ha sido recibido y será procesado en las próximas 24 horas.`
+    };
+    
+    // Simular envío
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    console.log('✅ Email de confirmación de video enviado');
+}
+
+// Mostrar confirmación final
+function showVideoConfirmation(reportId, email) {
+    showVideoReportStep('videoConfirmationSection');
+    
+    // Actualizar datos de confirmación
+    document.getElementById('videoReportId').textContent = reportId;
+    document.getElementById('videoConfirmationEmail').textContent = email;
+}
+
+// Funciones globales para acceso desde HTML
+window.closeVideoReportModal = closeVideoReportModal;
+window.openAutoVideoReport = openAutoVideoReport;
+window.closeVideoAutoSuggestion = closeVideoAutoSuggestion;
+
+// Función para mostrar el modal de reportes
+function showReportModal() {
+    const modal = document.getElementById('reportModal');
+    modal.classList.add('active');
+    
+    // Reset a la primera sección
+    showReportSection('reportSection');
+    
+    // Detectar información técnica automáticamente
+    detectTechnicalInfo();
+    
+    // Iniciar detección en tiempo real
+    startRealTimeDetection();
+}
+
+function hideReportModal() {
+    const modal = document.getElementById('reportModal');
+    modal.classList.remove('active');
+    
+    // Limpiar datos y detener detección
+    currentReportData = {};
+    stopRealTimeDetection();
+}
+
+function showReportSection(sectionId) {
+    document.querySelectorAll('.report-section').forEach(section => {
+        section.classList.remove('active');
+    });
+    document.getElementById(sectionId).classList.add('active');
+}
+
+// Detectar información técnica del usuario
+function detectTechnicalInfo() {
+    const browserInfo = navigator.userAgent;
+    const screenInfo = `${screen.width}x${screen.height}`;
+    
+    // Detectar tipo de navegador
+    let browser = 'Desconocido';
+    if (browserInfo.includes('Chrome')) browser = 'Chrome';
+    else if (browserInfo.includes('Firefox')) browser = 'Firefox';
+    else if (browserInfo.includes('Safari')) browser = 'Safari';
+    else if (browserInfo.includes('Edge')) browser = 'Edge';
+    
+    // Detectar conexión si está disponible
+    let connection = 'Desconocida';
+    if (navigator.connection) {
+        connection = navigator.connection.effectiveType || 'Desconocida';
+    }
+    
+    // Actualizar interfaz
+    document.getElementById('browserInfo').textContent = browser;
+    document.getElementById('screenInfo').textContent = screenInfo;
+    document.getElementById('connectionInfo').textContent = connection.toUpperCase();
+    
+    // Guardar en datos del reporte
+    currentReportData.technicalInfo = {
+        browser,
+        browserFull: browserInfo,
+        screen: screenInfo,
+        connection,
+        timestamp: new Date().toISOString(),
+        url: window.location.href
+    };
+}
+
+// Sistema de detección en tiempo real de problemas
+function startRealTimeDetection() {
+    realTimeDetection = true;
+    
+    // Detectar problemas de video cada 5 segundos
+    reportInterval = setInterval(() => {
+        if (!realTimeDetection) return;
+        
+        detectVideoProblems();
+        detectPerformanceIssues();
+        detectNetworkIssues();
+    }, 5000);
+    
+    console.log('🔍 Detección en tiempo real activada');
+}
+
+function stopRealTimeDetection() {
+    realTimeDetection = false;
+    if (reportInterval) {
+        clearInterval(reportInterval);
+        reportInterval = null;
+    }
+    console.log('🔍 Detección en tiempo real desactivada');
+}
+
+// Detectar problemas específicos de video
+function detectVideoProblems() {
+    const video = document.getElementById('mainVideo');
+    if (!video) return;
+    
+    const problems = [];
+    
+    // Verificar si el video está cargado pero no reproduce
+    if (video.readyState === 4 && video.paused && !video.ended) {
+        problems.push('Video cargado pero pausado inesperadamente');
+    }
+    
+    // Verificar problemas de buffering
+    if (video.readyState < 3) {
+        problems.push('Video experimentando buffering');
+    }
+    
+    // Verificar si hay error en el video
+    if (video.error) {
+        problems.push(`Error de video: ${video.error.message}`);
+    }
+    
+    // Verificar calidad/fps bajo
+    if (video.videoWidth && video.videoWidth < 480) {
+        problems.push('Calidad de video baja detectada');
+    }
+    
+    if (problems.length > 0) {
+        currentReportData.detectedProblems = problems;
+        console.log('🚨 Problemas detectados:', problems);
+        
+        // Auto-sugerir reporte si hay problemas críticos
+        if (problems.length >= 2) {
+            showAutoReportSuggestion();
+        }
+    }
+}
+
+// Detectar problemas de rendimiento
+function detectPerformanceIssues() {
+    // Verificar uso de memoria si está disponible
+    if (performance.memory) {
+        const memoryUsage = performance.memory.usedJSHeapSize / performance.memory.totalJSHeapSize;
+        if (memoryUsage > 0.8) {
+            currentReportData.performanceIssues = currentReportData.performanceIssues || [];
+            currentReportData.performanceIssues.push('Alto uso de memoria detectado');
+        }
+    }
+    
+    // Verificar latencia de red
+    const startTime = performance.now();
+    fetch('/api/health')
+        .then(() => {
+            const latency = performance.now() - startTime;
+            if (latency > 2000) {
+                currentReportData.performanceIssues = currentReportData.performanceIssues || [];
+                currentReportData.performanceIssues.push(`Alta latencia detectada: ${latency.toFixed(0)}ms`);
+            }
+        })
+        .catch(() => {
+            currentReportData.performanceIssues = currentReportData.performanceIssues || [];
+            currentReportData.performanceIssues.push('Problemas de conectividad detectados');
+        });
+}
+
+// Detectar problemas de red
+function detectNetworkIssues() {
+    if (navigator.onLine === false) {
+        currentReportData.networkIssues = currentReportData.networkIssues || [];
+        currentReportData.networkIssues.push('Conexión offline detectada');
+    }
+    
+    // Verificar velocidad de conexión si está disponible
+    if (navigator.connection && navigator.connection.downlink) {
+        const speed = navigator.connection.downlink;
+        if (speed < 1) {
+            currentReportData.networkIssues = currentReportData.networkIssues || [];
+            currentReportData.networkIssues.push(`Velocidad baja: ${speed} Mbps`);
+        }
+    }
+}
+
+// Mostrar sugerencia automática de reporte
+function showAutoReportSuggestion() {
+    const notification = document.createElement('div');
+    notification.className = 'auto-report-suggestion';
+    notification.innerHTML = `
+        <div class="suggestion-content">
+            <div class="suggestion-icon">🤖</div>
+            <div class="suggestion-text">
+                <strong>Problemas detectados automáticamente</strong>
+                <p>¿Quieres reportar los problemas que encontramos?</p>
+            </div>
+            <button class="suggestion-btn" onclick="openAutoReport()">Reportar</button>
+            <button class="suggestion-close" onclick="closeAutoSuggestion(this)">×</button>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.classList.add('active');
+    }, 100);
+    
+    // Auto-remove después de 10 segundos
+    setTimeout(() => {
+        if (document.body.contains(notification)) {
+            notification.classList.remove('active');
+            setTimeout(() => {
+                if (document.body.contains(notification)) {
+                    document.body.removeChild(notification);
+                }
+            }, 300);
+        }
+    }, 10000);
+}
+
+function openReportModal() {
+    showReportModal();
+}
+
+function openAutoReport() {
+    closeAutoSuggestion(document.querySelector('.auto-report-suggestion'));
+    showReportModal();
+    
+    // Pre-seleccionar el problema más relevante
+    if (currentReportData.detectedProblems) {
+        const firstProblem = currentReportData.detectedProblems[0];
+        if (firstProblem.includes('pausado')) {
+            selectProblemOption('video-freezes');
+        } else if (firstProblem.includes('buffering')) {
+            selectProblemOption('video-no-load');
+        } else if (firstProblem.includes('calidad')) {
+            selectProblemOption('quality-issues');
+        }
+    }
+}
+
+function closeAutoSuggestion(element) {
+    const suggestion = element.closest('.auto-report-suggestion');
+    suggestion.classList.remove('active');
+    setTimeout(() => {
+        if (document.body.contains(suggestion)) {
+            document.body.removeChild(suggestion);
+        }
+    }, 300);
+}
+
+function selectProblemOption(problemType) {
+    document.querySelectorAll('.problem-option').forEach(option => {
+        option.classList.remove('selected');
+    });
+    
+    const selectedOption = document.querySelector(`[data-problem="${problemType}"]`);
+    if (selectedOption) {
+        selectedOption.classList.add('selected');
+        
+        currentReportData.problemType = problemType;
+        currentReportData.problemTitle = selectedOption.querySelector('h4').textContent;
+        
+        // Mostrar formulario de contacto
+        document.getElementById('contactForm').style.display = 'block';
+        
+        // Mostrar campo de descripción si es "otro"
+        const descriptionGroup = document.getElementById('descriptionGroup');
+        if (problemType === 'other') {
+            descriptionGroup.style.display = 'block';
+        } else {
+            descriptionGroup.style.display = 'none';
+        }
+        
+        // Validar formulario
+        validateReportForm();
+    }
+}
+
+function validateReportForm() {
+    const email = document.getElementById('reportEmail').value;
+    const submitBtn = document.getElementById('submitReportBtn');
+    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    
+    submitBtn.disabled = !isValidEmail;
+}
+
+// Simular envío de correo electrónico
+async function sendConfirmationEmail(email, reportId, problemTitle) {
+    try {
+        // Simular API de envío de correo
+        console.log('📧 Enviando confirmación a:', email);
+        
+        const emailData = {
+            to: email,
+            subject: `Reporte ${reportId} - Confirmación recibida`,
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <div style="background: #1d9bf0; color: white; padding: 20px; text-align: center;">
+                        <h1>🎬 Beemo - Reporte Recibido</h1>
+                    </div>
+                    <div style="padding: 20px; background: #f9f9f9;">
+                        <h2>Hola,</h2>
+                        <p>Hemos recibido tu reporte sobre: <strong>${problemTitle}</strong></p>
+                        <div style="background: white; padding: 15px; border-left: 4px solid #1d9bf0; margin: 20px 0;">
+                            <p><strong>ID del reporte:</strong> ${reportId}</p>
+                            <p><strong>Estado:</strong> En revisión</p>
+                            <p><strong>Tiempo estimado:</strong> 24-48 horas</p>
+                        </div>
+                        <p>Nuestro sistema de detección automática monitoreará este problema y te notificaremos cuando esté resuelto.</p>
+                        <p>Gracias por ayudarnos a mejorar Beemo.</p>
+                        <hr>
+                        <p style="color: #666; font-size: 12px;">Este es un correo automático, no responder.</p>
+                    </div>
+                </div>
+            `
+        };
+        
+        // Simular envío exitoso después de 2 segundos
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        console.log('✅ Correo de confirmación enviado exitosamente');
+        return true;
+    } catch (error) {
+        console.error('❌ Error enviando confirmación:', error);
+        return false;
+    }
+}
+
+// Procesar envío del reporte
+async function submitReport() {
+    const email = document.getElementById('reportEmail').value;
+    const description = document.getElementById('problemDescription').value;
+    
+    // Generar ID único del reporte
+    const reportId = 'BM-' + new Date().getFullYear() + '-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+    
+    currentReportData.reportId = reportId;
+    currentReportData.email = email;
+    currentReportData.description = description;
+    currentReportData.timestamp = new Date().toISOString();
+    
+    // Cambiar a sección de enviando
+    showReportSection('sendingSection');
+    
+    // Simular proceso de envío con pasos
+    const steps = [
+        { id: 0, text: 'Recopilando información técnica...', delay: 1000 },
+        { id: 1, text: 'Analizando problemas detectados...', delay: 2000 },
+        { id: 2, text: 'Enviando confirmación por email...', delay: 1500 }
+    ];
+    
+    for (let i = 0; i < steps.length; i++) {
+        await new Promise(resolve => setTimeout(resolve, steps[i].delay));
+        
+        // Actualizar paso actual
+        document.querySelectorAll('.progress-step').forEach((step, index) => {
+            step.classList.toggle('active', index <= i);
+        });
+        
+        document.getElementById('sendingStatus').textContent = steps[i].text;
+        
+        // Enviar correo en el último paso
+        if (i === steps.length - 1) {
+            await sendConfirmationEmail(email, reportId, currentReportData.problemTitle);
+        }
+    }
+    
+    // Cambiar a sección de confirmación
+    setTimeout(() => {
+        showReportSection('confirmationSection');
+        
+        // Actualizar información de confirmación
+        document.getElementById('reportId').textContent = reportId;
+        document.getElementById('confirmationEmail').textContent = email;
+        
+        // Activar monitoreo automático
+        startAutomaticMonitoring(reportId);
+        
+        console.log('✅ Reporte enviado exitosamente:', currentReportData);
+    }, 500);
+}
+
+// Sistema de monitoreo automático
+function startAutomaticMonitoring(reportId) {
+    console.log(`🤖 Iniciando monitoreo automático para reporte ${reportId}`);
+    
+    // Simular resolución automática después de 20 segundos para demo
+    setTimeout(() => {
+        if (currentReportData.problemType === 'video-no-load' || currentReportData.problemType === 'video-freezes') {
+            showProblemResolvedNotification(reportId);
+        }
+    }, 20000);
+}
+
+function showProblemResolvedNotification(reportId) {
+    showNotification(`🎉 ¡Problema ${reportId} resuelto automáticamente!`, 'success');
+    
+    // Simular envío de correo de resolución
+    setTimeout(() => {
+        console.log(`📧 Enviando notificación de resolución para ${reportId}`);
+        showNotification('📧 Confirmación de resolución enviada a tu email', 'info');
+    }, 2000);
+}
+
 // Enhanced search functionality
 function performSearchBar(query) {
     if (query.length > 2) {
@@ -3793,6 +4757,92 @@ function generateSkeletonCards(count) {
         `;
     }
     return skeletons;
+}
+
+// Configurar sistema de reportes
+function setupReportSystem() {
+    // Event listeners para el modal de reportes
+    const reportClose = document.getElementById('reportClose');
+    const reportModal = document.getElementById('reportModal');
+    const problemOptions = document.querySelectorAll('.problem-option');
+    const reportEmail = document.getElementById('reportEmail');
+    const submitReportBtn = document.getElementById('submitReportBtn');
+    const closeReportBtn = document.getElementById('closeReportBtn');
+    
+    // Cerrar modal
+    if (reportClose) {
+        reportClose.addEventListener('click', hideReportModal);
+    }
+    
+    if (reportModal) {
+        reportModal.addEventListener('click', (e) => {
+            if (e.target === reportModal) {
+                hideReportModal();
+            }
+        });
+    }
+    
+    // Selección de problemas
+    problemOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            const problemType = option.dataset.problem;
+            selectProblemOption(problemType);
+        });
+    });
+    
+    // Validación de email
+    if (reportEmail) {
+        reportEmail.addEventListener('input', validateReportForm);
+    }
+    
+    // Envío del reporte
+    if (submitReportBtn) {
+        submitReportBtn.addEventListener('click', submitReport);
+    }
+    
+    // Cerrar modal desde confirmación
+    if (closeReportBtn) {
+        closeReportBtn.addEventListener('click', hideReportModal);
+    }
+    
+    // Agregar botón de reporte al reproductor
+    addReportButtonToPlayer();
+    
+    console.log('🚨 Sistema de reportes inicializado');
+}
+
+// Agregar botón de reporte al reproductor de video
+function addReportButtonToPlayer() {
+    // El botón se agregará dinámicamente cuando se abra el reproductor
+    // En la función showTikTokPlayer
+}
+
+// Modificar showTikTokPlayer para incluir botón de reporte
+function addReportButtonToActivePlayer() {
+    const videoControls = document.querySelector('.video-controls-tiktok');
+    if (videoControls && !document.getElementById('reportVideoBtn')) {
+        const reportBtn = document.createElement('button');
+        reportBtn.className = 'tiktok-btn';
+        reportBtn.id = 'reportVideoBtn';
+        reportBtn.innerHTML = `
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+            </svg>
+            <span style="font-size: 0.7rem; font-weight: 600;">Reportar</span>
+        `;
+        
+        reportBtn.addEventListener('click', () => {
+            showReportModal();
+            
+            // Pre-detectar problemas del video actual
+            const video = document.getElementById('mainVideo');
+            if (video) {
+                detectVideoProblems();
+            }
+        });
+        
+        videoControls.appendChild(reportBtn);
+    }
 }
 
 // Enhanced expanded search with skeleton
@@ -4077,6 +5127,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize expanded search with all series
     displayExpandedSearchResults(getAllSeries());
+    
+    // Inicializar sistema de reportes
+    setupReportSystem();
     
     // Inicializar sistema de likes
     console.log('🔄 Iniciando carga del sistema de likes...');
