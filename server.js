@@ -10,15 +10,44 @@ const PORT = process.env.PORT || 5000;
 // Middleware mejorado para móviles
 app.use(express.json({ limit: '10mb' }));
 app.use(cors({
-    origin: ["http://localhost:5000", "https://*.replit.dev", "https://*.replit.app"],
+    origin: function(origin, callback) {
+        // Permitir requests sin origin (como apps móviles)
+        if (!origin) return callback(null, true);
+        
+        // Permitir localhost y Replit
+        const allowedOrigins = [
+            'http://localhost:5000',
+            'https://localhost:5000'
+        ];
+        
+        // Permitir todos los dominios de Replit
+        if (origin.includes('replit.dev') || origin.includes('replit.app') || origin.includes('replit.co')) {
+            return callback(null, true);
+        }
+        
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        
+        return callback(null, true); // Permitir todos por ahora para debugging
+    },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Accept"]
 }));
+
+// Middleware para logging de requests
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - Origin: ${req.get('Origin')}`);
+    next();
+});
+
 app.use(express.static('.', {
     setHeaders: (res, path) => {
         if (path.endsWith('.js')) {
             res.setHeader('Content-Type', 'application/javascript');
         }
+        res.setHeader('Cache-Control', 'no-cache');
     }
 }));
 

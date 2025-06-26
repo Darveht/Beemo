@@ -406,19 +406,28 @@ let likesCache = new Map();
 // Conectar a WebSocket para actualizaciones en tiempo real
 function initializeLikesSystem() {
     try {
+        console.log('🔄 Inicializando sistema de likes...');
+        
         const socketOptions = {
-            transports: ['websocket', 'polling'],
+            transports: ['polling', 'websocket'],
             upgrade: true,
-            rememberUpgrade: true,
-            timeout: 20000,
-            forceNew: true
+            rememberUpgrade: false,
+            timeout: 10000,
+            forceNew: false,
+            autoConnect: true,
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000
         };
         
-        socket = io(window.location.origin, socketOptions);
+        const serverUrl = window.location.origin;
+        console.log('🌐 Conectando a:', serverUrl);
+        
+        socket = io(serverUrl, socketOptions);
         
         socket.on('connect', () => {
-            console.log('✅ Conectado al sistema de likes en tiempo real');
-            showNotification('Sistema de likes conectado', 'success');
+            console.log('✅ Conectado al sistema de likes en tiempo real - ID:', socket.id);
+            showNotification('Sistema de likes activado', 'success');
         });
         
         socket.on('likeUpdate', (data) => {
@@ -429,21 +438,33 @@ function initializeLikesSystem() {
         
         socket.on('disconnect', (reason) => {
             console.log('❌ Desconectado del sistema de likes:', reason);
-            showNotification('Reconectando sistema de likes...', 'warning');
+            if (reason !== 'io client disconnect') {
+                showNotification('Reconectando sistema de likes...', 'warning');
+            }
         });
         
         socket.on('connect_error', (error) => {
-            console.log('🔄 Error de conexión, reintentando...', error);
+            console.log('🔄 Error de conexión WebSocket:', error.message);
+            showNotification('Conectando sistema de likes...', 'info');
         });
         
-        socket.on('reconnect', () => {
-            console.log('✅ Reconectado al sistema de likes');
+        socket.on('reconnect', (attemptNumber) => {
+            console.log('✅ Reconectado al sistema de likes (intento', attemptNumber, ')');
             showNotification('Sistema de likes reconectado', 'success');
         });
         
+        socket.on('reconnect_error', (error) => {
+            console.log('❌ Error de reconexión:', error);
+        });
+        
+        socket.on('reconnect_failed', () => {
+            console.log('❌ Falló la reconexión al sistema de likes');
+            showNotification('Sistema de likes en modo offline', 'warning');
+        });
+        
     } catch (error) {
-        console.error('Error inicializando WebSocket:', error);
-        showNotification('Error en sistema de likes, usando modo offline', 'warning');
+        console.error('❌ Error crítico inicializando WebSocket:', error);
+        showNotification('Sistema de likes en modo offline', 'warning');
     }
 }
 
@@ -465,10 +486,14 @@ async function toggleLike(contentId, contentType = 'series') {
     try {
         console.log('👆 Procesando like para:', contentId);
         
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos timeout
+        // Verificar que tenemos una URL válida
+        const apiUrl = `${window.location.origin}/api/likes/${contentId}`;
+        console.log('🌐 URL de API:', apiUrl);
         
-        const response = await fetch(`/api/likes/${contentId}`, {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 segundos timeout
+        
+        const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -480,32 +505,45 @@ async function toggleLike(contentId, contentType = 'series') {
         
         clearTimeout(timeoutId);
         
+        console.log('📊 Respuesta HTTP:', response.status, response.statusText);
+        
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            const errorText = await response.text();
+            throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
         }
         
         const data = await response.json();
-        console.log('✅ Respuesta del servidor:', data);
+        console.log('✅ Datos del servidor:', data);
         
+        // Actualizar cache local
+        likesCache.set(contentId, data);
+        
+        // Actualizar interfaz
         updateLikesDisplay(contentId, data.likesCount, data.likesFormatted);
         
         // Mostrar notificación
         const action = data.action === 'added' ? 'agregado' : 'removido';
-        showNotification(`❤️ Like ${action} - ${data.likesFormatted} total`, 'success');
+        const emoji = data.action === 'added' ? '❤️' : '💔';
+        showNotification(`${emoji} Like ${action} (${data.likesFormatted} total)`, 'success');
         
-        // Forzar actualización en WebSocket si está conectado
+        // Emitir actualización WebSocket si está conectado
         if (socket && socket.connected) {
             socket.emit('likeUpdate', data);
+            console.log('📡 Actualización enviada por WebSocket');
+        } else {
+            console.log('⚠️ WebSocket no conectado, solo actualización local');
         }
         
         return data;
     } catch (error) {
-        console.error('❌ Error al dar like:', error);
+        console.error('❌ Error detallado al dar like:', error);
         
         if (error.name === 'AbortError') {
-            showNotification('⏱️ Timeout - Intenta de nuevo', 'warning');
+            showNotification('⏱️ Conexión lenta - Intenta de nuevo', 'warning');
+        } else if (error.message.includes('Failed to fetch')) {
+            showNotification('🌐 Error de conexión - Verifica tu internet', 'error');
         } else {
-            showNotification('❌ Error al procesar like - Verificando conexión...', 'error');
+            showNotification(`❌ Error: ${error.message}`, 'error');
         }
         
         return null;
@@ -3805,18 +3843,33 @@ function loadSocketIO() {
         }
         
         const script = document.createElement('script');
-        script.src = '/socket.io/socket.io.js';
-        script.onload = () => resolve();
-        script.onerror = () => {
-            console.error('Error cargando Socket.IO, usando modo offline');
-            // Crear mock de socket para evitar errores
-            window.io = () => ({
-                emit: () => {},
-                on: () => {},
-                connect: () => {},
-                disconnect: () => {}
-            });
+        script.src = 'https://cdn.socket.io/4.7.5/socket.io.min.js';
+        script.onload = () => {
+            console.log('✅ Socket.IO cargado correctamente');
             resolve();
+        };
+        script.onerror = () => {
+            console.error('Error cargando Socket.IO desde CDN, intentando ruta local...');
+            // Intentar cargar desde ruta local
+            const localScript = document.createElement('script');
+            localScript.src = '/socket.io/socket.io.js';
+            localScript.onload = () => {
+                console.log('✅ Socket.IO cargado desde servidor local');
+                resolve();
+            };
+            localScript.onerror = () => {
+                console.error('Error cargando Socket.IO, usando modo offline');
+                // Crear mock de socket para evitar errores
+                window.io = () => ({
+                    emit: () => {},
+                    on: () => {},
+                    connected: false,
+                    connect: () => {},
+                    disconnect: () => {}
+                });
+                resolve();
+            };
+            document.head.appendChild(localScript);
         };
         document.head.appendChild(script);
     });
@@ -4013,14 +4066,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize expanded search with all series
     displayExpandedSearchResults(getAllSeries());
     
-    // Inicializar sistema de likes solo para reproductores
-    if (isAuthenticated) {
-        loadSocketIO().then(() => {
-            initializeLikesSystem();
-            // initializeContentLikes(); - Quitado para páginas principales
-        }).catch(error => {
-            console.error('Error inicializando sistema de likes:', error);
-        });
+    // Inicializar sistema de likes
+    console.log('🔄 Iniciando carga del sistema de likes...');
+    loadSocketIO().then(() => {
+        console.log('✅ Socket.IO listo, inicializando sistema de likes...');
+        initializeLikesSystem();
+        
+        // Test de conectividad de la API
+        testApiConnection();
+    }).catch(error => {
+        console.error('❌ Error inicializando sistema de likes:', error);
+        showNotification('Sistema de likes en modo offline', 'warning');
+    });
+    
+    // Función de prueba de conectividad
+    function testApiConnection() {
+        fetch('/api/health')
+            .then(response => response.json())
+            .then(data => {
+                console.log('✅ API de likes funcionando:', data);
+            })
+            .catch(error => {
+                console.error('❌ API de likes no disponible:', error);
+                showNotification('API de likes no disponible', 'warning');
+            });
     }
 });
 
