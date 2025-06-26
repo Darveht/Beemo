@@ -1090,7 +1090,7 @@ body.video-playing .tiktok-player * {
 }
 
 .tiktok-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: transparent;
     transform: scale(1.05);
 }
 
@@ -2391,8 +2391,7 @@ body.video-playing .tiktok-player * {
     text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
 }
 
-.ad-close```text
- {
+.ad-close {
     background: rgba(0, 0, 0, 0.8);
     border: 2px solid #1d9bf0;
     color: #1d9bf0;
@@ -3689,7 +3688,7 @@ video::-ms-media-controls {
 }
 
 .tiktok-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: transparent;
     transform: scale(1.05);
 }
 
@@ -3736,209 +3735,6 @@ video::-ms-media-controls {
     100% {
         transform: scale(1);
         opacity: 1;
-    }
-}
-
-/* Indicador AD para anuncios interrumpidos */
-#adIndicator {
-    animation: adPulse 1s infinite !important;
-}
-
-@keyframes adPulse {
-    0%, 100% {
-        transform: scale(1);
-        box-shadow: 0 4px 12px rgba(255, 0, 0, 0.4);
-    }
-    50% {
-        transform: scale(1.05);
-        box-shadow: 0 6px 20px rgba(255, 0, 0, 0.8);
-    }
-}
-
-/* Estilos para anuncios interrumpidos */
-.ad-skip-indicator {
-    position: absolute;
-    top: 2rem;
-    right: 2rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    z-index: 100;
-}
-
-.ad-timer-display {
-    background: rgba(0, 0, 0, 0.9);
-    color: #1d9bf0;
-    padding: 0.75rem 1rem;
-    border-radius: 25px;
-    font-size: 1.2rem;
-    font-weight: 700;
-    border: 2px solid #1d9bf0;
-    backdrop-filter: blur(10px);
-    animation: adTimerPulse 1s infinite;
-}
-
-.ad-label {
-    background: #ff0000;
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    font-weight: bold;
-    font-size: 1rem;
-    animation: adLabelBlink 0.8s infinite;
-}
-
-@keyframes adTimerPulse {
-    0%, 100% {
-        box-shadow: 0 0 0 0 rgba(29, 155, 240, 0.7);
-    }
-    70% {
-        box-shadow: 0 0 0 10px rgba(29, 155, 240, 0);
-    }
-}
-
-@keyframes adLabelBlink {
-    0%, 50% {
-        opacity: 1;
-    }
-    51%, 100% {
-        opacity: 0.7;
-    }
-}
-
-/* Optimización para gestos zoom */
-/* Indicador AD para anuncios interrumpidos */
-#adIndicator {
-    animation: adPulse 1s infinite !important;
-}
-
-@keyframes adPulse {
-    0%, 100% {
-        transform: scale(1);
-        box-shadow: 0 4px 12px rgba(255, 0, 0, 0.4);
-    }
-    50% {
-        transform: scale(1.05);
-        box-shadow: 0 6px 20px rgba(255, 0, 0, 0.8);
-    }
-}
-
-/* Estilos para anuncios interrumpidos */
-.ad-skip-indicator {
-    position: absolute;
-    top: 2rem;
-    right: 2rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    z-index: 100;
-}
-
-.ad-timer-display {
-    background: rgba(0, 0, 0, 0.9);
-    color: #1d9bf0;
-    padding: 0.75rem 1rem;
-    border-radius: 25px;
-    font-size: 1.2rem;
-    font-weight: 700;
-    border: 2px solid #1d9bf0;
-    backdrop-filter: blur(10px);
-    animation: adTimerPulse 1s infinite;
-}
-
-.ad-label {
-    background: #ff0000;
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    font-weight: bold;
-    font-size: 1rem;
-    animation: adLabelBlink 0.8s infinite;
-}
-
-@keyframes adTimerPulse {
-    0%, 100% {
-        box-shadow: 0 0 0 0 rgba(29, 155, 240, 0.7);
-    }
-    70% {
-        box-shadow: 0 0 0 10px rgba(29, 155, 240, 0);
-    }
-}
-
-@keyframes adLabelBlink {
-    0%, 50% {
-        opacity: 1;
-    }
-    51%, 100% {
-        opacity: 0.7;
-    }
-}
-
-/* Optimización para gestos zoom */
-.video-container-tiktok {
-    touch-action: pan-x pan-y pinch-zoom;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    user-select: none;
-}
-
-.video-controls-tiktok,
-.video-info-tiktok,
-.close-player {
-    transition: opacity 0.3s ease, pointer-events 0.3s ease;
-}
-
-/* Mejoras de performance para video */
-#mainVideo {
-    will-change: transform;
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
-}
-
-/* Indicador de carga rápida */
-.fast-loading-indicator {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.9);
-    color: #1d9bf0;
-    padding: 1rem 2rem;
-    border-radius: 12px;
-    font-weight: 600;
-    z-index: 10000;
-    backdrop-filter: blur(10px);
-    border: 1px solid #1d9bf0;
-}
-
-.fast-loading-indicator::before {
-    content: '⚡';
-    margin-right: 0.5rem;
-    font-size: 1.2rem;
-}
-/* Indicador AD para anuncios interrumpidos */
-#adIndicator {
-    animation: adPulse 1s infinite !important;
-}
-
-/* Indicador AD para anuncios interrumpidos */
-#adIndicator {
-    animation: adPulse 1s infinite !important;
-}
-
-/* Indicador AD para anuncios interrumpidos */
-#adIndicator {
-    animation: adPulse 1s infinite !important;
-}
-
-@keyframes pulse {
-    0%, 100% {
-        opacity: 1;
-        transform: scale(1);
-    }
-    50% {
-        opacity: 0.5;
-        transform: scale(1.2);
     }
 }
 
@@ -4087,9 +3883,8 @@ video::-ms-media-controls {
         opacity: 1;
         transform: scale(1.02);
     }
-}
-
-/* Video progress bar */
+    Marca de agua Beemo estilo Netflix
+Video progress bar
 .video-progress-tiktok {
     position: fixed;
     bottom: 6rem;
