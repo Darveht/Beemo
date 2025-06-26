@@ -7,51 +7,31 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(express.json());
-app.use(cors());
-app.use(express.static('.'));
+// Middleware mejorado para móviles
+app.use(express.json({ limit: '10mb' }));
+app.use(cors({
+    origin: ["http://localhost:5000", "https://*.replit.dev", "https://*.replit.app"],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+}));
+app.use(express.static('.', {
+    setHeaders: (res, path) => {
+        if (path.endsWith('.js')) {
+            res.setHeader('Content-Type', 'application/javascript');
+        }
+    }
+}));
+
+const { initializeDatabase } = require('./db-init');
 
 // Inicializar base de datos SQLite
-const db = new sqlite3.Database('./likes.db', (err) => {
-    if (err) {
-        console.error('Error al abrir la base de datos:', err);
-    } else {
-        console.log('Conectado a la base de datos SQLite');
-        
-        // Crear tabla de likes si no existe
-        db.run(`CREATE TABLE IF NOT EXISTS likes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            content_id TEXT NOT NULL,
-            content_type TEXT NOT NULL,
-            likes_count INTEGER DEFAULT 0,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )`);
-        
-        // Crear tabla de likes individuales para evitar duplicados
-        db.run(`CREATE TABLE IF NOT EXISTS user_likes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id TEXT NOT NULL,
-            content_id TEXT NOT NULL,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE(user_id, content_id)
-        )`);
-        
-        // Insertar datos iniciales si no existen
-        db.get("SELECT COUNT(*) as count FROM likes WHERE content_id = 'la-nina-ceo'", (err, row) => {
-            if (row.count === 0) {
-                db.run("INSERT INTO likes (content_id, content_type, likes_count) VALUES (?, ?, ?)", 
-                    ['la-nina-ceo', 'series', 1247583]);
-                    
-                db.run("INSERT INTO likes (content_id, content_type, likes_count) VALUES (?, ?, ?)", 
-                    ['la-nina-ceo-ep1', 'episode', 892456]);
-                    
-                db.run("INSERT INTO likes (content_id, content_type, likes_count) VALUES (?, ?, ?)", 
-                    ['la-nina-ceo-ep2', 'episode', 756234]);
-            }
-        });
-    }
+let db;
+initializeDatabase().then(database => {
+    db = database;
+    console.log('🚀 Base de datos inicializada correctamente');
+}).catch(err => {
+    console.error('💥 Error fatal inicializando base de datos:', err);
+    process.exit(1);
 });
 
 // Función para formatear números grandes
@@ -74,6 +54,16 @@ function generateUserId(req) {
 }
 
 // API Endpoints
+
+// Health check
+app.get('/api/health', (req, res) => {
+    res.json({ 
+        status: 'OK', 
+        timestamp: new Date().toISOString(),
+        server: 'Beemo Likes System',
+        database: db ? 'Connected' : 'Disconnected'
+    });
+});
 
 // Obtener likes de un contenido
 app.get('/api/likes/:contentId', (req, res) => {
@@ -236,9 +226,14 @@ const { Server } = require('socket.io');
 
 const io = new Server(server, {
     cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
-    }
+        origin: ["http://localhost:5000", "https://*.replit.dev", "https://*.replit.app"],
+        methods: ["GET", "POST"],
+        credentials: true
+    },
+    allowEIO3: true,
+    transports: ['websocket', 'polling'],
+    pingTimeout: 60000,
+    pingInterval: 25000
 });
 
 // Función para transmitir actualizaciones de likes
@@ -266,7 +261,8 @@ io.on('connection', (socket) => {
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Servidor corriendo en puerto ${PORT}`);
+    console.log(`Servidor corriendo en http://0.0.0.0:${PORT}`);
+    console.log(`Accesible en: http://localhost:${PORT}`);
 });
 
 // Graceful shutdown

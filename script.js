@@ -405,20 +405,46 @@ let likesCache = new Map();
 
 // Conectar a WebSocket para actualizaciones en tiempo real
 function initializeLikesSystem() {
-    socket = io();
-    
-    socket.on('connect', () => {
-        console.log('Conectado al sistema de likes en tiempo real');
-    });
-    
-    socket.on('likeUpdate', (data) => {
-        updateLikesDisplay(data.contentId, data.likesCount, data.likesFormatted);
-        likesCache.set(data.contentId, data);
-    });
-    
-    socket.on('disconnect', () => {
-        console.log('Desconectado del sistema de likes');
-    });
+    try {
+        const socketOptions = {
+            transports: ['websocket', 'polling'],
+            upgrade: true,
+            rememberUpgrade: true,
+            timeout: 20000,
+            forceNew: true
+        };
+        
+        socket = io(window.location.origin, socketOptions);
+        
+        socket.on('connect', () => {
+            console.log('✅ Conectado al sistema de likes en tiempo real');
+            showNotification('Sistema de likes conectado', 'success');
+        });
+        
+        socket.on('likeUpdate', (data) => {
+            console.log('📡 Actualización de likes recibida:', data);
+            updateLikesDisplay(data.contentId, data.likesCount, data.likesFormatted);
+            likesCache.set(data.contentId, data);
+        });
+        
+        socket.on('disconnect', (reason) => {
+            console.log('❌ Desconectado del sistema de likes:', reason);
+            showNotification('Reconectando sistema de likes...', 'warning');
+        });
+        
+        socket.on('connect_error', (error) => {
+            console.log('🔄 Error de conexión, reintentando...', error);
+        });
+        
+        socket.on('reconnect', () => {
+            console.log('✅ Reconectado al sistema de likes');
+            showNotification('Sistema de likes reconectado', 'success');
+        });
+        
+    } catch (error) {
+        console.error('Error inicializando WebSocket:', error);
+        showNotification('Error en sistema de likes, usando modo offline', 'warning');
+    }
 }
 
 // Obtener likes de un contenido
@@ -437,25 +463,51 @@ async function getLikes(contentId) {
 // Dar/quitar like
 async function toggleLike(contentId, contentType = 'series') {
     try {
+        console.log('👆 Procesando like para:', contentId);
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos timeout
+        
         const response = await fetch(`/api/likes/${contentId}`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
-            body: JSON.stringify({ contentType })
+            body: JSON.stringify({ contentType }),
+            signal: controller.signal
         });
         
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
         const data = await response.json();
+        console.log('✅ Respuesta del servidor:', data);
+        
         updateLikesDisplay(contentId, data.likesCount, data.likesFormatted);
         
         // Mostrar notificación
         const action = data.action === 'added' ? 'agregado' : 'removido';
-        showNotification(`Like ${action} - ${data.likesFormatted} total`, 'success');
+        showNotification(`❤️ Like ${action} - ${data.likesFormatted} total`, 'success');
+        
+        // Forzar actualización en WebSocket si está conectado
+        if (socket && socket.connected) {
+            socket.emit('likeUpdate', data);
+        }
         
         return data;
     } catch (error) {
-        console.error('Error al dar like:', error);
-        showNotification('Error al procesar like', 'error');
+        console.error('❌ Error al dar like:', error);
+        
+        if (error.name === 'AbortError') {
+            showNotification('⏱️ Timeout - Intenta de nuevo', 'warning');
+        } else {
+            showNotification('❌ Error al procesar like - Verificando conexión...', 'error');
+        }
+        
         return null;
     }
 }
@@ -3755,7 +3807,17 @@ function loadSocketIO() {
         const script = document.createElement('script');
         script.src = '/socket.io/socket.io.js';
         script.onload = () => resolve();
-        script.onerror = () => reject(new Error('Error cargando Socket.IO'));
+        script.onerror = () => {
+            console.error('Error cargando Socket.IO, usando modo offline');
+            // Crear mock de socket para evitar errores
+            window.io = () => ({
+                emit: () => {},
+                on: () => {},
+                connect: () => {},
+                disconnect: () => {}
+            });
+            resolve();
+        };
         document.head.appendChild(script);
     });
 }
