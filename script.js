@@ -1161,6 +1161,20 @@ function showTikTokPlayer(title, startEpisode = 1) {
         const currentTime = video.currentTime;
         video.pause();
         
+        // Ocultar completamente el video del episodio
+        const videoContainer = document.querySelector('.video-container-tiktok');
+        const videoContent = document.getElementById('videoContent');
+        
+        if (videoContainer) {
+            videoContainer.style.opacity = '0';
+            videoContainer.style.visibility = 'hidden';
+            videoContainer.style.zIndex = '-1';
+        }
+        
+        if (videoContent) {
+            videoContent.style.display = 'none';
+        }
+        
         // Mostrar indicador AD prominente
         showAdIndicator();
         showNotification('Anuncio en 2 segundos...', 'warning');
@@ -1170,6 +1184,17 @@ function showTikTokPlayer(title, startEpisode = 1) {
             showInterruptedAd(() => {
                 // Callback cuando termina el anuncio
                 hideAdIndicator();
+                
+                // Restaurar visibilidad del video del episodio
+                if (videoContainer) {
+                    videoContainer.style.opacity = '1';
+                    videoContainer.style.visibility = 'visible';
+                    videoContainer.style.zIndex = '1';
+                }
+                
+                if (videoContent) {
+                    videoContent.style.display = 'block';
+                }
                 
                 // Reanudar video desde donde estaba exactamente
                 video.currentTime = currentTime;
@@ -1188,7 +1213,7 @@ function showTikTokPlayer(title, startEpisode = 1) {
                     });
                 }
             });
-        }, 2000); // Aumentar tiempo para ver que se pausó
+        }, 2000);
     }
     
     // Mostrar indicador "AD"
@@ -1243,6 +1268,20 @@ function showTikTokPlayer(title, startEpisode = 1) {
         const closeBtn = document.getElementById('adClose');
         const progress = document.getElementById('adProgress');
 
+        // Ocultar completamente el reproductor principal
+        const tikTokPlayer = document.querySelector('.tiktok-player');
+        if (tikTokPlayer) {
+            tikTokPlayer.style.zIndex = '1';
+        }
+        
+        // Asegurar que el modal esté por encima de todo
+        modal.style.zIndex = '999999';
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100vw';
+        modal.style.height = '100vh';
+        
         // Bloquear scroll del body
         document.body.style.overflow = 'hidden';
         document.body.style.position = 'fixed';
@@ -1364,6 +1403,12 @@ function showTikTokPlayer(title, startEpisode = 1) {
                     timer.textContent = '30';
                     progress.style.width = '0%';
                     
+                    // Restaurar z-index del reproductor principal
+                    const tikTokPlayer = document.querySelector('.tiktok-player');
+                    if (tikTokPlayer) {
+                        tikTokPlayer.style.zIndex = '999999';
+                    }
+                    
                     // Restaurar scroll del body
                     document.body.style.overflow = '';
                     document.body.style.position = '';
@@ -1382,6 +1427,12 @@ function showTikTokPlayer(title, startEpisode = 1) {
             modal.classList.remove('active');
             timer.textContent = '30';
             progress.style.width = '0%';
+            
+            // Restaurar z-index del reproductor principal
+            const tikTokPlayer = document.querySelector('.tiktok-player');
+            if (tikTokPlayer) {
+                tikTokPlayer.style.zIndex = '999999';
+            }
             
             // Restaurar scroll del body
             document.body.style.overflow = '';
