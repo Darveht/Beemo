@@ -536,6 +536,9 @@ function showTikTokPlayer(title, startEpisode = 1) {
     // Crear contenedor del reproductor
     player.innerHTML = `
         <div class="video-container-tiktok">
+            <!-- Marca de agua Beemo estilo Netflix -->
+            <div class="beemo-watermark">BEEMO</div>
+            
             <button class="close-player">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
@@ -1231,7 +1234,7 @@ function showTikTokPlayer(title, startEpisode = 1) {
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, #ff0000, #cc0000);
+            background: transparent;
             color: white;
             padding: 2rem 3rem;
             border-radius: 20px;
@@ -1240,13 +1243,13 @@ function showTikTokPlayer(title, startEpisode = 1) {
             z-index: 100000;
             animation: adPulse 1s infinite;
             box-shadow: 0 8px 30px rgba(255, 0, 0, 0.6);
-            border: 3px solid white;
+            border: 3px solid #ff0000;
             text-align: center;
             backdrop-filter: blur(10px);
         `;
         indicator.innerHTML = `
             <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📺</div>
-            <div style="font-size: 2rem; font-weight: 800;">ANUNCIO</div>
+            <div style="font-size: 2rem; font-weight: 800; color: #ff0000;">ANUNCIO</div>
             <div style="font-size: 1rem; margin-top: 0.5rem; opacity: 0.9;">Video pausado</div>
         `;
         document.body.appendChild(indicator);
@@ -1312,7 +1315,6 @@ function showTikTokPlayer(title, startEpisode = 1) {
                 </video>
                 <div class="ad-skip-indicator">
                     <div class="ad-timer-display" id="interruptedAdTimer">15</div>
-                    <div class="ad-label">ANUNCIO</div>
                 </div>
                 <div class="ad-play-overlay" id="adPlayOverlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 10; cursor: pointer;">
                     <div style="text-align: center; color: white;">
@@ -3627,9 +3629,119 @@ function showSubscriptionModal(episodeNumber, seriesTitle, playerElement) {
 // Enhanced search functionality
 function performSearchBar(query) {
     if (query.length > 2) {
-        performSearch(query);
+        showSearchWithSkeleton(query);
         document.getElementById('searchModal').classList.add('active');
     }
+}
+
+// Show skeleton loading before search results
+function showSearchWithSkeleton(query) {
+    const resultsContainer = document.getElementById('searchResults');
+    const resultsList = document.getElementById('resultsList');
+    
+    // Show loading state immediately
+    resultsContainer.style.display = 'block';
+    resultsList.innerHTML = `
+        <div class="search-loading">
+            <div class="spinner-360"></div>
+            <h3>Buscando series...</h3>
+            <p>Explorando nuestra base de datos</p>
+        </div>
+    `;
+    
+    // Show skeleton cards after 1 second
+    setTimeout(() => {
+        resultsList.innerHTML = generateSkeletonCards(5);
+        
+        // Show loading dots
+        setTimeout(() => {
+            resultsList.innerHTML = `
+                <div class="search-loading">
+                    <div class="loading-dots-modern">
+                        <div class="loading-dot-modern"></div>
+                        <div class="loading-dot-modern"></div>
+                        <div class="loading-dot-modern"></div>
+                    </div>
+                    <h3>Procesando resultados...</h3>
+                    <p>Casi terminamos</p>
+                </div>
+            `;
+            
+            // Finally show real results after skeleton phase
+            setTimeout(() => {
+                performSearch(query);
+            }, 2000);
+        }, 2000);
+    }, 1000);
+}
+
+// Generate skeleton loading cards
+function generateSkeletonCards(count) {
+    let skeletons = '';
+    for (let i = 0; i < count; i++) {
+        skeletons += `
+            <div class="skeleton-card">
+                <div class="skeleton skeleton-image"></div>
+                <div class="skeleton-info">
+                    <div class="skeleton skeleton-text large"></div>
+                    <div class="skeleton skeleton-text small"></div>
+                    <div class="skeleton skeleton-text"></div>
+                </div>
+            </div>
+        `;
+    }
+    return skeletons;
+}
+
+// Enhanced expanded search with skeleton
+function performExpandedSearch(query) {
+    const resultsContainer = document.getElementById('expandedSearchResults');
+    
+    // Show loading state
+    resultsContainer.innerHTML = `
+        <div class="search-loading" style="grid-column: 1 / -1;">
+            <div class="spinner-360"></div>
+            <h3>Buscando "${query}"...</h3>
+            <p>Analizando nuestra biblioteca de contenido</p>
+        </div>
+    `;
+    
+    // Show skeleton after 1 second
+    setTimeout(() => {
+        resultsContainer.innerHTML = generateExpandedSkeletonCards(6);
+        
+        // Show actual results after skeleton phase
+        setTimeout(() => {
+            const allSeries = getAllSeries();
+            const filteredResults = allSeries.filter(result => 
+                result.title.toLowerCase().includes(query.toLowerCase()) ||
+                result.genre.toLowerCase().includes(query.toLowerCase()) ||
+                result.description.toLowerCase().includes(query.toLowerCase())
+            );
+            displayExpandedSearchResults(filteredResults);
+        }, 2500);
+    }, 1500);
+}
+
+// Generate expanded skeleton cards
+function generateExpandedSkeletonCards(count) {
+    let skeletons = '';
+    for (let i = 0; i < count; i++) {
+        skeletons += `
+            <div class="expanded-result-card" style="pointer-events: none;">
+                <div class="skeleton skeleton-image" style="width: 120px; height: 160px;"></div>
+                <div class="expanded-result-info">
+                    <div class="skeleton skeleton-text small" style="width: 80px; height: 12px;"></div>
+                    <div class="skeleton skeleton-text large" style="height: 24px; margin: 0.5rem 0;"></div>
+                    <div class="skeleton skeleton-text" style="width: 200px; height: 14px; margin-bottom: 1rem;"></div>
+                    <div class="skeleton skeleton-text" style="height: 14px; margin-bottom: 0.5rem;"></div>
+                    <div class="skeleton skeleton-text" style="height: 14px; width: 90%;"></div>
+                    <div class="skeleton skeleton-text" style="width: 120px; height: 36px; margin-top: 1.5rem; border-radius: 20px;"></div>
+                </div>
+            </div>
+        `;
+    }
+    return skeletons;
 }
 
 // Función para cargar script de Socket.IO
