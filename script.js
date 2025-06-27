@@ -371,16 +371,28 @@ function switchToSection(section) {
     });
     document.getElementById('homeSection').style.display = 'none';
     
+    // Show/hide home controls based on section
+    const homeControls = document.querySelector('.home-controls');
+    
     // Show selected section
     if (section === 'home') {
         document.getElementById('homeSection').style.display = 'block';
+        if (homeControls) {
+            homeControls.style.display = 'flex';
+        }
         window.scrollTo(0, 0);
     } else if (section === 'library') {
         document.getElementById('librarySection').style.display = 'block';
+        if (homeControls) {
+            homeControls.style.display = 'none';
+        }
         updateLibraryDisplay();
         window.scrollTo(0, 0);
     } else if (section === 'profile') {
         document.getElementById('profileSection').style.display = 'block';
+        if (homeControls) {
+            homeControls.style.display = 'none';
+        }
         updateProfileDisplay();
         window.scrollTo(0, 0);
     }

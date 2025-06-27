@@ -579,6 +579,30 @@ body {
     color: #71767b;
 }
 
+/* Controles de la sección de inicio */
+.home-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 1rem 0;
+    padding: 0 2rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@media (max-width: 768px) {
+    .home-controls {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .search-bar-container {
+        width: 100%;
+    }
+}
+
 .rewards-btn {
     background: linear-gradient(135deg, #ffd700, #ffb347);
     border: none;
