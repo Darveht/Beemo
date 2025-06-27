@@ -644,7 +644,7 @@ body {
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    margin: 1rem 0;
+    margin: 2rem 0 1.5rem 0;
     padding: 0 2rem;
     max-width: 1200px;
     margin-left: auto;
@@ -663,31 +663,34 @@ body {
 }
 
 .rewards-btn {
-    background: linear-gradient(135deg, #ffd700, #ffb347);
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
     border: none;
-    color: #000;
+    color: white;
     cursor: pointer;
-    padding: 0.6rem 1rem;
-    border-radius: 20px;
+    padding: 0.7rem 1rem;
+    border-radius: 16px;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
     gap: 0.5rem;
     font-weight: 600;
     font-size: 0.9rem;
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
 }
 
 .rewards-btn:hover {
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+    background: linear-gradient(135deg, #ee5a24, #d63031);
 }
 
 .coin-count {
-    background: rgba(0, 0, 0, 0.2);
-    padding: 0.2rem 0.5rem;
-    border-radius: 10px;
-    color: #000;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.25rem 0.6rem;
+    border-radius: 12px;
+    color: white;
     font-weight: 700;
+    font-size: 0.8rem;
 }
 
 /* Hero Section - Netflix Style Pantalla Completa */
@@ -1104,10 +1107,10 @@ body {
 /* Etiquetas automáticas para series */
 .series-badge {
     position: absolute;
-    top: 0.5rem;
-    left: 0.5rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
+    top: 0.75rem;
+    left: 0.75rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
     font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -1118,11 +1121,11 @@ body {
 }
 
 .series-badge:nth-child(2) {
-    top: 2.3rem;
+    top: 2.8rem;
 }
 
 .series-badge:nth-child(3) {
-    top: 4.1rem;
+    top: 4.6rem;
 }
 
 .new-badge {
@@ -1262,6 +1265,10 @@ body {
 /* Continue Watching */
 .continue-card {
     position: relative;
+}
+
+.continue-card .play-btn {
+    display: none !important;
 }
 
 .progress-indicator {

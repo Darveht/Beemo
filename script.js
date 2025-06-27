@@ -1781,14 +1781,7 @@ function showTikTokPlayer(title, startEpisode = 1) {
             
             
             
-            <div class="play-control-overlay" id="playControlOverlay" style="display: none;">
-                <button class="video-play-btn" id="videoPlayBtn">
-                    <svg width="60" height="60" viewBox="0 0 24 24" fill="white">
-                        <path d="M8 5v14l11-7z"/>
-                    </svg>
-                </button>
-                <p style="color: white; margin-top: 1rem; font-size: 1.1rem;">Toca para reproducir</p>
-            </div>
+            
         </div>
     `;
 
@@ -2165,9 +2158,6 @@ function showTikTokPlayer(title, startEpisode = 1) {
     function setupVideoPlayer() {
         const video = document.getElementById('mainVideo');
         const progressBar = document.getElementById('videoProgressBar');
-        const playControl = document.getElementById('playControlOverlay');
-        const playBtn = document.getElementById('videoPlayBtn');
-
         if (!video) {
             console.error('Video element not found');
             return;
@@ -2189,11 +2179,9 @@ function showTikTokPlayer(title, startEpisode = 1) {
         video.setAttribute('webkit-playsinline', '');
         video.setAttribute('x-webkit-airplay', 'allow');
         
-        // Mostrar overlay de play al inicio
+        // Ocultar overlay de play desde el inicio
         if (playControl) {
-            playControl.style.display = 'flex';
-            playControl.style.background = 'rgba(0, 0, 0, 0.8)';
-            playControl.style.zIndex = '1000';
+            playControl.style.display = 'none';
         }
 
         // Configurar sistema de gestos zoom (pinch)
@@ -2218,10 +2206,6 @@ function showTikTokPlayer(title, startEpisode = 1) {
                 
                 await video.play();
                 
-                if (playControl) {
-                    playControl.style.display = 'none';
-                }
-                
                 showNotification('Reproduciendo episodio', 'success');
                 
             } catch (error) {
@@ -2230,10 +2214,7 @@ function showTikTokPlayer(title, startEpisode = 1) {
                 try {
                     video.muted = true;
                     await video.play();
-                    if (playControl) {
-                        playControl.style.display = 'none';
-                    }
-                    showNotification('Toca para activar sonido', 'info');
+                    showNotification('Video iniciado', 'info');
                     
                     // Permitir activar sonido después
                     video.addEventListener('click', () => {
@@ -2248,28 +2229,12 @@ function showTikTokPlayer(title, startEpisode = 1) {
             }
         };
 
-        // Event listeners para reproducción
-        if (playBtn) {
-            playBtn.addEventListener('click', startPlayback);
-        }
-        
-        if (playControl) {
-            playControl.addEventListener('click', startPlayback);
-        }
+        // Sin event listeners para overlay ya que se reproduce automáticamente
 
-        // Reproducción automática optimizada más rápida
+        // Reproducción automática inmediata
         setTimeout(() => {
-            video.play().then(() => {
-                if (playControl) {
-                    playControl.style.display = 'none';
-                }
-            }).catch(() => {
-                console.log('Autoplay falló, mostrando controles');
-                if (playControl) {
-                    playControl.style.display = 'flex';
-                }
-            });
-        }, 300); // Reducido de 1000ms a 300ms
+            startPlayback();
+        }, 100);
 
         // Actualizar barra de progreso visible y sistema de anuncios
         video.addEventListener('timeupdate', () => {
@@ -2327,7 +2292,7 @@ function showTikTokPlayer(title, startEpisode = 1) {
         video.addEventListener('canplaythrough', () => {
             console.log('Video can play through');
             // Auto-iniciar si no está ya reproduciéndose
-            if (video.paused && !playControl.style.display !== 'none') {
+            if (video.paused) {
                 startPlayback();
             }
         });
