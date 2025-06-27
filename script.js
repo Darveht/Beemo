@@ -349,8 +349,10 @@ function enterMainApp() {
 
         setTimeout(() => {
             mainApp.classList.add('active');
-            // Apply translation to main app
-            applyTranslation(currentLanguage);
+            // Apply automatic translation to main app
+            if (currentLanguage !== 'es') {
+                applyAutomaticTranslation(currentLanguage);
+            }
         }, 50);
     }, 300);
 }
@@ -1602,46 +1604,52 @@ function applyAutomaticTags(cardElement, seriesId, releaseDate) {
     const existingBadges = cardElement.querySelectorAll('.series-badge');
     existingBadges.forEach(badge => badge.remove());
     
-    // Aplicar nuevas etiquetas
-    tags.forEach((tag, index) => {
+    // Aplicar solo la etiqueta más prioritaria para evitar duplicados
+    if (tags.length > 0) {
+        const topTag = tags[0]; // Solo usar la primera etiqueta (más importante)
         const badge = document.createElement('div');
-        badge.className = `series-badge ${tag.class}`;
-        badge.textContent = tag.text;
-        badge.style.top = `${0.5 + (index * 1.8)}rem`;
+        badge.className = `series-badge ${topTag.class}`;
+        badge.textContent = topTag.text;
         
-        cardElement.appendChild(badge);
-    });
+        // Insertar después de la imagen, antes del card-info
+        const cardInfo = cardElement.querySelector('.card-info');
+        if (cardInfo) {
+            cardElement.insertBefore(badge, cardInfo);
+        } else {
+            cardElement.appendChild(badge);
+        }
+    }
 }
 
 function detectSeriesTags(seriesId, releaseDate) {
-    const tags = [];
     const now = new Date();
     const release = new Date(releaseDate);
     const daysSinceRelease = Math.floor((now - release) / (1000 * 60 * 60 * 24));
     
-    // Lógica de detección automática
+    // Sistema de prioridad: solo una etiqueta por serie
+    // Prioridad: NUEVA > EXCLUSIVA > TENDENCIA > POPULAR
     
-    // Serie nueva (menos de 7 días)
+    // Serie nueva (menos de 7 días) - MÁXIMA PRIORIDAD
     if (daysSinceRelease <= 7 && daysSinceRelease >= 0) {
-        tags.push({ class: 'new-badge', text: 'NUEVA' });
+        return [{ class: 'new-badge', text: 'NUEVA', priority: 1 }];
     }
     
-    // Serie trending (basado en actividad simulada)
-    if (isSeriesTrending(seriesId)) {
-        tags.push({ class: 'trending-badge', text: 'TENDENCIA' });
-    }
-    
-    // Serie popular (basado en likes y visualizaciones)
-    if (isSeriesPopular(seriesId)) {
-        tags.push({ class: 'popular-badge', text: 'POPULAR' });
-    }
-    
-    // Serie exclusiva
+    // Serie exclusiva - SEGUNDA PRIORIDAD
     if (isSeriesExclusive(seriesId)) {
-        tags.push({ class: 'exclusive-badge', text: 'EXCLUSIVA' });
+        return [{ class: 'exclusive-badge', text: 'EXCLUSIVA', priority: 2 }];
     }
     
-    return tags;
+    // Serie trending - TERCERA PRIORIDAD
+    if (isSeriesTrending(seriesId)) {
+        return [{ class: 'trending-badge', text: 'TENDENCIA', priority: 3 }];
+    }
+    
+    // Serie popular - CUARTA PRIORIDAD
+    if (isSeriesPopular(seriesId)) {
+        return [{ class: 'popular-badge', text: 'POPULAR', priority: 4 }];
+    }
+    
+    return []; // Sin etiqueta si no cumple ningún criterio
 }
 
 function isSeriesTrending(seriesId) {

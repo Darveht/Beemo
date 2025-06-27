@@ -1114,6 +1114,15 @@ body {
     letter-spacing: 0.5px;
     z-index: 10;
     backdrop-filter: blur(5px);
+    pointer-events: none;
+}
+
+.series-badge:nth-child(2) {
+    top: 2.3rem;
+}
+
+.series-badge:nth-child(3) {
+    top: 4.1rem;
 }
 
 .new-badge {
