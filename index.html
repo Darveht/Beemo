@@ -950,17 +950,27 @@
         <section class="hero">
             <div class="hero-content">
                 <h1 class="hero-title">La Niña de los Cuatro CEO</h1>
-                <p class="hero-description">
-                    Una joven prodigio se convierte en la protegida de cuatro poderosos CEOs, navegando el mundo empresarial mientras descubre el amor. Cada episodio de 1 minuto te mantendrá enganchado.
-                </p>
-                <div class="hero-buttons">
-                    <button class="btn btn-primary" onclick="showTikTokPlayer('La Niña de los Cuatro CEO', 1)">Reproducir</button>
-                    <button class="btn btn-secondary" id="heroMyListBtn" onclick="addToMyListWithAnimation()">
+                <div class="hero-buttons-netflix">
+                    <button class="netflix-btn netflix-btn-play" onclick="showTikTokPlayer('La Niña de los Cuatro CEO', 1)">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                        <span>Reproducir</span>
+                    </button>
+                    <button class="netflix-btn netflix-btn-list" id="heroMyListBtn" onclick="addToMyListWithAnimation()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                        </svg>
                         <span class="btn-text">Mi Lista</span>
-                        <span class="btn-icon">+</span>
                     </button>
                 </div>
-                
+            </div>
+            
+            <!-- Líneas animadas al final del banner -->
+            <div class="hero-animated-lines">
+                <div class="animated-line"></div>
+                <div class="animated-line"></div>
+                <div class="animated-line"></div>
             </div>
         </section>
 
