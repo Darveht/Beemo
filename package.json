@@ -1,4 +1,3 @@
-
 {
   "name": "beemo-tv",
   "version": "1.0.0",
@@ -9,11 +8,11 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "sqlite3": "^5.1.6",
-    "socket.io": "^4.7.4",
     "cors": "^2.8.5",
-    "crypto": "^1.0.1"
+    "crypto": "^1.0.1",
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
