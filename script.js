@@ -14,6 +14,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Auth screen event listeners
     setupAuthEventListeners();
 
+    // Initialize navigation and library system
+    initializeBottomNavigation();
+    initializeLibrarySystem();
+    initializeProfileSystem();
+
     // Check if user is already authenticated
     if (isAuthenticated) {
         showMainApp();
@@ -295,6 +300,502 @@ function logout() {
 
     // Reload page to show welcome screen
     window.location.reload();
+}
+
+// Bottom Navigation System
+let currentSection = 'home';
+let lastScrollTop = 0;
+let isScrolling = false;
+let likedSeries = JSON.parse(localStorage.getItem('likedSeries') || '[]');
+let userProfile = JSON.parse(localStorage.getItem('userProfile') || '{"name": "Usuario Invitado", "email": "invitado@beemo.tv", "avatar": null}');
+
+function initializeBottomNavigation() {
+    const bottomNavItems = document.querySelectorAll('.bottom-nav-item');
+    const bottomNav = document.getElementById('bottomNav');
+    
+    // Setup navigation click handlers
+    bottomNavItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const section = item.dataset.section;
+            switchToSection(section);
+        });
+    });
+    
+    // Auto-hide navigation on scroll
+    let scrollTimer;
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        if (!isScrolling) {
+            isScrolling = true;
+        }
+        
+        // Clear previous timer
+        clearTimeout(scrollTimer);
+        
+        // Hide nav when scrolling down, show when scrolling up
+        if (scrollTop > lastScrollTop && scrollTop > 100) {
+            bottomNav.classList.add('hidden');
+        } else {
+            bottomNav.classList.remove('hidden');
+        }
+        
+        // Show nav after scrolling stops
+        scrollTimer = setTimeout(() => {
+            bottomNav.classList.remove('hidden');
+            isScrolling = false;
+        }, 150);
+        
+        lastScrollTop = scrollTop;
+    });
+    
+    // Initialize sections
+    updateLibraryCount();
+}
+
+function switchToSection(section) {
+    currentSection = section;
+    
+    // Update navigation active state
+    document.querySelectorAll('.bottom-nav-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    document.querySelector(`[data-section="${section}"]`).classList.add('active');
+    
+    // Hide all sections
+    document.querySelectorAll('.page-section').forEach(pageSection => {
+        pageSection.style.display = 'none';
+    });
+    document.getElementById('homeSection').style.display = 'none';
+    
+    // Show selected section
+    if (section === 'home') {
+        document.getElementById('homeSection').style.display = 'block';
+        window.scrollTo(0, 0);
+    } else if (section === 'library') {
+        document.getElementById('librarySection').style.display = 'block';
+        updateLibraryDisplay();
+        window.scrollTo(0, 0);
+    } else if (section === 'profile') {
+        document.getElementById('profileSection').style.display = 'block';
+        updateProfileDisplay();
+        window.scrollTo(0, 0);
+    }
+}
+
+// Library System
+function initializeLibrarySystem() {
+    // Load saved library data
+    likedSeries = JSON.parse(localStorage.getItem('likedSeries') || '[]');
+    updateLibraryCount();
+}
+
+function addToLibrary(seriesData) {
+    const existingIndex = likedSeries.findIndex(series => series.id === seriesData.id);
+    
+    if (existingIndex === -1) {
+        // Add new series to library
+        const libraryItem = {
+            ...seriesData,
+            likedAt: new Date().toISOString(),
+            lastWatched: new Date().toISOString()
+        };
+        
+        likedSeries.unshift(libraryItem);
+        localStorage.setItem('likedSeries', JSON.stringify(likedSeries));
+        updateLibraryCount();
+        showNotification('Serie agregada a tu biblioteca', 'success');
+    }
+}
+
+function removeFromLibrary(seriesId) {
+    likedSeries = likedSeries.filter(series => series.id !== seriesId);
+    localStorage.setItem('likedSeries', JSON.stringify(likedSeries));
+    updateLibraryCount();
+    updateLibraryDisplay();
+    showNotification('Serie removida de tu biblioteca', 'info');
+}
+
+function updateLibraryCount() {
+    const libraryCount = document.getElementById('libraryCount');
+    if (libraryCount) {
+        libraryCount.textContent = likedSeries.length;
+        libraryCount.style.display = likedSeries.length > 0 ? 'flex' : 'none';
+    }
+}
+
+function updateLibraryDisplay() {
+    const libraryGrid = document.getElementById('libraryGrid');
+    const likedSeriesCount = document.getElementById('likedSeriesCount');
+    const totalLikesGiven = document.getElementById('totalLikesGiven');
+    const watchTimeStats = document.getElementById('watchTimeStats');
+    
+    // Update stats
+    if (likedSeriesCount) likedSeriesCount.textContent = likedSeries.length;
+    if (totalLikesGiven) totalLikesGiven.textContent = likedSeries.length * 15; // Estimate
+    if (watchTimeStats) watchTimeStats.textContent = Math.floor(likedSeries.length * 0.75) + 'h';
+    
+    if (!libraryGrid) return;
+    
+    if (likedSeries.length === 0) {
+        libraryGrid.innerHTML = `
+            <div class="empty-library">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                <h3>Biblioteca vacía</h3>
+                <p>Las series que te gusten aparecerán aquí</p>
+                <button class="explore-btn" onclick="switchToSection('home')">Explorar Series</button>
+            </div>
+        `;
+    } else {
+        libraryGrid.innerHTML = likedSeries.map(series => `
+            <div class="library-item" onclick="playFromLibrary('${series.id}')">
+                <img src="${series.thumbnail}" alt="${series.title}">
+                <div class="library-item-info">
+                    <h3>${series.title}</h3>
+                    <p>${series.rating} • ${series.episodes}</p>
+                    <div class="liked-date">Agregado ${formatDate(series.likedAt)}</div>
+                </div>
+                <button class="remove-from-library" onclick="event.stopPropagation(); removeFromLibrary('${series.id}')" style="position: absolute; top: 0.5rem; right: 0.5rem; background: rgba(0,0,0,0.8); border: none; color: #ff4757; padding: 0.5rem; border-radius: 50%; cursor: pointer;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
+            </div>
+        `).join('');
+    }
+}
+
+function playFromLibrary(seriesId) {
+    const series = likedSeries.find(s => s.id === seriesId);
+    if (series) {
+        showTikTokPlayer(series.title, 1);
+        
+        // Update last watched
+        series.lastWatched = new Date().toISOString();
+        localStorage.setItem('likedSeries', JSON.stringify(likedSeries));
+    }
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return 'hace unos minutos';
+    if (diffInHours < 24) return `hace ${diffInHours}h`;
+    if (diffInHours < 48) return 'ayer';
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `hace ${diffInDays} días`;
+    
+    return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+}
+
+// Profile System
+function initializeProfileSystem() {
+    userProfile = JSON.parse(localStorage.getItem('userProfile') || '{"name": "Usuario Invitado", "email": "invitado@beemo.tv", "avatar": null}');
+    
+    // Setup edit profile modal
+    const editProfileBtn = document.getElementById('editProfileBtn');
+    const editProfileModal = document.getElementById('editProfileModal');
+    const closeEditProfile = document.getElementById('closeEditProfile');
+    const saveProfileBtn = document.getElementById('saveProfileBtn');
+    const cancelProfileBtn = document.getElementById('cancelProfileBtn');
+    const avatarInput = document.getElementById('avatarInput');
+    
+    if (editProfileBtn) {
+        editProfileBtn.addEventListener('click', showEditProfile);
+    }
+    
+    if (closeEditProfile) {
+        closeEditProfile.addEventListener('click', hideEditProfile);
+    }
+    
+    if (cancelProfileBtn) {
+        cancelProfileBtn.addEventListener('click', hideEditProfile);
+    }
+    
+    if (saveProfileBtn) {
+        saveProfileBtn.addEventListener('click', saveProfile);
+    }
+    
+    if (avatarInput) {
+        avatarInput.addEventListener('change', handleAvatarUpload);
+    }
+    
+    updateProfileDisplay();
+}
+
+function updateProfileDisplay() {
+    const profileName = document.getElementById('profileName');
+    const profileEmail = document.getElementById('profileEmail');
+    const profileAvatar = document.getElementById('profileAvatar');
+    const profileCoinCount = document.getElementById('profileCoinCount');
+    
+    if (profileName) profileName.textContent = userProfile.name;
+    if (profileEmail) profileEmail.textContent = userProfile.email;
+    if (profileCoinCount) profileCoinCount.textContent = userCoins;
+    
+    if (profileAvatar && userProfile.avatar) {
+        profileAvatar.innerHTML = `<img src="${userProfile.avatar}" alt="Avatar">`;
+    }
+}
+
+function showEditProfile() {
+    const modal = document.getElementById('editProfileModal');
+    const nameInput = document.getElementById('editProfileName');
+    const emailInput = document.getElementById('editProfileEmail');
+    const avatarPreview = document.getElementById('avatarPreview');
+    
+    nameInput.value = userProfile.name;
+    emailInput.value = userProfile.email;
+    
+    if (userProfile.avatar) {
+        avatarPreview.innerHTML = `<img src="${userProfile.avatar}" alt="Avatar">`;
+    }
+    
+    modal.classList.add('active');
+}
+
+function hideEditProfile() {
+    const modal = document.getElementById('editProfileModal');
+    modal.classList.remove('active');
+}
+
+function handleAvatarUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+        if (file.size > 5 * 1024 * 1024) { // 5MB limit
+            showNotification('La imagen debe ser menor a 5MB', 'error');
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const avatarPreview = document.getElementById('avatarPreview');
+            avatarPreview.innerHTML = `<img src="${e.target.result}" alt="Avatar">`;
+            userProfile.avatar = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function saveProfile() {
+    const nameInput = document.getElementById('editProfileName');
+    const emailInput = document.getElementById('editProfileEmail');
+    
+    if (!nameInput.value.trim()) {
+        showNotification('El nombre es requerido', 'error');
+        return;
+    }
+    
+    if (!emailInput.value.trim() || !isValidEmail(emailInput.value)) {
+        showNotification('Ingresa un email válido', 'error');
+        return;
+    }
+    
+    userProfile.name = nameInput.value.trim();
+    userProfile.email = emailInput.value.trim();
+    
+    localStorage.setItem('userProfile', JSON.stringify(userProfile));
+    updateProfileDisplay();
+    hideEditProfile();
+    showNotification('Perfil actualizado correctamente', 'success');
+}
+
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+function showSubscriptionSection() {
+    showMonetizationModal();
+    // Switch to subscriptions tab
+    setTimeout(() => {
+        const subscriptionsTab = document.querySelector('[data-tab="subscriptions"]');
+        if (subscriptionsTab) {
+            subscriptionsTab.click();
+        }
+    }, 100);
+}
+
+// Función para agregar a Mi Lista con animación especial
+function addToMyListWithAnimation() {
+    const button = document.getElementById('heroMyListBtn');
+    const heroSection = document.querySelector('.hero');
+    
+    // Verificar si ya está en la lista
+    const seriesData = {
+        id: 'la-nina-ceo',
+        title: 'La Niña de los Cuatro CEO',
+        thumbnail: 'https://www.dropbox.com/scl/fi/r24wdvq29de6w6djkaqsc/IMG_4044.png?rlkey=5e2lge2dv00n427p0i5jdqxgy&st=65b6ye7u&raw=1',
+        rating: '9.5',
+        episodes: '45 eps',
+        year: '2024',
+        genre: 'Romance Empresarial'
+    };
+    
+    const isAlreadyAdded = likedSeries.some(series => series.id === seriesData.id);
+    
+    if (isAlreadyAdded) {
+        // Si ya está agregado, mostrar animación de confirmación
+        showAlreadyAddedAnimation(button);
+        showNotification('Ya está en tu biblioteca', 'info');
+        return;
+    }
+    
+    // Deshabilitar el botón temporalmente
+    button.disabled = true;
+    button.style.pointerEvents = 'none';
+    
+    // Crear contenedor de animación
+    const animationContainer = document.createElement('div');
+    animationContainer.className = 'my-list-animation';
+    
+    // Crear el corazón parpadeando
+    const heart = document.createElement('div');
+    heart.className = 'heart-animation';
+    heart.innerHTML = '💖';
+    
+    // Crear las líneas saltando
+    const linesContainer = document.createElement('div');
+    linesContainer.className = 'lines-animation';
+    
+    for (let i = 0; i < 3; i++) {
+        const line = document.createElement('div');
+        line.className = 'bounce-line';
+        linesContainer.appendChild(line);
+    }
+    
+    // Crear checkmark de confirmación
+    const checkmark = document.createElement('div');
+    checkmark.className = 'success-checkmark-hero';
+    checkmark.innerHTML = '✓';
+    
+    // Crear partículas
+    const particlesContainer = document.createElement('div');
+    particlesContainer.className = 'particles-effect';
+    
+    for (let i = 0; i < 5; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = `${Math.random() * 100}%`;
+        particle.style.top = `${50 + Math.random() * 20}%`;
+        particlesContainer.appendChild(particle);
+    }
+    
+    // Agregar elementos al contenedor
+    animationContainer.appendChild(heart);
+    animationContainer.appendChild(linesContainer);
+    animationContainer.appendChild(checkmark);
+    animationContainer.appendChild(particlesContainer);
+    
+    // Agregar al hero section
+    heroSection.appendChild(animationContainer);
+    
+    // Animar el botón
+    button.style.transform = 'scale(0.95)';
+    button.style.transition = 'all 0.2s ease';
+    
+    setTimeout(() => {
+        button.style.transform = 'scale(1.05)';
+    }, 100);
+    
+    setTimeout(() => {
+        button.style.transform = 'scale(1)';
+        button.classList.add('confirmed');
+        
+        // Agregar a la biblioteca
+        addToLibrary(seriesData);
+        
+        // Mostrar notificación de éxito
+        showNotification('¡Agregado a tu biblioteca! 💖', 'success');
+        
+        // Actualizar el texto del botón
+        const btnText = button.querySelector('.btn-text');
+        btnText.textContent = 'En Mi Lista';
+        
+    }, 300);
+    
+    // Limpiar animación después de 2 segundos
+    setTimeout(() => {
+        if (animationContainer && animationContainer.parentNode) {
+            animationContainer.remove();
+        }
+        
+        // Rehabilitar el botón
+        button.disabled = false;
+        button.style.pointerEvents = 'auto';
+        
+    }, 2000);
+}
+
+// Función para mostrar animación cuando ya está agregado
+function showAlreadyAddedAnimation(button) {
+    button.style.transform = 'scale(0.95)';
+    button.style.transition = 'all 0.2s ease';
+    
+    // Efecto de "rebote"
+    setTimeout(() => {
+        button.style.transform = 'scale(1.1)';
+        button.style.background = 'rgba(34, 197, 94, 0.3)';
+        button.style.borderColor = '#22c55e';
+    }, 100);
+    
+    setTimeout(() => {
+        button.style.transform = 'scale(1)';
+        button.style.background = '';
+        button.style.borderColor = '';
+    }, 300);
+    
+    // Crear mini animación de confirmación
+    const miniHeart = document.createElement('div');
+    miniHeart.style.cssText = `
+        position: absolute;
+        top: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 1.5rem;
+        color: #22c55e;
+        animation: miniHeartFloat 1s ease-out forwards;
+        pointer-events: none;
+        z-index: 1000;
+    `;
+    miniHeart.innerHTML = '✓';
+    
+    // Agregar keyframe para mini corazón
+    if (!document.getElementById('miniHeartStyle')) {
+        const style = document.createElement('style');
+        style.id = 'miniHeartStyle';
+        style.textContent = `
+            @keyframes miniHeartFloat {
+                0% {
+                    transform: translateX(-50%) translateY(0) scale(0);
+                    opacity: 0;
+                }
+                50% {
+                    transform: translateX(-50%) translateY(-10px) scale(1.2);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateX(-50%) translateY(-20px) scale(0);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    button.style.position = 'relative';
+    button.appendChild(miniHeart);
+    
+    setTimeout(() => {
+        if (miniHeart && miniHeart.parentNode) {
+            miniHeart.remove();
+        }
+    }, 1000);
 }
 
 // Add logout button functionality to header (can be added later)
@@ -1729,8 +2230,27 @@ function showTikTokPlayer(title, startEpisode = 1) {
             likesCounter.textContent = result.likesFormatted;
             if (result.action === 'added') {
                 likeBtn.classList.add('liked');
+                
+                // Agregar a biblioteca si es la serie principal y no existe
+                if (startEpisode === 1 && title === 'La Niña de los Cuatro CEO') {
+                    const seriesData = {
+                        id: generateContentId(title),
+                        title: title,
+                        thumbnail: 'https://www.dropbox.com/scl/fi/r24wdvq29de6w6djkaqsc/IMG_4044.png?rlkey=5e2lge2dv00n427p0i5jdqxgy&st=65b6ye7u&raw=1',
+                        rating: '9.5',
+                        episodes: '45 eps',
+                        year: '2024',
+                        genre: 'Romance Empresarial'
+                    };
+                    addToLibrary(seriesData);
+                }
             } else {
                 likeBtn.classList.remove('liked');
+                
+                // Remover de biblioteca si quitó el like
+                if (startEpisode === 1 && title === 'La Niña de los Cuatro CEO') {
+                    removeFromLibrary(generateContentId(title));
+                }
             }
         } else {
             // Revertir cambio optimistic si hubo error
