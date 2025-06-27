@@ -3,12 +3,63 @@ const YAHOO_CLIENT_ID = 'dj0yJmk9bDdrb2lTMFNWT0tDJmQ9WVdrOVNHaHlkMHhZUkV3bWNHbzl
 // Configuración para Netlify
 const YAHOO_REDIRECT_URI = 'https://beemotv.netlify.app';
 
+// Translation System
+let currentLanguage = localStorage.getItem('selectedLanguage') || 'es';
+let isTranslating = false;
+
+// Diccionario de traducciones
+const translations = {
+    es: {
+        welcome_title: "Mira tus series cortas favoritas y dales like",
+        welcome_subtitle: "Descubre dramas increíbles de 1 minuto cada episodio",
+        login_btn: "Iniciar Sesión",
+        register_btn: "Registrarse",
+        welcome_footer: "Disfruta de contenido ilimitado",
+        login_title: "Iniciar Sesión",
+        register_title: "Crear Cuenta",
+        search_placeholder: "Buscar series y dramas...",
+        library_title: "Mi Biblioteca",
+        profile_title: "Mi Perfil",
+        play_btn: "Reproducir",
+        my_list_btn: "Mi Lista",
+        episode: "Episodio",
+        home: "Inicio",
+        library: "Biblioteca", 
+        profile: "Perfil",
+        translating: "Traduciendo interfaz...",
+        translation_complete: "Traducción completada"
+    },
+    zh: {
+        welcome_title: "观看您最喜欢的短剧并点赞",
+        welcome_subtitle: "发现每集1分钟的精彩剧集",
+        login_btn: "登录",
+        register_btn: "注册",
+        welcome_footer: "享受无限内容",
+        login_title: "登录",
+        register_title: "创建账户",
+        search_placeholder: "搜索剧集和电视剧...",
+        library_title: "我的图书馆",
+        profile_title: "我的资料",
+        play_btn: "播放",
+        my_list_btn: "我的列表",
+        episode: "剧集",
+        home: "首页",
+        library: "图书馆",
+        profile: "资料",
+        translating: "正在翻译界面...",
+        translation_complete: "翻译完成"
+    }
+};
+
 // Auth State Management
 let currentUser = null;
 let isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
 
 // Initialize Auth on page load
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize translation system first
+    initializeTranslationSystem();
+    
     initializeAuth();
 
     // Auth screen event listeners
@@ -25,8 +76,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check if user is already authenticated
     if (isAuthenticated) {
         showMainApp();
+        // Apply saved language to main app
+        setTimeout(() => {
+            applyTranslation(currentLanguage);
+        }, 500);
     } else {
         showWelcomeScreen();
+        // Apply saved language to auth screens
+        setTimeout(() => {
+            applyTranslation(currentLanguage);
+        }, 100);
     }
 
     // Check for OAuth callback
@@ -252,6 +311,8 @@ function enterMainApp() {
 
         setTimeout(() => {
             mainApp.classList.add('active');
+            // Apply translation to main app
+            applyTranslation(currentLanguage);
         }, 50);
     }, 300);
 }
@@ -267,6 +328,11 @@ function showMainApp() {
     registerScreen.style.display = 'none';
     mainApp.style.display = 'block';
     mainApp.classList.add('active');
+    
+    // Apply current language translation to main app
+    setTimeout(() => {
+        applyTranslation(currentLanguage);
+    }, 200);
 }
 
 function showAuthLoading(message) {
@@ -889,6 +955,266 @@ function showAlreadyAddedAnimation(button) {
             miniHeart.remove();
         }
     }, 1000);
+}
+
+// Translation System Functions
+function initializeTranslationSystem() {
+    console.log('🌐 Inicializando sistema de traducción...');
+    
+    // Setup language selectors for all auth screens
+    setupLanguageSelector('languageBtn', 'languageOptions');
+    setupLanguageSelector('languageBtnLogin', 'languageOptionsLogin');
+    setupLanguageSelector('languageBtnRegister', 'languageOptionsRegister');
+    
+    // Apply saved language
+    updateLanguageSelector(currentLanguage);
+    
+    console.log('✅ Sistema de traducción inicializado');
+}
+
+function setupLanguageSelector(btnId, optionsId) {
+    const btn = document.getElementById(btnId);
+    const options = document.getElementById(optionsId);
+    
+    if (!btn || !options) return;
+    
+    // Toggle dropdown
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        options.classList.toggle('active');
+        
+        // Close other dropdowns
+        document.querySelectorAll('.language-options').forEach(opt => {
+            if (opt !== options) {
+                opt.classList.remove('active');
+            }
+        });
+    });
+    
+    // Handle language selection
+    options.addEventListener('click', (e) => {
+        const option = e.target.closest('.language-option');
+        if (!option) return;
+        
+        const lang = option.dataset.lang;
+        const flag = option.dataset.flag;
+        
+        changeLanguage(lang, flag);
+        options.classList.remove('active');
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', () => {
+        options.classList.remove('active');
+    });
+}
+
+function updateLanguageSelector(lang) {
+    const languageData = {
+        es: { flag: '🇪🇸', name: 'Español' },
+        zh: { flag: '🇨🇳', name: '中文' }
+    };
+    
+    const data = languageData[lang];
+    if (!data) return;
+    
+    // Update all language selectors
+    ['', 'Login', 'Register'].forEach(suffix => {
+        const flagEl = document.getElementById(`selectedFlag${suffix}`);
+        const textEl = document.getElementById(`selectedLanguage${suffix}`);
+        
+        if (flagEl) flagEl.textContent = data.flag;
+        if (textEl) textEl.textContent = data.name;
+        
+        // Update selected state in options
+        const options = document.getElementById(`languageOptions${suffix}`);
+        if (options) {
+            options.querySelectorAll('.language-option').forEach(opt => {
+                opt.classList.toggle('selected', opt.dataset.lang === lang);
+            });
+        }
+    });
+}
+
+async function changeLanguage(lang, flag) {
+    if (lang === currentLanguage || isTranslating) return;
+    
+    try {
+        isTranslating = true;
+        showTranslationLoading();
+        
+        console.log(`🔄 Cambiando idioma a: ${lang}`);
+        
+        currentLanguage = lang;
+        localStorage.setItem('selectedLanguage', lang);
+        
+        // Update language selector UI
+        updateLanguageSelector(lang);
+        
+        // Apply translation
+        await applyTranslation(lang);
+        
+        hideTranslationLoading();
+        showNotification(translations[lang].translation_complete, 'success');
+        
+    } catch (error) {
+        console.error('❌ Error cambiando idioma:', error);
+        showNotification('Error en la traducción', 'error');
+        hideTranslationLoading();
+    } finally {
+        isTranslating = false;
+    }
+}
+
+async function applyTranslation(targetLang) {
+    if (!translations[targetLang]) {
+        console.warn('Idioma no soportado:', targetLang);
+        return;
+    }
+    
+    const translationData = translations[targetLang];
+    
+    // Translate elements with data-translate attribute
+    document.querySelectorAll('[data-translate]').forEach(element => {
+        const key = element.getAttribute('data-translate');
+        if (translationData[key]) {
+            element.textContent = translationData[key];
+        }
+    });
+    
+    // Translate specific elements by ID or class
+    translateSpecificElements(targetLang);
+    
+    // Translate dynamic content with Google Translate API for remaining text
+    await translateRemainingContent(targetLang);
+}
+
+function translateSpecificElements(targetLang) {
+    const translationData = translations[targetLang];
+    
+    // Update placeholders
+    const searchInputs = document.querySelectorAll('input[placeholder*="Buscar"], input[placeholder*="搜索"], input[placeholder*="Search"]');
+    searchInputs.forEach(input => {
+        input.placeholder = translationData.search_placeholder || input.placeholder;
+    });
+    
+    // Update navigation items
+    const navItems = [
+        { selector: '[data-section="home"] span', key: 'home' },
+        { selector: '[data-section="library"] span', key: 'library' },
+        { selector: '[data-section="profile"] span', key: 'profile' }
+    ];
+    
+    navItems.forEach(({ selector, key }) => {
+        const element = document.querySelector(selector);
+        if (element && translationData[key]) {
+            element.textContent = translationData[key];
+        }
+    });
+    
+    // Update page headers
+    const headers = [
+        { id: 'librarySection', selector: '.page-header h1', key: 'library_title' },
+        { id: 'profileSection', selector: '.page-header h1', key: 'profile_title' }
+    ];
+    
+    headers.forEach(({ id, selector, key }) => {
+        const section = document.getElementById(id);
+        if (section) {
+            const header = section.querySelector(selector);
+            if (header && translationData[key]) {
+                header.textContent = translationData[key];
+            }
+        }
+    });
+}
+
+async function translateRemainingContent(targetLang) {
+    if (targetLang === 'es') return; // No need to translate Spanish content
+    
+    try {
+        // Get all text nodes that need translation
+        const elementsToTranslate = document.querySelectorAll('h1, h2, h3, h4, p, button, span, label');
+        const textsToTranslate = [];
+        
+        elementsToTranslate.forEach(element => {
+            // Skip elements that are already translated or don't need translation
+            if (element.hasAttribute('data-translate') || 
+                element.closest('.language-selector') ||
+                element.textContent.trim().length < 2 ||
+                /^[\d\s\.\,\-\+\(\)\[\]]+$/.test(element.textContent) || // Skip numbers/symbols only
+                element.querySelector('svg') || // Skip elements with icons
+                element.classList.contains('translation-processed')) {
+                return;
+            }
+            
+            const text = element.textContent.trim();
+            if (text && !textsToTranslate.includes(text)) {
+                textsToTranslate.push({
+                    text: text,
+                    element: element
+                });
+            }
+        });
+        
+        // Use Google Translate API (free tier simulation)
+        for (const item of textsToTranslate.slice(0, 50)) { // Limit to avoid rate limits
+            try {
+                const translatedText = await translateWithGoogleAPI(item.text, 'es', targetLang);
+                if (translatedText && translatedText !== item.text) {
+                    item.element.textContent = translatedText;
+                    item.element.classList.add('translation-processed');
+                }
+                
+                // Add small delay to avoid rate limiting
+                await new Promise(resolve => setTimeout(resolve, 100));
+            } catch (error) {
+                console.log('Error translating text:', item.text, error);
+            }
+        }
+        
+    } catch (error) {
+        console.log('Error in remaining content translation:', error);
+    }
+}
+
+async function translateWithGoogleAPI(text, fromLang, toLang) {
+    try {
+        // Use Google Translate free API
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${fromLang}&tl=${toLang}&dt=t&q=${encodeURIComponent(text)}`;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data && data[0] && data[0][0] && data[0][0][0]) {
+            return data[0][0][0];
+        }
+        
+        return null;
+    } catch (error) {
+        console.log('Google Translate API error:', error);
+        return null;
+    }
+}
+
+function showTranslationLoading() {
+    // Remove existing loading indicator
+    const existing = document.getElementById('translationLoading');
+    if (existing) existing.remove();
+    
+    const loading = document.createElement('div');
+    loading.id = 'translationLoading';
+    loading.className = 'translation-loading';
+    loading.textContent = translations[currentLanguage].translating;
+    
+    document.body.appendChild(loading);
+}
+
+function hideTranslationLoading() {
+    const loading = document.getElementById('translationLoading');
+    if (loading) {
+        loading.remove();
+    }
 }
 
 // Add logout button functionality to header (can be added later)
