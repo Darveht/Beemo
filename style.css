@@ -690,36 +690,35 @@ body {
     font-weight: 700;
 }
 
-/* Hero Section - Netflix Style con imagen de fondo */
+/* Hero Section - Netflix Style Pantalla Completa */
 .hero {
     margin-top: 80px;
-    padding: 4rem 2rem;
-    max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
-    border-bottom: 1px solid #2f3336;
+    padding: 0;
+    width: 100vw;
+    height: 70vh;
+    margin-left: calc(-50vw + 50%);
     position: relative;
-    background: linear-gradient(
-        135deg,
-        rgba(0, 0, 0, 0.8) 0%,
-        rgba(0, 0, 0, 0.6) 40%,
-        rgba(0, 0, 0, 0.8) 100%
-    ), url('https://www.dropbox.com/scl/fi/r24wdvq29de6w6djkaqsc/IMG_4044.png?rlkey=5e2lge2dv00n427p0i5jdqxgy&st=65b6ye7u&raw=1');
+    background: url('https://www.dropbox.com/scl/fi/r24wdvq29de6w6djkaqsc/IMG_4044.png?rlkey=5e2lge2dv00n427p0i5jdqxgy&st=65b6ye7u&raw=1');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: flex-end;
+    border-radius: 0;
+    border-bottom: none;
+    box-shadow: none;
 }
 
 .hero-content {
     max-width: 600px;
     position: relative;
-    z-index: 2;
+    z-index: 3;
+    padding: 4rem 2rem;
+    margin-left: 2rem;
 }
 
-/* Overlay decorativo estilo Netflix */
+/* Overlay estilo Netflix - gradiente hacia abajo */
 .hero::before {
     content: '';
     position: absolute;
@@ -728,12 +727,31 @@ body {
     right: 0;
     bottom: 0;
     background: linear-gradient(
-        45deg,
-        rgba(29, 155, 240, 0.1) 0%,
-        transparent 50%,
-        rgba(147, 51, 234, 0.1) 100%
+        180deg,
+        transparent 0%,
+        transparent 30%,
+        rgba(0, 0, 0, 0.3) 50%,
+        rgba(0, 0, 0, 0.7) 80%,
+        rgba(0, 0, 0, 0.9) 100%
     );
     z-index: 1;
+}
+
+/* Overlay adicional para mejor contraste */
+.hero::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.8) 0%,
+        rgba(0, 0, 0, 0.4) 50%,
+        transparent 100%
+    );
+    z-index: 2;
 }
 
 .hero-title {
@@ -979,29 +997,7 @@ body {
     display: none;
 }
 
-.hero-info {
-    display: flex;
-    gap: 2rem;
-    color: #e7e9ea;
-    font-size: 0.9rem;
-    font-weight: 500;
-    background: rgba(0, 0, 0, 0.4);
-    padding: 0.75rem 1rem;
-    border-radius: 25px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    margin-top: 1rem;
-}
-
-.rating {
-    color: #1d9bf0;
-    font-weight: 600;
-}
-
-.rating::before {
-    content: "★ ";
-    color: #ffd700;
-}
+/* Hero info eliminada - información innecesaria removida */
 
 /* Categories - Small Twitter-style carousel */
 .categories-section {
@@ -1103,6 +1099,53 @@ body {
     visibility: visible;
     justify-self: start;
     flex-shrink: 0;
+}
+
+/* Etiquetas automáticas para series */
+.series-badge {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    z-index: 10;
+    backdrop-filter: blur(5px);
+}
+
+.new-badge {
+    background: linear-gradient(135deg, #ff4757, #ff3742);
+    color: white;
+    animation: pulseBadge 2s ease-in-out infinite;
+}
+
+.trending-badge {
+    background: linear-gradient(135deg, #ffd700, #ffb347);
+    color: #000;
+}
+
+.popular-badge {
+    background: linear-gradient(135deg, #1d9bf0, #1a8cd8);
+    color: white;
+}
+
+.exclusive-badge {
+    background: linear-gradient(135deg, #9333ea, #7c3aed);
+    color: white;
+}
+
+@keyframes pulseBadge {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
 }
 
 .content-card:hover {
@@ -6613,10 +6656,16 @@ video::-ms-media-controls {
     }
 
     .hero {
-        padding: 3rem 1rem;
-        text-align: center;
-        margin: 80px 1rem 0;
-        border-radius: 16px;
+        height: 60vh;
+        margin-left: calc(-50vw + 50%);
+        width: 100vw;
+        margin-top: 80px;
+    }
+
+    .hero-content {
+        padding: 2rem 1rem;
+        margin-left: 0;
+        text-align: left;
     }
 
     .hero-title {
@@ -6626,12 +6675,6 @@ video::-ms-media-controls {
     .hero-description {
         font-size: 1rem;
         padding: 0.75rem;
-    }
-
-    .hero-info {
-        flex-direction: column;
-        gap: 0.5rem;
-        text-align: center;
     }
 
     .content-feed {

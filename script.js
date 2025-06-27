@@ -373,6 +373,9 @@ function showMainApp() {
             applyAutomaticTranslation(currentLanguage);
         }
     }, 200);
+    
+    // Inicializar sistema de etiquetas automáticas
+    initializeSeriesTagging();
 }
 
 function showAuthLoading(message) {
@@ -1572,6 +1575,128 @@ async function initializeContentLikes() {
     // Esta función ahora solo se ejecuta dentro del reproductor
     // Las cards de la página principal no tendrán likes
     return;
+}
+
+// Sistema de etiquetas automáticas para series
+function initializeSeriesTagging() {
+    console.log('🏷️ Inicializando sistema de etiquetas automáticas...');
+    
+    // Detectar y aplicar etiquetas a todas las series
+    const seriesCards = document.querySelectorAll('.content-card[data-series-id]');
+    
+    seriesCards.forEach(card => {
+        const seriesId = card.getAttribute('data-series-id');
+        const releaseDate = card.getAttribute('data-release-date');
+        
+        // Aplicar etiquetas automáticas
+        applyAutomaticTags(card, seriesId, releaseDate);
+    });
+    
+    console.log(`✅ ${seriesCards.length} series procesadas con etiquetas automáticas`);
+}
+
+function applyAutomaticTags(cardElement, seriesId, releaseDate) {
+    const tags = detectSeriesTags(seriesId, releaseDate);
+    
+    // Limpiar etiquetas existentes
+    const existingBadges = cardElement.querySelectorAll('.series-badge');
+    existingBadges.forEach(badge => badge.remove());
+    
+    // Aplicar nuevas etiquetas
+    tags.forEach((tag, index) => {
+        const badge = document.createElement('div');
+        badge.className = `series-badge ${tag.class}`;
+        badge.textContent = tag.text;
+        badge.style.top = `${0.5 + (index * 1.8)}rem`;
+        
+        cardElement.appendChild(badge);
+    });
+}
+
+function detectSeriesTags(seriesId, releaseDate) {
+    const tags = [];
+    const now = new Date();
+    const release = new Date(releaseDate);
+    const daysSinceRelease = Math.floor((now - release) / (1000 * 60 * 60 * 24));
+    
+    // Lógica de detección automática
+    
+    // Serie nueva (menos de 7 días)
+    if (daysSinceRelease <= 7 && daysSinceRelease >= 0) {
+        tags.push({ class: 'new-badge', text: 'NUEVA' });
+    }
+    
+    // Serie trending (basado en actividad simulada)
+    if (isSeriesTrending(seriesId)) {
+        tags.push({ class: 'trending-badge', text: 'TENDENCIA' });
+    }
+    
+    // Serie popular (basado en likes y visualizaciones)
+    if (isSeriesPopular(seriesId)) {
+        tags.push({ class: 'popular-badge', text: 'POPULAR' });
+    }
+    
+    // Serie exclusiva
+    if (isSeriesExclusive(seriesId)) {
+        tags.push({ class: 'exclusive-badge', text: 'EXCLUSIVA' });
+    }
+    
+    return tags;
+}
+
+function isSeriesTrending(seriesId) {
+    // Simular detección de trending basado en actividad reciente
+    const trendingSeries = ['la-nina-ceo'];
+    return trendingSeries.includes(seriesId);
+}
+
+function isSeriesPopular(seriesId) {
+    // Simular detección de popularidad basado en métricas
+    const popularSeries = ['la-nina-ceo'];
+    return popularSeries.includes(seriesId);
+}
+
+function isSeriesExclusive(seriesId) {
+    // Detectar series exclusivas de Beemo
+    const exclusiveSeries = [];
+    return exclusiveSeries.includes(seriesId);
+}
+
+// Función para agregar nuevas series automáticamente
+function addNewSeries(seriesData) {
+    const { id, title, thumbnail, genre, episodes, releaseDate } = seriesData;
+    
+    console.log(`📺 Agregando nueva serie: ${title}`);
+    
+    // Crear elemento de la serie
+    const seriesCard = document.createElement('div');
+    seriesCard.className = 'content-card';
+    seriesCard.setAttribute('data-series-id', id);
+    seriesCard.setAttribute('data-release-date', releaseDate);
+    
+    seriesCard.innerHTML = `
+        <img src="${thumbnail}" alt="${title}">
+        <div class="card-info">
+            <h3>${title}</h3>
+            <p>${genre} • ${episodes} eps</p>
+        </div>
+        <button class="play-btn" onclick="showTikTokPlayer('${title}', 1)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+        </button>
+    `;
+    
+    // Agregar a la grilla de series disponibles
+    const seriesGrid = document.querySelector('.content-section .content-grid');
+    if (seriesGrid) {
+        seriesGrid.appendChild(seriesCard);
+        
+        // Aplicar etiquetas automáticas
+        applyAutomaticTags(seriesCard, id, releaseDate);
+        
+        showNotification(`Nueva serie agregada: ${title}`, 'success');
+    }
 }
 
 // Generar ID de contenido desde título
