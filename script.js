@@ -126,6 +126,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 100);
     }
 
+    // Inicializar sistema de categorías funcionales
+    setTimeout(() => {
+        initializeCategoriesSystem();
+    }, 500);
+
     // Check for OAuth callback
     handleOAuthCallback();
 });
@@ -1468,6 +1473,294 @@ function initializeRealTimeStats() {
             }, 100);
         }
     };
+}
+
+// Sistema de categorías funcionales
+let allSeries = [];
+let currentCategory = 'todos';
+
+// Base de datos completa de series
+function getAllSeries() {
+    return [
+        {
+            id: 'la-nina-ceo',
+            title: 'La Niña de los Cuatro CEO',
+            thumbnail: 'https://www.dropbox.com/scl/fi/r24wdvq29de6w6djkaqsc/IMG_4044.png?rlkey=5e2lge2dv00n427p0i5jdqxgy&st=65b6ye7u&raw=1',
+            genre: 'Romance Empresarial',
+            category: 'romance',
+            episodes: '45 eps',
+            rating: '9.5',
+            year: '2024',
+            isNew: true,
+            isTrending: true,
+            releaseDate: '2024-12-20'
+        },
+        {
+            id: 'emperador-dragon',
+            title: 'El Emperador Dragón Renacido',
+            thumbnail: 'https://via.placeholder.com/280x400/8B5CF6/fff?text=Emperador+Dragón',
+            genre: 'Fantasía Épica',
+            category: 'fantasia',
+            episodes: '38 eps',
+            rating: '9.7',
+            year: '2024',
+            isNew: false,
+            isTrending: true,
+            releaseDate: '2024-11-15'
+        },
+        {
+            id: 'ceo-secreto',
+            title: 'Mi Esposo es un CEO Secreto',
+            thumbnail: 'https://via.placeholder.com/280x400/EF4444/fff?text=CEO+Secreto',
+            genre: 'Romance Moderno',
+            category: 'romance',
+            episodes: '42 eps',
+            rating: '9.2',
+            year: '2024',
+            isNew: false,
+            isTrending: false,
+            releaseDate: '2024-10-10'
+        },
+        {
+            id: 'maestro-artes',
+            title: 'El Maestro de las Artes Marciales',
+            thumbnail: 'https://via.placeholder.com/280x400/F59E0B/fff?text=Artes+Marciales',
+            genre: 'Acción Histórica',
+            category: 'artes',
+            episodes: '35 eps',
+            rating: '9.0',
+            year: '2024',
+            isNew: false,
+            isTrending: false,
+            releaseDate: '2024-09-25'
+        },
+        {
+            id: 'comedia-real',
+            title: 'La Comedia del Emperador',
+            thumbnail: 'https://via.placeholder.com/280x400/10B981/fff?text=Comedia+Real',
+            genre: 'Comedia Histórica',
+            category: 'comedia',
+            episodes: '28 eps',
+            rating: '8.8',
+            year: '2024',
+            isNew: true,
+            isTrending: false,
+            releaseDate: '2024-12-15'
+        },
+        {
+            id: 'thriller-palacio',
+            title: 'Secretos del Palacio Imperial',
+            thumbnail: 'https://via.placeholder.com/280x400/6366F1/fff?text=Thriller+Palacio',
+            genre: 'Thriller Histórico',
+            category: 'thriller',
+            episodes: '40 eps',
+            rating: '9.3',
+            year: '2024',
+            isNew: false,
+            isTrending: true,
+            releaseDate: '2024-08-20'
+        }
+    ];
+}
+
+// Inicializar sistema de categorías
+function initializeCategoriesSystem() {
+    allSeries = getAllSeries();
+    
+    // Event listeners para categorías
+    const categoryChips = document.querySelectorAll('.category-chip');
+    categoryChips.forEach(chip => {
+        chip.addEventListener('click', (e) => {
+            const category = e.target.getAttribute('data-category');
+            selectCategory(category);
+        });
+    });
+    
+    // Mostrar todas las series inicialmente
+    displaySeriesByCategory('todos');
+}
+
+// Seleccionar categoría
+function selectCategory(category) {
+    currentCategory = category;
+    
+    // Actualizar UI de categorías
+    document.querySelectorAll('.category-chip').forEach(chip => {
+        chip.classList.remove('active');
+    });
+    
+    document.querySelector(`[data-category="${category}"]`).classList.add('active');
+    
+    // Filtrar y mostrar series
+    displaySeriesByCategory(category);
+    
+    // Animación de scroll suave
+    const categoriesSection = document.querySelector('.categories-section');
+    if (categoriesSection) {
+        categoriesSection.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'nearest' 
+        });
+    }
+    
+    // Feedback visual
+    showNotification(`Mostrando: ${getCategoryDisplayName(category)}`, 'info');
+}
+
+// Obtener nombre display de categoría
+function getCategoryDisplayName(category) {
+    const names = {
+        'todos': 'Todas las series',
+        'nuevos': 'Nuevos lanzamientos',
+        'populares': 'Más populares',
+        'romance': 'Romance',
+        'accion': 'Acción',
+        'comedia': 'Comedia',
+        'fantasia': 'Fantasía',
+        'artes': 'Artes Marciales',
+        'historico': 'Histórico',
+        'thriller': 'Thriller'
+    };
+    return names[category] || category;
+}
+
+// Mostrar series por categoría
+function displaySeriesByCategory(category) {
+    let filteredSeries = [];
+    
+    switch(category) {
+        case 'todos':
+            filteredSeries = allSeries;
+            break;
+        case 'nuevos':
+            filteredSeries = allSeries.filter(serie => serie.isNew);
+            break;
+        case 'populares':
+            filteredSeries = allSeries.filter(serie => parseFloat(serie.rating) >= 9.2);
+            break;
+        case 'romance':
+            filteredSeries = allSeries.filter(serie => serie.category === 'romance');
+            break;
+        case 'accion':
+            filteredSeries = allSeries.filter(serie => serie.category === 'accion');
+            break;
+        case 'comedia':
+            filteredSeries = allSeries.filter(serie => serie.category === 'comedia');
+            break;
+        case 'fantasia':
+            filteredSeries = allSeries.filter(serie => serie.category === 'fantasia');
+            break;
+        case 'artes':
+            filteredSeries = allSeries.filter(serie => serie.category === 'artes');
+            break;
+        case 'historico':
+            filteredSeries = allSeries.filter(serie => 
+                serie.genre.includes('Histórico') || serie.genre.includes('Imperial')
+            );
+            break;
+        case 'thriller':
+            filteredSeries = allSeries.filter(serie => serie.category === 'thriller');
+            break;
+        default:
+            filteredSeries = allSeries;
+    }
+    
+    // Actualizar la grilla de contenido
+    updateContentGrid(filteredSeries);
+    
+    // Actualizar banner si hay series en trending
+    const trendingSeries = filteredSeries.filter(serie => serie.isTrending);
+    if (trendingSeries.length > 0 && category !== 'todos') {
+        updateBannerToSeries(trendingSeries[0]);
+    }
+}
+
+// Actualizar grilla de contenido
+function updateContentGrid(series) {
+    const contentGrid = document.querySelector('.content-section .content-grid');
+    if (!contentGrid) return;
+    
+    // Animación de salida
+    contentGrid.style.opacity = '0.3';
+    contentGrid.style.transform = 'translateY(20px)';
+    
+    setTimeout(() => {
+        // Limpiar contenido actual
+        contentGrid.innerHTML = '';
+        
+        if (series.length === 0) {
+            // Mostrar mensaje de no hay series
+            contentGrid.innerHTML = `
+                <div class="no-series-message" style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: #666;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+                    <h3>No hay series en esta categoría</h3>
+                    <p>Prueba con otra categoría o vuelve a "Todos"</p>
+                    <button onclick="selectCategory('todos')" style="margin-top: 1rem; padding: 0.75rem 1.5rem; background: #000; color: white; border: none; border-radius: 25px; cursor: pointer;">
+                        Ver todas las series
+                    </button>
+                </div>
+            `;
+        } else {
+            // Generar cards de series
+            series.forEach((serie, index) => {
+                const card = createSeriesCard(serie);
+                contentGrid.appendChild(card);
+                
+                // Animación escalonada de entrada
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        }
+        
+        // Animación de entrada
+        contentGrid.style.opacity = '1';
+        contentGrid.style.transform = 'translateY(0)';
+        
+    }, 300);
+}
+
+// Crear card de serie
+function createSeriesCard(serie) {
+    const card = document.createElement('div');
+    card.className = 'content-card';
+    card.setAttribute('data-series-id', serie.id);
+    card.setAttribute('data-release-date', serie.releaseDate);
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(30px)';
+    card.style.transition = 'all 0.4s ease';
+    
+    // Determinar etiqueta
+    let badge = '';
+    if (serie.isNew) {
+        badge = '<div class="series-badge new-badge">NUEVA</div>';
+    } else if (serie.isTrending) {
+        badge = '<div class="series-badge trending-badge">TENDENCIA</div>';
+    } else if (parseFloat(serie.rating) >= 9.5) {
+        badge = '<div class="series-badge popular-badge">POPULAR</div>';
+    }
+    
+    card.innerHTML = `
+        ${badge}
+        <img src="${serie.thumbnail}" alt="${serie.title}" loading="lazy">
+        <div class="card-info">
+            <h3>${serie.title}</h3>
+            <p>${serie.genre} • ${serie.episodes}</p>
+        </div>
+        <button class="play-btn" onclick="showTikTokPlayer('${serie.title}', 1)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+        </button>
+    `;
+    
+    // Event listener para reproducir serie
+    card.addEventListener('click', () => {
+        showTikTokPlayer(serie.title, 1);
+    });
+    
+    return card;
 }
 
 // Watch history management
