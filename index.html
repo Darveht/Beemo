@@ -249,135 +249,321 @@
             </div>
 
             <div class="membership-tabs">
-                <button class="tab-btn active" data-tab="subscriptions">💎 Suscripciones</button>
-                <button class="tab-btn" data-tab="coins">🪙 Monedas</button>
+                <button class="tab-btn active" data-tab="subscriptions">Suscripciones</button>
+                <button class="tab-btn" data-tab="coins">Monedas</button>
             </div>
 
             <div class="monetization-content">
                 <!-- Sección de Suscripciones -->
                 <div class="tab-content active" id="subscriptions-tab">
-                    <div class="subscription-hero">
-                        <h2>Disfruta Beemo Sin Límites</h2>
-                        <p>Acceso ilimitado a todo el contenido premium sin anuncios</p>
-                    </div>
-
-                    <div class="membership-plans">
-                        <!-- Plan Gratuito -->
-                        <div class="membership-plan free-plan">
-                            <div class="plan-header">
-                                <h3>Gratuito</h3>
-                                <div class="plan-price">$0<span>/siempre</span></div>
-                            </div>
-                            <div class="plan-features">
-                                <div class="feature included">✓ Episodios 1-8 gratis</div>
-                                <div class="feature limited">⚡ Con anuncios</div>
-                                <div class="feature limited">🔒 Contenido limitado</div>
-                                <div class="feature limited">📱 Calidad estándar</div>
-                            </div>
-                            <button class="plan-btn secondary" id="currentPlanBtn">Plan Actual</button>
+                    <!-- Hero Section -->
+                    <div class="subscription-hero-uber">
+                        <div class="hero-background-uber">
+                            <div class="hero-gradient-uber"></div>
                         </div>
-
-                        <!-- Plan Prueba Gratuita -->
-                        <div class="membership-plan trial-plan popular">
-                            <div class="plan-badge">🎁 Prueba Gratis</div>
-                            <div class="plan-header">
-                                <h3>Prueba Premium</h3>
-                                <div class="plan-price">Gratis<span>/3 días</span></div>
+                        <div class="hero-content-uber">
+                            <div class="hero-icon-uber">
+                                <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
                             </div>
-                            <div class="plan-features">
-                                <div class="feature included">✓ Todo el contenido</div>
-                                <div class="feature included">🚫 Sin anuncios</div>
-                                <div class="feature included">🔓 Episodios premium</div>
-                                <div class="feature included">📱 HD y 4K</div>
-                                <div class="feature included">⬇️ Descargas offline</div>
+                            <h1 class="hero-title-uber">Disfruta Beemo Premium</h1>
+                            <p class="hero-subtitle-uber">Series ilimitadas, sin anuncios, calidad 4K</p>
+                            <div class="hero-stats-uber">
+                                <div class="stat-uber">
+                                    <span class="stat-number-uber">45+</span>
+                                    <span class="stat-label-uber">Series</span>
+                                </div>
+                                <div class="stat-uber">
+                                    <span class="stat-number-uber">1M+</span>
+                                    <span class="stat-label-uber">Usuarios</span>
+                                </div>
+                                <div class="stat-uber">
+                                    <span class="stat-number-uber">4K</span>
+                                    <span class="stat-label-uber">Ultra HD</span>
+                                </div>
                             </div>
-                            <button class="plan-btn primary" id="startTrialBtn">
-                                <span id="authIcon">🔐</span> Iniciar Prueba
-                            </button>
-                            <p class="plan-note">Se requiere verificación con Apple ID/Google</p>
-                        </div>
-
-                        <!-- Plan Semanal -->
-                        <div class="membership-plan weekly-plan">
-                            <div class="plan-header">
-                                <h3>Semanal</h3>
-                                <div class="plan-price">$4<span>/semana</span></div>
-                            </div>
-                            <div class="plan-features">
-                                <div class="feature included">✓ Todo el contenido</div>
-                                <div class="feature included">🚫 Sin anuncios</div>
-                                <div class="feature included">🔓 Episodios premium</div>
-                                <div class="feature included">📱 HD y 4K</div>
-                                <div class="feature included">⬇️ Descargas offline</div>
-                            </div>
-                            <button class="plan-btn primary" data-plan="weekly" data-amount="400" data-period="7">
-                                Suscribirse
-                            </button>
-                            <p class="plan-note">Renovación automática</p>
-                        </div>
-
-                        <!-- Plan Mensual -->
-                        <div class="membership-plan monthly-plan bestseller">
-                            <div class="plan-badge">🔥 Más Popular</div>
-                            <div class="plan-header">
-                                <h3>Mensual</h3>
-                                <div class="plan-price">$8<span>/mes</span></div>
-                            </div>
-                            <div class="plan-features">
-                                <div class="feature included">✓ Todo el contenido</div>
-                                <div class="feature included">🚫 Sin anuncios</div>
-                                <div class="feature included">🔓 Episodios premium</div>
-                                <div class="feature included">📱 HD y 4K</div>
-                                <div class="feature included">⬇️ Descargas offline</div>
-                                <div class="feature included">🎯 Acceso prioritario</div>
-                            </div>
-                            <button class="plan-btn primary" data-plan="monthly" data-amount="800" data-period="30">
-                                Suscribirse
-                            </button>
-                            <p class="plan-note">Ahorra 50% vs plan semanal</p>
-                        </div>
-
-                        <!-- Plan de 2 Días -->
-                        <div class="membership-plan daily-plan">
-                            <div class="plan-header">
-                                <h3>2 Días</h3>
-                                <div class="plan-price">$1.99<span>/2 días</span></div>
-                            </div>
-                            <div class="plan-features">
-                                <div class="feature included">✓ Todo el contenido</div>
-                                <div class="feature included">🚫 Sin anuncios</div>
-                                <div class="feature included">🔓 Episodios premium</div>
-                                <div class="feature included">📱 HD y 4K</div>
-                            </div>
-                            <button class="plan-btn primary" data-plan="daily" data-amount="199" data-period="2">
-                                Prueba Rápida
-                            </button>
-                            <p class="plan-note">Perfecto para maratones</p>
                         </div>
                     </div>
 
-                    <div class="subscription-benefits">
-                        <h3>✨ Beneficios Premium</h3>
-                        <div class="benefits-grid">
-                            <div class="benefit-item">
-                                <div class="benefit-icon">🚫</div>
-                                <h4>Sin Anuncios</h4>
-                                <p>Disfruta tus series sin interrupciones</p>
+                    <!-- Planes de Membresía -->
+                    <div class="subscription-plans-uber">
+                        <div class="plans-header-uber">
+                            <h2>Elige tu plan perfecto</h2>
+                            <p>Cancela cuando quieras • Sin compromisos • Garantía de satisfacción</p>
+                        </div>
+
+                        <div class="plans-grid-uber">
+                            <!-- Plan Gratuito -->
+                            <div class="plan-card-uber plan-free">
+                                <div class="plan-header-uber">
+                                    <div class="plan-icon-uber">
+                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                        </svg>
+                                    </div>
+                                    <h3 class="plan-name-uber">Básico</h3>
+                                    <div class="plan-price-uber">
+                                        <span class="price-currency-uber">$</span>
+                                        <span class="price-amount-uber">0</span>
+                                        <span class="price-period-uber">/siempre</span>
+                                    </div>
+                                    <p class="plan-description-uber">Perfecto para empezar</p>
+                                </div>
+
+                                <div class="plan-features-uber">
+                                    <div class="feature-uber included">
+                                        <svg class="feature-icon-uber" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                        </svg>
+                                        <span>Episodios 1-8 gratuitos</span>
+                                    </div>
+                                    <div class="feature-uber limited">
+                                        <svg class="feature-icon-uber" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                                        </svg>
+                                        <span>Con anuncios publicitarios</span>
+                                    </div>
+                                    <div class="feature-uber limited">
+                                        <svg class="feature-icon-uber" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                                        </svg>
+                                        <span>Calidad estándar 720p</span>
+                                    </div>
+                                    <div class="feature-uber limited">
+                                        <svg class="feature-icon-uber" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                                        </svg>
+                                        <span>Contenido limitado</span>
+                                    </div>
+                                </div>
+
+                                <button class="plan-button-uber secondary current">
+                                    <span>Plan Actual</span>
+                                </button>
                             </div>
-                            <div class="benefit-item">
-                                <div class="benefit-icon">🔓</div>
-                                <h4>Todo Desbloqueado</h4>
-                                <p>Acceso completo a todos los episodios</p>
+
+                            <!-- Plan Premium -->
+                            <div class="plan-card-uber plan-premium recommended">
+                                <div class="plan-badge-uber">Más Popular</div>
+                                <div class="plan-header-uber">
+                                    <div class="plan-icon-uber">
+                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                        </svg>
+                                    </div>
+                                    <h3 class="plan-name-uber">Premium</h3>
+                                    <div class="plan-price-uber">
+                                        <span class="price-currency-uber">$</span>
+                                        <span class="price-amount-uber">8</span>
+                                        <span class="price-period-uber">/mes</span>
+                                    </div>
+                                    <p class="plan-description-uber">La experiencia completa</p>
+                                </div>
+
+                                <div class="plan-features-uber">
+                                    <div class="feature-uber included">
+                                        <svg class="feature-icon-uber" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                        </svg>
+                                        <span>Todo el contenido desbloqueado</span>
+                                    </div>
+                                    <div class="feature-uber included">
+                                        <svg class="feature-icon-uber" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                        </svg>
+                                        <span>Sin anuncios nunca más</span>
+                                    </div>
+                                    <div class="feature-uber included">
+                                        <svg class="feature-icon-uber" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                        </svg>
+                                        <span>Calidad 4K Ultra HD</span>
+                                    </div>
+                                    <div class="feature-uber included">
+                                        <svg class="feature-icon-uber" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                        </svg>
+                                        <span>Descargas offline ilimitadas</span>
+                                    </div>
+                                    <div class="feature-uber included">
+                                        <svg class="feature-icon-uber" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                        </svg>
+                                        <span>Acceso prioritario al contenido</span>
+                                    </div>
+                                    <div class="feature-uber included">
+                                        <svg class="feature-icon-uber" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                        </svg>
+                                        <span>Soporte premium 24/7</span>
+                                    </div>
+                                </div>
+
+                                <button class="plan-button-uber primary" data-plan="monthly" data-amount="800" data-period="30">
+                                    <span>Comenzar Premium</span>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+                                    </svg>
+                                </button>
+
+                                <div class="plan-guarantee-uber">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                                    </svg>
+                                    <span>Garantía de 7 días</span>
+                                </div>
                             </div>
-                            <div class="benefit-item">
-                                <div class="benefit-icon">📱</div>
-                                <h4>4K Ultra HD</h4>
-                                <p>Máxima calidad de video disponible</p>
+
+                            <!-- Plan Prueba -->
+                            <div class="plan-card-uber plan-trial">
+                                <div class="plan-badge-uber trial">Prueba Gratis</div>
+                                <div class="plan-header-uber">
+                                    <div class="plan-icon-uber">
+                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.5 6L12 10.5 8.5 8 12 5.5 15.5 8zM12 21c-4.41 0-8-3.59-8-8 0-1.82.62-3.5 1.64-4.84L12 13.5l6.36-5.34C19.38 9.5 20 11.18 20 13c0 4.41-3.59 8-8 8z"/>
+                                        </svg>
+                                    </div>
+                                    <h3 class="plan-name-uber">Prueba Premium</h3>
+                                    <div class="plan-price-uber">
+                                        <span class="price-amount-uber trial">Gratis</span>
+                                        <span class="price-period-uber">/3 días</span>
+                                    </div>
+                                    <p class="plan-description-uber">Experimenta todo sin costo</p>
+                                </div>
+
+                                <div class="plan-features-uber">
+                                    <div class="feature-uber included">
+                                        <svg class="feature-icon-uber" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                        </svg>
+                                        <span>Acceso completo por 3 días</span>
+                                    </div>
+                                    <div class="feature-uber included">
+                                        <svg class="feature-icon-uber" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                        </svg>
+                                        <span>Todas las funciones premium</span>
+                                    </div>
+                                    <div class="feature-uber included">
+                                        <svg class="feature-icon-uber" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                        </svg>
+                                        <span>Cancela en cualquier momento</span>
+                                    </div>
+                                    <div class="feature-uber included">
+                                        <svg class="feature-icon-uber" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                        </svg>
+                                        <span>Sin compromisos</span>
+                                    </div>
+                                </div>
+
+                                <button class="plan-button-uber primary trial" id="startTrialBtn">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s```tool_code
+3.1 1.39 3.1 3.1v2z"/>
+                                    </svg>
+                                    <span>Probar Gratis</span>
+                                </button>
+
+                                <div class="trial-note-uber">
+                                    Requiere verificación segura
+                                </div>
                             </div>
-                            <div class="benefit-item">
-                                <div class="benefit-icon">⬇️</div>
-                                <h4>Descargas</h4>
-                                <p>Ve offline cuando quieras</p>
+                        </div>
+                    </div>
+
+                    <!-- Beneficios Premium -->
+                    <div class="premium-benefits-uber">
+                        <div class="benefits-header-uber">
+                            <h2>Por qué elegir Beemo Premium</h2>
+                            <p>La mejor experiencia de entretenimiento en series cortas</p>
+                        </div>
+
+                        <div class="benefits-grid-uber">
+                            <div class="benefit-card-uber">
+                                <div class="benefit-icon-container-uber">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                    </svg>
+                                </div>
+                                <h3>Sin Interrupciones</h3>
+                                <p>Disfruta todas tus series favoritas sin anuncios molestos que interrumpan la experiencia</p>
+                            </div>
+
+                            <div class="benefit-card-uber">
+                                <div class="benefit-icon-container-uber">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                                    </svg>
+                                </div>
+                                <h3>Contenido Exclusivo</h3>
+                                <p>Accede a episodios premium y series exclusivas antes que nadie más</p>
+                            </div>
+
+                            <div class="benefit-card-uber">
+                                <div class="benefit-icon-container-uber">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                                    </svg>
+                                </div>
+                                <h3>Calidad Superior</h3>
+                                <p>Streaming en 4K Ultra HD para la mejor experiencia visual posible</p>
+                            </div>
+
+                            <div class="benefit-card-uber">
+                                <div class="benefit-icon-container-uber">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                                    </svg>
+                                </div>
+                                <h3>Ver Offline</h3>
+                                <p>Descarga tus episodios favoritos y disfrútalos sin conexión a internet</p>
+                            </div>
+
+                            <div class="benefit-card-uber">
+                                <div class="benefit-icon-container-uber">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                    </svg>
+                                </div>
+                                <h3>Soporte Premium</h3>
+                                <p>Atención al cliente prioritaria 24/7 para resolver cualquier duda</p>
+                            </div>
+
+                            <div class="benefit-card-uber">
+                                <div class="benefit-icon-container-uber">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M9 11H7v6h2v-6zm4 0h-2v6h2v-6zm4 0h-2v6h2v-6zm2-7h-3l-1-1h-6l-1 1H5v2h14V4zM6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/>
+                                    </svg>
+                                </div>
+                                <h3>Flexibilidad Total</h3>
+                                <p>Cancela o cambia tu plan en cualquier momento sin penalizaciones</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer de Garantías -->
+                    <div class="subscription-footer-uber">
+                        <div class="guarantee-section-uber">
+                            <div class="guarantee-item-uber">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                                </svg>
+                                <span>Garantía de satisfacción</span>
+                            </div>
+                            <div class="guarantee-item-uber">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                                </svg>
+                                <span>Pagos 100% seguros</span>
+                            </div>
+                            <div class="guarantee-item-uber">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/>
+                                </svg>
+                                <span>Cancela cuando quieras</span>
                             </div>
                         </div>
                     </div>
@@ -386,7 +572,11 @@
                 <!-- Sección de Monedas -->
                 <div class="tab-content" id="coins-tab">
                     <div class="coin-balance">
-                        <div class="coin-icon">🪙</div>
+                        <div class="coin-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
+                            </svg>
+                        </div>
                         <div class="balance-info">
                             <h3 id="modalCoinCount">0 Monedas</h3>
                             <p>Usa monedas para desbloquear episodios individuales</p>
@@ -398,7 +588,11 @@
                             <h3>Gana Monedas Gratis</h3>
 
                             <div class="earn-option">
-                                <div class="earn-icon">📺</div>
+                                <div class="earn-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM8 15v-1.5c0-.83.67-1.5 1.5-1.5.83 0 1.5.67 1.5 1.5V15H8zm2.5-4C9.67 11 9 10.33 9 9.5S9.67 8 10.5 8s1.5.67 1.5 1.5S11.33 11 10.5 11zm5 4v-1.5c0-.83.67-1.5 1.5-1.5.83 0 1.5.67 1.5 1.5V15H13.5zm2.5-4c-.83 0-1.5-.67-1.5-1.5S15.67 8 16.5 8s1.5.67 1.5 1.5S17.33 11 16.5 11z"/>
+                                    </svg>
+                                </div>
                                 <div class="earn-info">
                                     <h4>Ver Anuncio</h4>
                                     <p>Gana 20 monedas por cada anuncio de 30 segundos</p>
@@ -407,7 +601,11 @@
                             </div>
 
                             <div class="earn-option">
-                                <div class="earn-icon">📤</div>
+                                <div class="earn-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/>
+                                    </svg>
+                                </div>
                                 <div class="earn-info">
                                     <h4>Compartir con Amigos</h4>
                                     <p>Gana 50 monedas cuando un amigo abra tu enlace</p>
@@ -450,7 +648,7 @@
                         </div>
 
                         <div class="unlock-episodes">
-                            <h3>🔓 Desbloquear Episodios</h3>
+                            <h3>Desbloquear Episodios</h3>
                             <p>Episodios 1-8: Gratis</p>
                             <p>Episodios 9+: 30 monedas cada uno</p>
                             <div id="autoUnlockStatus" class="auto-unlock-status" style="display: none;">
@@ -785,7 +983,7 @@
             </div>
         </div>
 
-        
+
 
         <!-- Selection Mode Controls -->
         <div class="selection-controls" id="selectionControls" style="display: none;">
@@ -921,7 +1119,7 @@
                         </div>
                         <div class="option-value-uber">
                             <span class="coin-balance-uber">
-                                🪙 <span id="profileCoinCount">0</span>
+                                <span id="profileCoinCount">0</span> monedas
                             </span>
                             <svg class="option-arrow-uber" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
@@ -1065,7 +1263,7 @@
                     <h1>Beemo</h1>
                 </div>
             </div>
-            
+
             <div class="header-controls">
                 <div class="search-bar-container-compact">
                     <svg class="search-icon-bar" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -1073,13 +1271,15 @@
                     </svg>
                     <input type="text" placeholder="Buscar..." class="search-bar-input-compact" id="searchBarInput">
                 </div>
-                
+
                 <button class="rewards-btn-compact" id="rewardsBtn">
-                    <img src="https://cdn-icons-png.flaticon.com/512/1244/1244248.png" alt="Recompensas" style="width: 16px; height: 16px; filter: brightness(0) invert(1);">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
+                    </svg>
                     <span class="coin-count-compact" id="coinCount">0</span>
                 </button>
-                
-                
+
+
             </div>
         </div>
 
