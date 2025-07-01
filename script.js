@@ -514,11 +514,18 @@ function switchToSection(section) {
     }
 }
 
-// Library System
+// My List System
+let recentlyWatched = JSON.parse(localStorage.getItem('recentlyWatched') || '[]');
+let isSelectionMode = false;
+let selectedItems = new Set();
+
 function initializeLibrarySystem() {
     // Load saved library data
     likedSeries = JSON.parse(localStorage.getItem('likedSeries') || '[]');
+    recentlyWatched = JSON.parse(localStorage.getItem('recentlyWatched') || '[]');
     updateLibraryCount();
+    setupListTabs();
+    setupSelectionMode();
 }
 
 function addToLibrary(seriesData) {
@@ -563,20 +570,177 @@ function updateLibraryCount() {
     }
 }
 
+// Setup tab navigation
+function setupListTabs() {
+    const tabButtons = document.querySelectorAll('.list-tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const targetTab = button.getAttribute('data-tab');
+            
+            // Update active tab
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            
+            // Update active content
+            tabContents.forEach(content => content.classList.remove('active'));
+            const targetContent = document.getElementById(targetTab === 'collection' ? 'collectionTab' : 'recentTab');
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
+            
+            // Update display based on active tab
+            if (targetTab === 'collection') {
+                updateLibraryDisplay();
+            } else {
+                updateRecentlyWatchedDisplay();
+            }
+        });
+    });
+}
+
+// Setup selection mode - Activación directa con tres puntos
+function setupSelectionMode() {
+    const listOptionsBtn = document.getElementById('listOptionsBtn');
+    const selectionControls = document.getElementById('selectionControls');
+    const cancelSelectionBtn = document.getElementById('cancelSelectionBtn');
+    const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+    
+    // Activar modo selección directamente al hacer clic en los tres puntos
+    listOptionsBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!isSelectionMode) {
+            enterSelectionMode();
+            showNotification('Modo selección activado', 'info');
+        } else {
+            exitSelectionMode();
+            showNotification('Modo selección desactivado', 'info');
+        }
+    });
+    
+    // Cancel selection mode
+    cancelSelectionBtn?.addEventListener('click', exitSelectionMode);
+    
+    // Delete selected items
+    deleteSelectedBtn?.addEventListener('click', deleteSelectedItems);
+}
+
+function enterSelectionMode() {
+    isSelectionMode = true;
+    selectedItems.clear();
+    
+    const selectionControls = document.getElementById('selectionControls');
+    const items = document.querySelectorAll('.library-item, .recent-item');
+    
+    // Show selection controls
+    if (selectionControls) {
+        selectionControls.style.display = 'flex';
+    }
+    
+    // Add selection mode to items
+    items.forEach(item => {
+        item.classList.add('selection-mode');
+        
+        // Add selection checkbox
+        const checkbox = document.createElement('div');
+        checkbox.className = 'selection-checkbox';
+        item.appendChild(checkbox);
+        
+        // Update click handler
+        const originalOnclick = item.onclick;
+        item.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleItemSelection(item);
+        };
+        
+        // Store original onclick for restoration
+        item.dataset.originalOnclick = originalOnclick;
+    });
+    
+    updateSelectionUI();
+}
+
+function exitSelectionMode() {
+    isSelectionMode = false;
+    selectedItems.clear();
+    
+    const selectionControls = document.getElementById('selectionControls');
+    const items = document.querySelectorAll('.library-item, .recent-item');
+    
+    // Hide selection controls
+    if (selectionControls) {
+        selectionControls.style.display = 'none';
+    }
+    
+    // Remove selection mode from items
+    items.forEach(item => {
+        item.classList.remove('selection-mode');
+        
+        // Remove checkbox
+        const checkbox = item.querySelector('.selection-checkbox');
+        if (checkbox) {
+            checkbox.remove();
+        }
+        
+        // Restore original onclick
+        if (item.dataset.originalOnclick) {
+            item.onclick = item.dataset.originalOnclick;
+            delete item.dataset.originalOnclick;
+        }
+    });
+}
+
+function toggleItemSelection(item) {
+    const itemId = item.dataset.itemId || item.dataset.seriesId;
+    const checkbox = item.querySelector('.selection-checkbox');
+    
+    if (selectedItems.has(itemId)) {
+        selectedItems.delete(itemId);
+        checkbox.classList.remove('selected');
+        item.classList.remove('selected');
+    } else {
+        selectedItems.add(itemId);
+        checkbox.classList.add('selected');
+        item.classList.add('selected');
+    }
+    
+    updateSelectionUI();
+}
+
+function updateSelectionUI() {
+    const selectedCount = document.getElementById('selectedCount');
+    const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+    
+    if (selectedCount) {
+        selectedCount.textContent = selectedItems.size;
+    }
+    
+    if (deleteSelectedBtn) {
+        deleteSelectedBtn.disabled = selectedItems.size === 0;
+    }
+}
+
+function deleteSelectedItems() {
+    if (selectedItems.size === 0) return;
+    
+    const activeTab = document.querySelector('.list-tab.active')?.getAttribute('data-tab');
+    
+    selectedItems.forEach(itemId => {
+        if (activeTab === 'collection') {
+            removeFromLibrary(itemId);
+        } else {
+            removeFromRecentlyWatched(itemId);
+        }
+    });
+    
+    exitSelectionMode();
+    showNotification(`${selectedItems.size} elementos eliminados`, 'success');
+}
+
 function updateLibraryDisplay() {
     const libraryGrid = document.getElementById('libraryGrid');
-    const likedSeriesCount = document.getElementById('likedSeriesCount');
-    const totalLikesGiven = document.getElementById('totalLikesGiven');
-    const watchTimeStats = document.getElementById('watchTimeStats');
-    
-    // Calcular estadísticas en tiempo real
-    const totalWatchTime = calculateTotalWatchTime();
-    const totalLikes = calculateTotalLikes();
-    
-    // Update stats with real-time data
-    if (likedSeriesCount) likedSeriesCount.textContent = likedSeries.length;
-    if (totalLikesGiven) totalLikesGiven.textContent = totalLikes;
-    if (watchTimeStats) watchTimeStats.textContent = formatWatchTime(totalWatchTime);
     
     if (!libraryGrid) return;
     
@@ -584,30 +748,133 @@ function updateLibraryDisplay() {
         libraryGrid.innerHTML = `
             <div class="empty-library">
                 <svg width="80" height="80" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
                 </svg>
-                <h3>Biblioteca vacía</h3>
-                <p>Las series que te gusten aparecerán aquí</p>
+                <h3>Colección vacía</h3>
+                <p>Las series que guardes aparecerán aquí</p>
                 <button class="explore-btn" onclick="switchToSection('home')">Explorar Series</button>
             </div>
         `;
     } else {
         libraryGrid.innerHTML = likedSeries.map(series => `
-            <div class="library-item" onclick="playFromLibrary('${series.id}')">
+            <div class="library-item" data-item-id="${series.id}" onclick="playFromLibrary('${series.id}')">
                 <img src="${series.thumbnail}" alt="${series.title}">
                 <div class="library-item-info">
                     <h3>${series.title}</h3>
                     <p>${series.rating} • ${series.episodes}</p>
                     <div class="liked-date">Agregado ${formatDate(series.likedAt)}</div>
                 </div>
-                <button class="remove-from-library" onclick="event.stopPropagation(); removeFromLibrary('${series.id}')" style="position: absolute; top: 0.5rem; right: 0.5rem; background: rgba(0,0,0,0.8); border: none; color: #ff4757; padding: 0.5rem; border-radius: 50%; cursor: pointer;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                    </svg>
-                </button>
+                ${!isSelectionMode ? `
+                    <button class="remove-from-library" onclick="event.stopPropagation(); removeFromLibrary('${series.id}')" style="position: absolute; top: 0.5rem; right: 0.5rem; background: rgba(0,0,0,0.8); border: none; color: #ff4757; padding: 0.5rem; border-radius: 50%; cursor: pointer;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                        </svg>
+                    </button>
+                ` : ''}
             </div>
         `).join('');
     }
+    
+    // Re-setup selection mode if active
+    if (isSelectionMode) {
+        setTimeout(() => {
+            const items = document.querySelectorAll('.library-item');
+            items.forEach(item => {
+                item.classList.add('selection-mode');
+                const checkbox = document.createElement('div');
+                checkbox.className = 'selection-checkbox';
+                item.appendChild(checkbox);
+                
+                item.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleItemSelection(item);
+                };
+            });
+        }, 100);
+    }
+}
+
+function updateRecentlyWatchedDisplay() {
+    const recentGrid = document.getElementById('recentGrid');
+    
+    if (!recentGrid) return;
+    
+    if (recentlyWatched.length === 0) {
+        recentGrid.innerHTML = `
+            <div class="empty-recent">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
+                </svg>
+                <h3>Sin historial reciente</h3>
+                <p>Los videos que veas aparecerán aquí</p>
+                <button class="explore-btn" onclick="switchToSection('home')">Ver Series</button>
+            </div>
+        `;
+    } else {
+        recentGrid.innerHTML = recentlyWatched.map(item => `
+            <div class="recent-item" data-item-id="${item.id}" onclick="playFromLibrary('${item.id}')">
+                <img src="${item.thumbnail}" alt="${item.title}" class="recent-item-image">
+                <div class="recent-item-info">
+                    <h3>${item.title}</h3>
+                    <p>Episodio ${item.episode}</p>
+                    <div class="recent-watch-time">Visto ${formatDate(item.watchedAt)}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    // Re-setup selection mode if active
+    if (isSelectionMode) {
+        setTimeout(() => {
+            const items = document.querySelectorAll('.recent-item');
+            items.forEach(item => {
+                item.classList.add('selection-mode');
+                const checkbox = document.createElement('div');
+                checkbox.className = 'selection-checkbox';
+                item.appendChild(checkbox);
+                
+                item.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleItemSelection(item);
+                };
+            });
+        }, 100);
+    }
+}
+
+function addToRecentlyWatched(title, episode, thumbnail) {
+    const id = generateContentId(title);
+    
+    // Remove if already exists
+    recentlyWatched = recentlyWatched.filter(item => item.id !== id);
+    
+    // Add to beginning
+    recentlyWatched.unshift({
+        id: id,
+        title: title,
+        episode: episode,
+        thumbnail: thumbnail,
+        watchedAt: new Date().toISOString()
+    });
+    
+    // Keep only last 20 items
+    recentlyWatched = recentlyWatched.slice(0, 20);
+    
+    localStorage.setItem('recentlyWatched', JSON.stringify(recentlyWatched));
+    
+    // Update display if on recent tab
+    const activeTab = document.querySelector('.list-tab.active')?.getAttribute('data-tab');
+    if (activeTab === 'recent') {
+        updateRecentlyWatchedDisplay();
+    }
+}
+
+function removeFromRecentlyWatched(itemId) {
+    recentlyWatched = recentlyWatched.filter(item => item.id !== itemId);
+    localStorage.setItem('recentlyWatched', JSON.stringify(recentlyWatched));
+    updateRecentlyWatchedDisplay();
 }
 
 function playFromLibrary(seriesId) {
@@ -2547,8 +2814,11 @@ function showTikTokPlayer(title, startEpisode = 1) {
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
     
-    // Buscar información de la serie
+    // Add to recently watched
     const seriesData = getAllSeries().find(series => series.title === title);
+    const thumbnail = seriesData ? seriesData.thumbnail : getCurrentSeriesThumbnail(title);
+    addToRecentlyWatched(title, startEpisode, thumbnail);
+    
     let currentEpisode = startEpisode;
     let watchInterval;
     let watchTime = 0;
