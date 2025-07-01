@@ -777,32 +777,216 @@ body {
     color: #666666;
 }
 
-/* Controles de la sección de inicio - Estilo Uber */
-.home-controls {
+/* Header de la App con Logo - Estilo Uber Reorganizado */
+.app-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1.5rem;
-    margin: 2rem 0;
-    padding: 0;
+    padding: 1rem 2rem;
+    margin: 0;
     max-width: 1400px;
     margin-left: auto;
     margin-right: auto;
     background: transparent;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
+/* Logo Section - Izquierda */
+.logo-section {
+    flex-shrink: 0;
+    width: 200px;
+}
+
+.app-logo {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.app-logo h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #000000, #333333);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
+    letter-spacing: -0.02em;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.logo-tagline {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #666666;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.2rem 0.4rem;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+    margin-left: 0.25rem;
+}
+
+/* Header Controls - Centro y Derecha */
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+    justify-content: space-between;
+}
+
+/* Search Bar Compacta - Centro */
+.search-bar-container-compact {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: #ffffff;
+    border: 2px solid transparent;
+    border-radius: 20px;
+    padding: 0.6rem 1rem;
+    flex: 1;
+    max-width: 280px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    min-height: 38px;
+}
+
+.search-bar-container-compact:focus-within {
+    border-color: #000000;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05), 0 4px 16px rgba(0, 0, 0, 0.08);
+    background: #ffffff;
+}
+
+.search-bar-container-compact:hover {
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
+    background: #ffffff;
+}
+
+.search-icon-bar {
+    color: #666666;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+}
+
+.search-bar-container-compact:focus-within .search-icon-bar {
+    color: #000000;
+}
+
+.search-bar-input-compact {
+    flex: 1;
+    background: none;
+    border: none;
+    color: #000000;
+    font-size: 0.85rem;
+    outline: none;
+    font-family: inherit;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+}
+
+.search-bar-input-compact::placeholder {
+    color: #999999;
+    font-weight: 400;
+}
+
+.search-bar-container-compact:focus-within .search-bar-input-compact::placeholder {
+    color: #666666;
+}
+
+/* Botón de Recompensas Compacto - Derecha (Sin animaciones) */
+.rewards-btn-compact {
+    background: #000000;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0.6rem 1rem;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 600;
+    font-size: 0.8rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+    white-space: nowrap;
+    min-height: 38px;
+    letter-spacing: -0.01em;
+}
+
+.rewards-btn-compact:hover {
+    background: #1a1a1a;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
+}
+
+.rewards-btn-compact:active {
+    background: #0a0a0a;
+}
+
+.coin-count-compact {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    color: white;
+    font-weight: 700;
+    font-size: 0.7rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    min-width: 24px;
+    text-align: center;
+}
+
+/* Responsive para móviles */
 @media (max-width: 768px) {
-    .home-controls {
+    .app-header {
+        padding: 1rem;
         flex-direction: row;
-        gap: 1rem;
-        justify-content: space-between;
-        margin: 1.5rem 0;
-        padding: 0 0.5rem;
+        gap: 0.5rem;
+        align-items: center;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     }
     
-    .search-bar-container {
+    .logo-section {
+        width: auto;
+        flex-shrink: 0;
+    }
+    
+    .app-logo h1 {
+        font-size: 1.5rem;
+    }
+    
+    .logo-tagline {
+        font-size: 0.6rem;
+        padding: 0.15rem 0.3rem;
+    }
+    
+    .header-controls {
+        flex-direction: row;
+        gap: 0.5rem;
+        justify-content: space-between;
+    }
+    
+    .search-bar-container-compact {
         flex: 1;
-        margin-right: 0.5rem;
+        max-width: none;
+        padding: 0.5rem 0.8rem;
+        min-height: 36px;
+    }
+    
+    .search-bar-input-compact {
+        font-size: 0.8rem;
+    }
+    
+    .rewards-btn-compact {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.75rem;
+        min-height: 36px;
+    }
+    
+    .coin-count-compact {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.4rem;
+        min-width: 20px;
     }
 }
 
@@ -876,20 +1060,20 @@ body {
 
 /* Hero Section - Estilo Netflix */
 .hero {
-    margin-top: 0.5rem;
+    margin-top: 0;
     padding: 0;
     max-width: 100vw;
     margin-left: calc(-50vw + 50%);
     width: 100vw;
     position: relative;
     background: #1a1a1a; /* Fondo por defecto gris oscuro en lugar de negro */
-    border-radius: 0;
     border: none;
+    outline: none;
     box-shadow: none;
     overflow: hidden;
     display: flex;
     align-items: flex-end;
-    min-height: 500px;
+    min-height: 450px;
     margin-bottom: 2rem;
     background-image: linear-gradient(
         rgba(0, 0, 0, 0.3) 0%,
@@ -1379,13 +1563,13 @@ body {
 
 /* Categories - Estilo Uber Mejorado */
 .categories-section {
-    padding: 0.5rem 1.5rem 1rem 1.5rem;
+    padding: 0.25rem 1.5rem 0.5rem 1.5rem;
     max-width: 1400px;
     margin: 0 auto;
     background: transparent;
-    border-radius: 0;
-    box-shadow: none;
     border: none;
+    box-shadow: none;
+    outline: none;
     position: relative;
 }
 
@@ -1393,36 +1577,15 @@ body {
     display: flex;
     gap: 0.75rem;
     overflow-x: auto;
-    padding: 1rem 0 1.5rem 0;
+    padding: 0.5rem 0 0.75rem 0;
     scrollbar-width: none;
     -ms-overflow-style: none;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     position: relative;
-}
-
-.categories-carousel::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 20px;
-    background: linear-gradient(90deg, #f7f7f7, transparent);
-    z-index: 2;
-    pointer-events: none;
-}
-
-.categories-carousel::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    width: 20px;
-    background: linear-gradient(270deg, #f7f7f7, transparent);
-    z-index: 2;
-    pointer-events: none;
+    border: none;
+    outline: none;
+    background: transparent;
 }
 
 .categories-carousel::-webkit-scrollbar {
@@ -1433,9 +1596,9 @@ body {
     background: #ffffff;
     border: 2px solid #e6e6e6;
     color: #333333;
-    padding: 0.6rem 1.25rem;
-    border-radius: 50px;
-    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -1545,6 +1708,8 @@ body {
     padding: 0 1.5rem 6rem 1.5rem;
     background: #f7f7f7;
     min-height: 100vh;
+    border: none;
+    outline: none;
 }
 
 .content-section {
@@ -7502,7 +7667,17 @@ video::-ms-media-controls {
     }
 
     .categories-section {
-        padding: 0.5rem 1rem;
+        padding: 0.25rem 1rem 0.5rem 1rem;
+    }
+    
+    .categories-carousel {
+        padding: 0.5rem 0 0.5rem 0;
+    }
+    
+    .category-chip {
+        padding: 0.35rem 0.7rem;
+        font-size: 0.75rem;
+        border-radius: 18px;
     }
 
     .home-controls {
