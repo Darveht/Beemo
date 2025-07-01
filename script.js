@@ -104,6 +104,9 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeLibrarySystem();
     initializeProfileSystem();
     
+    // Initialize search input handler
+    initializeSearchInput();
+    
     // Inicializar actualización automática de estadísticas
     initializeRealTimeStats();
 
@@ -1531,15 +1534,33 @@ function addLogoutToHeader() {
     }
 }
 
-// Header scroll effect
-window.addEventListener('scroll', () => {
-    const header = document.querySelector('.header');
-    if (window.scrollY > 50) {
-        header.style.background = 'rgba(0, 0, 0, 0.95)';
-        header.style.borderBottomColor = '#1d9bf0';
+// Header scroll effect - Ocultar header al hacer scroll
+let lastScrollY = window.scrollY;
+let ticking = false;
+
+function updateHeader() {
+    const appHeader = document.querySelector('.app-header');
+    const currentScrollY = window.scrollY;
+    
+    if (!appHeader) return;
+    
+    // Ocultar header al hacer scroll hacia abajo, mostrar al hacer scroll hacia arriba
+    if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        // Scrolling down & past header height
+        appHeader.classList.add('hidden');
     } else {
-        header.style.background = 'rgba(0, 0, 0, 0.85)';
-        header.style.borderBottomColor = '#2f3336';
+        // Scrolling up
+        appHeader.classList.remove('hidden');
+    }
+    
+    lastScrollY = currentScrollY;
+    ticking = false;
+}
+
+window.addEventListener('scroll', () => {
+    if (!ticking) {
+        requestAnimationFrame(updateHeader);
+        ticking = true;
     }
 });
 
@@ -3183,6 +3204,55 @@ function isSeriesExclusive(seriesId) {
     // Detectar series exclusivas de Beemo
     const exclusiveSeries = [];
     return exclusiveSeries.includes(seriesId);
+}
+
+// Función para inicializar input de búsqueda
+function initializeSearchInput() {
+    const searchInput = document.getElementById('searchBarInput');
+    const searchContainer = document.querySelector('.search-bar-container-compact');
+    
+    if (!searchInput || !searchContainer) return;
+    
+    // Solo activar búsqueda con click/tap directo en el contenedor
+    searchContainer.addEventListener('click', (e) => {
+        e.stopPropagation();
+        searchInput.style.pointerEvents = 'auto';
+        searchInput.focus();
+        showSearchModal();
+    });
+    
+    // Prevenir activación accidental con scroll
+    searchContainer.addEventListener('touchstart', (e) => {
+        // Solo activar si el toque es directamente en el contenedor
+        if (e.target === searchContainer || e.target === searchInput) {
+            e.stopPropagation();
+        }
+    });
+    
+    // Desactivar input cuando se pierde el foco
+    searchInput.addEventListener('blur', () => {
+        searchInput.style.pointerEvents = 'none';
+    });
+    
+    // Manejar escape para cerrar
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            searchInput.blur();
+            searchInput.style.pointerEvents = 'none';
+        }
+    });
+}
+
+// Función para mostrar modal de búsqueda
+function showSearchModal() {
+    const searchModal = document.getElementById('searchModal');
+    if (searchModal) {
+        searchModal.classList.add('active');
+        const modalInput = document.getElementById('searchInput');
+        if (modalInput) {
+            setTimeout(() => modalInput.focus(), 100);
+        }
+    }
 }
 
 // Función para agregar nuevas series automáticamente
