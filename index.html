@@ -840,81 +840,178 @@
         </div>
     </section>
 
-    <!-- Profile Section -->
+    <!-- Profile Section - Estilo Uber -->
     <section class="page-section" id="profileSection" style="display: none;">
-        <div class="page-header">
-            <h1>Mi Perfil</h1>
-            <p>Configuración de cuenta</p>
-        </div>
         <div class="profile-content">
-            <div class="profile-card">
-                <div class="profile-avatar" id="profileAvatar">
-                    <svg width="60" height="60" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                    </svg>
-                </div>
-                <div class="profile-info">
-                    <h2 id="profileName">Usuario Invitado</h2>
-                    <p id="profileEmail">invitado@beemo.tv</p>
-                    <span class="profile-badge">Cuenta Gratuita</span>
-                </div>
-                <button class="edit-profile-btn" id="editProfileBtn">
+            <!-- Header Principal del Perfil -->
+            <div class="profile-header-uber">
+                <button class="edit-profile-btn-uber" id="editProfileBtn">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
                     </svg>
-                    Editar Perfil
+                    Editar
                 </button>
+
+                <div class="profile-main-info">
+                    <div class="profile-avatar-uber" id="profileAvatar">
+                        <svg width="50" height="50" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                    </div>
+
+                    <div class="profile-details-uber">
+                        <h1 class="profile-name-uber" id="profileName">Usuario Invitado</h1>
+                        <p class="profile-email-uber" id="profileEmail">invitado@beemo.tv</p>
+                        <span class="profile-badge-uber" id="profileBadge">Cuenta Gratuita</span>
+
+                        <div class="profile-stats-uber">
+                            <div class="stat-item-uber">
+                                <span class="stat-number-uber" id="profileSeriesCount">0</span>
+                                <span class="stat-label-uber">Series</span>
+                            </div>
+                            <div class="stat-item-uber">
+                                <span class="stat-number-uber" id="profileWatchTime">0h</span>
+                                <span class="stat-label-uber">Visto</span>
+                            </div>
+                            <div class="stat-item-uber">
+                                <span class="stat-number-uber" id="profileLikes">0</span>
+                                <span class="stat-label-uber">Likes</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="profile-options">
-                <div class="option-item" onclick="showSubscriptionSection()">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                    </svg>
-                    <div>
-                        <h3>Suscripción Premium</h3>
-                        <p>Desbloquea contenido exclusivo</p>
+            <!-- Secciones de Opciones -->
+            <div class="profile-sections-uber">
+                <!-- Sección Premium -->
+                <div class="profile-section-uber">
+                    <div class="section-header-uber">
+                        <h2 class="section-title-uber">Membresía</h2>
+                        <p class="section-subtitle-uber">Gestiona tu suscripción y beneficios</p>
                     </div>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
-                    </svg>
+
+                    <div class="option-item-uber" onclick="showSubscriptionSection()">
+                        <div class="option-icon-uber premium">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                        </div>
+                        <div class="option-content-uber">
+                            <h3 class="option-title-uber">Suscripción Premium</h3>
+                            <p class="option-description-uber">Desbloquea contenido exclusivo sin anuncios</p>
+                        </div>
+                        <div class="option-value-uber">
+                            <span>Activar</span>
+                            <svg class="option-arrow-uber" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="option-item-uber" onclick="showMonetizationModal()">
+                        <div class="option-icon-uber premium">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
+                            </svg>
+                        </div>
+                        <div class="option-content-uber">
+                            <h3 class="option-title-uber">Monedas Beemo</h3>
+                            <p class="option-description-uber">Compra episodios individuales</p>
+                        </div>
+                        <div class="option-value-uber">
+                            <span class="coin-balance-uber">
+                                🪙 <span id="profileCoinCount">0</span>
+                            </span>
+                            <svg class="option-arrow-uber" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+                            </svg>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="option-item" onclick="showMonetizationModal()">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
-                    </svg>
-                    <div>
-                        <h3>Monedas Beemo</h3>
-                        <p>Compra monedas para episodios</p>
+                <!-- Sección de Configuración -->
+                <div class="profile-section-uber">
+                    <div class="section-header-uber">
+                        <h2 class="section-title-uber">Configuración</h2>
+                        <p class="section-subtitle-uber">Personaliza tu experiencia en Beemo</p>
                     </div>
-                    <span class="coin-balance">🪙 <span id="profileCoinCount">0</span></span>
+
+                    <div class="option-item-uber">
+                        <div class="option-icon-uber settings">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.82,11.69,4.82,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+                            </svg>
+                        </div>
+                        <div class="option-content-uber">
+                            <h3 class="option-title-uber">Preferencias</h3>
+                            <p class="option-description-uber">Calidad de video y notificaciones</p>
+                        </div>
+                        <div class="option-value-uber">
+                            <svg class="option-arrow-uber" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="option-item-uber">
+                        <div class="option-icon-uber settings">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            </svg>
+                        </div>
+                        <div class="option-content-uber">
+                            <h3 class="option-title-uber">Privacidad</h3>
+                            <p class="option-description-uber">Control de datos y actividad</p>
+                        </div>
+                        <div class="option-value-uber">
+                            <svg class="option-arrow-uber" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="option-item-uber">
+                        <div class="option-icon-uber settings">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                        </div>
+                        <div class="option-content-uber">
+                            <h3 class="option-title-uber">Ayuda y Soporte</h3>
+                            <p class="option-description-uber">Centro de ayuda y contacto</p>
+                        </div>
+                        <div class="option-value-uber">
+                            <svg class="option-arrow-uber" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+                            </svg>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="option-item">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.82,11.69,4.82,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
-                    </svg>
-                    <div>
-                        <h3>Configuración</h3>
-                        <p>Ajustes de la aplicación</p>
+                <!-- Sección de Cuenta -->
+                <div class="profile-section-uber">
+                    <div class="section-header-uber">
+                        <h2 class="section-title-uber">Cuenta</h2>
+                        <p class="section-subtitle-uber">Gestión de cuenta y sesión</p>
                     </div>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
-                    </svg>
-                </div>
 
-                <div class="option-item" onclick="logout()">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.59L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
-                    </svg>
-                    <div>
-                        <h3>Cerrar Sesión</h3>
-                        <p>Salir de tu cuenta</p>
+                    <div class="option-item-uber" onclick="logout()">
+                        <div class="option-icon-uber danger">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.59L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                            </svg>
+                        </div>
+                        <div class="option-content-uber">
+                            <h3 class="option-title-uber">Cerrar Sesión</h3>
+                            <p class="option-description-uber">Salir de tu cuenta de Beemo</p>
+                        </div>
+                        <div class="option-value-uber">
+                            <svg class="option-arrow-uber" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+                            </svg>
+                        </div>
                     </div>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
-                    </svg>
                 </div>
             </div>
         </div>
@@ -981,6 +1078,8 @@
                     <img src="https://cdn-icons-png.flaticon.com/512/1244/1244248.png" alt="Recompensas" style="width: 16px; height: 16px; filter: brightness(0) invert(1);">
                     <span class="coin-count-compact" id="coinCount">0</span>
                 </button>
+                
+                
             </div>
         </div>
 
@@ -1000,31 +1099,92 @@
             </div>
         </section>
 
-        <!-- Hero Section -->
-        <section class="hero">
-            <div class="hero-content">
-                <h1 class="hero-title">La Niña de los Cuatro CEO</h1>
-                <div class="hero-buttons-netflix">
-                    <button class="netflix-btn netflix-btn-play" onclick="showTikTokPlayer('La Niña de los Cuatro CEO', 1)">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M8 5v14l11-7z"/>
-                        </svg>
-                        <span>Reproducir</span>
-                    </button>
-                    <button class="netflix-btn netflix-btn-list" id="heroMyListBtn" onclick="addToMyListWithAnimation()">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-                        </svg>
-                        <span class="btn-text">Mi Lista</span>
-                    </button>
+        <!-- Hero Banner Slider -->
+        <section class="hero" id="heroSlider">
+            <div class="hero-slider" id="heroSliderContainer">
+                <!-- Slide 1 -->
+                <div class="hero-slide active" data-series="la-nina-ceo">
+                    <div class="hero-content">
+                        <div class="hero-info">
+                            <h1 class="hero-title">La Niña de los Cuatro CEO</h1>
+                            <p class="hero-description">Una joven prodigio se convierte en la protegida de cuatro poderosos CEOs, navegando el mundo empresarial mientras descubre el amor.</p>
+                            <div class="hero-meta">
+                                <span class="hero-rating">★ 9.5</span>
+                                <span>45 episodios</span>
+                                <span>Romance</span>
+                            </div>
+                        </div>
+                        <div class="hero-actions">
+                            <button class="hero-quick-play" onclick="showTikTokPlayer('La Niña de los Cuatro CEO', 1)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                                Ver
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 2 -->
+                <div class="hero-slide" data-series="emperador-dragon">
+                    <div class="hero-content">
+                        <div class="hero-info">
+                            <h1 class="hero-title">El Emperador Dragón Renacido</h1>
+                            <p class="hero-description">Un poderoso emperador dragón reencarna en el mundo moderno para recuperar su trono perdido y enfrentar a antiguos enemigos.</p>
+                            <div class="hero-meta">
+                                <span class="hero-rating">★ 9.7</span>
+                                <span>38 episodios</span>
+                                <span>Fantasía</span>
+                            </div>
+                        </div>
+                        <div class="hero-actions">
+                            <button class="hero-quick-play" onclick="showTikTokPlayer('El Emperador Dragón Renacido', 1)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                                Ver
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 3 -->
+                <div class="hero-slide" data-series="ceo-secreto">
+                    <div class="hero-content">
+                        <div class="hero-info">
+                            <h1 class="hero-title">Mi Esposo es un CEO Secreto</h1>
+                            <p class="hero-description">Después de un matrimonio arreglado, descubre que su esposo aparentemente ordinario es en realidad el CEO más poderoso del país.</p>
+                            <div class="hero-meta">
+                                <span class="hero-rating">★ 9.2</span>
+                                <span>42 episodios</span>
+                                <span>Romance</span>
+                            </div>
+                        </div>
+                        <div class="hero-actions">
+                            <button class="hero-quick-play" onclick="showTikTokPlayer('Mi Esposo es un CEO Secreto', 1)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                                Ver
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Líneas animadas al final del banner -->
-            <div class="hero-animated-lines">
-                <div class="animated-line"></div>
-                <div class="animated-line"></div>
-                <div class="animated-line"></div>
+            <!-- Indicadores -->
+            <div class="hero-indicators">
+                <div class="hero-indicator active" data-slide="0"></div>
+                <div class="hero-indicator" data-slide="1"></div>
+                <div class="hero-indicator" data-slide="2"></div>
+            </div>
+
+            <!-- Hint de deslizamiento -->
+            <div class="hero-swipe-hint">
+                <span>Desliza</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+                </svg>
             </div>
         </section>
 
