@@ -95,6 +95,9 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeTranslationSystem();
     
     initializeAuth();
+    
+    // Initialize plans carousel navigation
+    initializePlansCarousel();
 
     // Auth screen event listeners
     setupAuthEventListeners();
@@ -3494,6 +3497,98 @@ function showTikTokPlayer(title, startEpisode = 1) {
                         <source src="${videoUrl}" type="video/mp4">
                         Tu navegador no soporta el elemento de video.
                     </video>
+
+
+// Plans Carousel Navigation
+function initializePlansCarousel() {
+    const carousel = document.getElementById('plansCarousel');
+    const prevBtn = document.getElementById('plansPrevBtn');
+    const nextBtn = document.getElementById('plansNextBtn');
+    
+    if (!carousel || !prevBtn || !nextBtn) return;
+    
+    let scrollAmount = 0;
+    
+    function updateNavigationButtons() {
+        const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+        prevBtn.disabled = scrollAmount <= 0;
+        nextBtn.disabled = scrollAmount >= maxScroll;
+    }
+    
+    function scrollCarousel(direction) {
+        const cardWidth = 350 + 32; // card width + gap
+        const scrollDistance = cardWidth;
+        
+        if (direction === 'next') {
+            scrollAmount = Math.min(scrollAmount + scrollDistance, carousel.scrollWidth - carousel.clientWidth);
+        } else {
+            scrollAmount = Math.max(scrollAmount - scrollDistance, 0);
+        }
+        
+        carousel.scrollTo({
+            left: scrollAmount,
+            behavior: 'smooth'
+        });
+        
+        setTimeout(updateNavigationButtons, 300);
+    }
+    
+    prevBtn.addEventListener('click', () => scrollCarousel('prev'));
+    nextBtn.addEventListener('click', () => scrollCarousel('next'));
+    
+    // Update buttons on scroll
+    carousel.addEventListener('scroll', () => {
+        scrollAmount = carousel.scrollLeft;
+        updateNavigationButtons();
+    });
+    
+    // Initialize button states
+    updateNavigationButtons();
+    
+    // Handle touch/swipe on mobile
+    let startX = 0;
+    let isDragging = false;
+    
+    carousel.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        isDragging = true;
+    });
+    
+    carousel.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+    });
+    
+    carousel.addEventListener('touchend', (e) => {
+        if (!isDragging) return;
+        
+        const endX = e.changedTouches[0].clientX;
+        const diffX = startX - endX;
+        
+        if (Math.abs(diffX) > 50) {
+            if (diffX > 0) {
+                scrollCarousel('next');
+            } else {
+                scrollCarousel('prev');
+            }
+        }
+        
+        isDragging = false;
+    });
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+        const modalActive = document.querySelector('.monetization-modal-overlay.active');
+        if (!modalActive) return;
+        
+        if (e.key === 'ArrowLeft') {
+            scrollCarousel('prev');
+        } else if (e.key === 'ArrowRight') {
+            scrollCarousel('next');
+        }
+    });
+}
+
                     <div class="play-control-overlay" id="playControlOverlay" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2; text-align: center; color: white;">
                         <button class="video-play-btn" id="videoPlayBtn" style="background: rgba(255,255,255,0.2); border: none; border-radius: 50%; width: 80px; height: 80px; font-size: 2rem; color: white; cursor: pointer;">
                             ▶
