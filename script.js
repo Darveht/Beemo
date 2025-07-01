@@ -116,6 +116,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 applyAutomaticTranslation(currentLanguage);
             }
         }, 300);
+        
+        // Inicializar polling solo en la app principal
+        setTimeout(() => {
+            initializePolling();
+        }, 1000);
     } else {
         showWelcomeScreen();
         // Apply automatic translation to auth screens
@@ -1717,8 +1722,275 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeSearchAnimations();
         initializePageAnimations();
         createAmbientParticles();
+        initializeHeroSlider();
     }, 500);
 });
+
+// Sistema de Hero Slider moderno
+let currentSlide = 0;
+let isSliding = false;
+let slideInterval;
+
+function initializeHeroSlider() {
+    const heroSlider = document.getElementById('heroSlider');
+    const sliderContainer = document.getElementById('heroSliderContainer');
+    const indicators = document.querySelectorAll('.hero-indicator');
+    
+    if (!heroSlider || !sliderContainer) return;
+    
+    // Touch events para móvil
+    let startX = 0;
+    let startY = 0;
+    let currentX = 0;
+    let isDragging = false;
+    
+    // Mouse events para desktop
+    heroSlider.addEventListener('mousedown', handleStart);
+    heroSlider.addEventListener('mousemove', handleMove);
+    heroSlider.addEventListener('mouseup', handleEnd);
+    heroSlider.addEventListener('mouseleave', handleEnd);
+    
+    // Touch events para móvil
+    heroSlider.addEventListener('touchstart', handleStart, { passive: true });
+    heroSlider.addEventListener('touchmove', handleMove, { passive: true });
+    heroSlider.addEventListener('touchend', handleEnd);
+    
+    // Indicadores clickeables
+    indicators.forEach((indicator, index) => {
+        indicator.addEventListener('click', () => {
+            goToSlide(index);
+        });
+    });
+    
+    // Auto-slide cada 5 segundos
+    startAutoSlide();
+    
+    // Pausar auto-slide cuando el usuario interactúa
+    heroSlider.addEventListener('mouseenter', stopAutoSlide);
+    heroSlider.addEventListener('mouseleave', startAutoSlide);
+    
+    function handleStart(e) {
+        if (isSliding) return;
+        
+        isDragging = true;
+        startX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
+        startY = e.type === 'mousedown' ? e.clientY : e.touches[0].clientY;
+        currentX = startX;
+        
+        heroSlider.style.cursor = 'grabbing';
+        stopAutoSlide();
+    }
+    
+    function handleMove(e) {
+        if (!isDragging) return;
+        
+        e.preventDefault();
+        currentX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
+        const diffX = currentX - startX;
+        const diffY = Math.abs((e.type === 'mousemove' ? e.clientY : e.touches[0].clientY) - startY);
+        
+        // Solo procesar si el movimiento horizontal es mayor que el vertical
+        if (Math.abs(diffX) > diffY && Math.abs(diffX) > 10) {
+            // Añadir resistencia visual
+            const resistance = Math.abs(diffX) > 100 ? 0.5 : 1;
+            sliderContainer.style.transform = `translateX(calc(-${currentSlide * 33.333}% + ${diffX * resistance}px))`;
+        }
+    }
+    
+    function handleEnd(e) {
+        if (!isDragging) return;
+        
+        isDragging = false;
+        heroSlider.style.cursor = 'grab';
+        
+        const diffX = currentX - startX;
+        const threshold = 80; // Umbral mínimo para cambiar slide
+        
+        if (Math.abs(diffX) > threshold) {
+            if (diffX > 0 && currentSlide > 0) {
+                // Deslizar a la izquierda (slide anterior)
+                goToSlide(currentSlide - 1);
+            } else if (diffX < 0 && currentSlide < 2) {
+                // Deslizar a la derecha (slide siguiente)
+                goToSlide(currentSlide + 1);
+            } else {
+                // Volver al slide actual
+                updateSlider();
+            }
+        } else {
+            // Volver al slide actual si no se alcanzó el umbral
+            updateSlider();
+        }
+        
+        // Restart auto-slide después de 3 segundos
+        setTimeout(startAutoSlide, 3000);
+    }
+    
+    function goToSlide(slideIndex) {
+        if (isSliding || slideIndex === currentSlide) return;
+        
+        isSliding = true;
+        currentSlide = slideIndex;
+        
+        updateSlider();
+        updateIndicators();
+        
+        // Feedback haptic en móviles
+        if ('vibrate' in navigator) {
+            navigator.vibrate(50);
+        }
+        
+        setTimeout(() => {
+            isSliding = false;
+        }, 400);
+    }
+    
+    function updateSlider() {
+        const translateX = -currentSlide * 33.333;
+        sliderContainer.style.transform = `translateX(${translateX}%)`;
+        sliderContainer.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        
+        // Limpiar transición después de la animación
+        setTimeout(() => {
+            sliderContainer.style.transition = '';
+        }, 400);
+    }
+    
+    function updateIndicators() {
+        indicators.forEach((indicator, index) => {
+            indicator.classList.toggle('active', index === currentSlide);
+        });
+    }
+    
+    function nextSlide() {
+        const nextIndex = currentSlide === 2 ? 0 : currentSlide + 1;
+        goToSlide(nextIndex);
+    }
+    
+    function startAutoSlide() {
+        stopAutoSlide();
+        slideInterval = setInterval(nextSlide, 5000);
+    }
+    
+    function stopAutoSlide() {
+        if (slideInterval) {
+            clearInterval(slideInterval);
+            slideInterval = null;
+        }
+    }
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft' && currentSlide > 0) {
+            goToSlide(currentSlide - 1);
+        } else if (e.key === 'ArrowRight' && currentSlide < 2) {
+            goToSlide(currentSlide + 1);
+        }
+    });
+}
+
+// Sistema de detección de deslizamiento hacia abajo en el banner
+function initializeBannerSwipeDetection() {
+    const hero = document.querySelector('.hero');
+    if (!hero) return;
+    
+    let startY = 0;
+    let startTime = 0;
+    let isScrolling = false;
+    
+    // Detectar inicio del toque/deslizamiento
+    hero.addEventListener('touchstart', (e) => {
+        startY = e.touches[0].clientY;
+        startTime = Date.now();
+        isScrolling = false;
+    }, { passive: true });
+    
+    // Detectar movimiento del deslizamiento
+    hero.addEventListener('touchmove', (e) => {
+        if (!startY) return;
+        
+        const currentY = e.touches[0].clientY;
+        const diffY = currentY - startY;
+        
+        // Si se desliza hacia abajo más de 50px
+        if (diffY > 50 && !isScrolling) {
+            isScrolling = true;
+            const duration = Date.now() - startTime;
+            
+            // Si el deslizamiento es rápido (menos de 300ms) o suficientemente largo
+            if (duration < 300 || diffY > 100) {
+                triggerBannerRefreshFromSwipe();
+            }
+        }
+    }, { passive: true });
+    
+    // Limpiar al finalizar el toque
+    hero.addEventListener('touchend', () => {
+        startY = 0;
+        startTime = 0;
+        isScrolling = false;
+    }, { passive: true });
+    
+    // También detectar en escritorio con mouse
+    hero.addEventListener('mousedown', (e) => {
+        startY = e.clientY;
+        startTime = Date.now();
+        isScrolling = false;
+        
+        const handleMouseMove = (e) => {
+            if (!startY) return;
+            
+            const currentY = e.clientY;
+            const diffY = currentY - startY;
+            
+            if (diffY > 50 && !isScrolling) {
+                isScrolling = true;
+                const duration = Date.now() - startTime;
+                
+                if (duration < 300 || diffY > 100) {
+                    triggerBannerRefreshFromSwipe();
+                    document.removeEventListener('mousemove', handleMouseMove);
+                    document.removeEventListener('mouseup', handleMouseUp);
+                }
+            }
+        };
+        
+        const handleMouseUp = () => {
+            startY = 0;
+            startTime = 0;
+            isScrolling = false;
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        };
+        
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+    });
+}
+
+// Función específica para el refresh activado por deslizamiento
+function triggerBannerRefreshFromSwipe() {
+    console.log('🔄 Deslizamiento detectado - Activando refresh automático...');
+    
+    // Feedback visual inmediato en el banner
+    const hero = document.querySelector('.hero');
+    if (hero) {
+        hero.style.transform = 'translateY(5px)';
+        hero.style.transition = 'transform 0.2s ease';
+        
+        setTimeout(() => {
+            hero.style.transform = 'translateY(0)';
+        }, 200);
+    }
+    
+    // Mostrar notificación de activación
+    showNotification('🔄 Buscando contenido nuevo...', 'info');
+    
+    // Activar la función de refresh con animación
+    setTimeout(() => {
+        refreshBannerWithAnimation();
+    }, 300);
+}
 
 // Sistema de estadísticas en tiempo real
 function initializeRealTimeStats() {
@@ -2355,6 +2627,157 @@ function initializeTrendingBannerDetector() {
     setTimeout(() => {
         detectAndUpdateTrendingBanner();
     }, 5000);
+}
+
+// Función para refrescar banner con animación de deslizamiento
+function refreshBannerWithAnimation() {
+    console.log('🔄 Iniciando refresh del banner con animación...');
+    
+    const heroSection = document.querySelector('.hero');
+    const refreshOverlay = createRefreshOverlay();
+    
+    // Mostrar overlay de carga
+    document.body.appendChild(refreshOverlay);
+    setTimeout(() => refreshOverlay.classList.add('active'), 50);
+    
+    // Animar banner deslizándose hacia abajo
+    if (heroSection) {
+        heroSection.classList.add('banner-slide-down');
+    }
+    
+    // Simular proceso de búsqueda de contenido nuevo
+    simulateContentRefresh(() => {
+        // Callback cuando termine la búsqueda
+        setTimeout(() => {
+            // Ocultar overlay
+            refreshOverlay.classList.remove('active');
+            
+            setTimeout(() => {
+                refreshOverlay.remove();
+                
+                // Restaurar banner con nueva serie
+                if (heroSection) {
+                    heroSection.classList.remove('banner-slide-down');
+                    heroSection.classList.add('banner-slide-up');
+                    
+                    // Limpiar clase de animación después
+                    setTimeout(() => {
+                        heroSection.classList.remove('banner-slide-up');
+                    }, 800);
+                }
+                
+                // Detectar y actualizar con nueva serie
+                detectAndUpdateTrendingBanner();
+                
+            }, 300);
+        }, 1000);
+    });
+}
+
+// Crear overlay de refresh con bolitas tipo Twitter
+function createRefreshOverlay() {
+    const overlay = document.createElement('div');
+    overlay.className = 'banner-refresh-overlay';
+    overlay.innerHTML = `
+        <div class="refresh-loading-container">
+            <h2 class="refresh-title">Buscando contenido nuevo</h2>
+            <p class="refresh-subtitle">Actualizando series en tendencia...</p>
+            
+            <div class="twitter-loading-dots">
+                <div class="twitter-dot"></div>
+                <div class="twitter-dot"></div>
+                <div class="twitter-dot"></div>
+            </div>
+            
+            <div class="refresh-progress-text" id="refreshProgressText">
+                Analizando tendencias...
+            </div>
+            
+            <div class="refresh-success-message" id="refreshSuccessMessage">
+                <div class="refresh-success-icon">✓</div>
+                <span>¡Contenido actualizado!</span>
+            </div>
+        </div>
+    `;
+    
+    return overlay;
+}
+
+// Simular proceso de refresh del contenido
+function simulateContentRefresh(callback) {
+    const progressSteps = [
+        { text: 'Analizando tendencias...', delay: 0 },
+        { text: 'Verificando series populares...', delay: 800 },
+        { text: 'Actualizando rankings...', delay: 1600 },
+        { text: 'Seleccionando mejor contenido...', delay: 2400 }
+    ];
+    
+    const progressText = document.getElementById('refreshProgressText');
+    const successMessage = document.getElementById('refreshSuccessMessage');
+    
+    progressSteps.forEach((step, index) => {
+        setTimeout(() => {
+            if (progressText) {
+                progressText.textContent = step.text;
+                progressText.classList.add('active');
+                
+                setTimeout(() => {
+                    progressText.classList.remove('active');
+                }, 400);
+            }
+            
+            // En el último paso, mostrar mensaje de éxito
+            if (index === progressSteps.length - 1) {
+                setTimeout(() => {
+                    if (successMessage) {
+                        successMessage.classList.add('show');
+                    }
+                    
+                    // Ejecutar callback después de mostrar éxito
+                    setTimeout(callback, 500);
+                }, 400);
+            }
+        }, step.delay);
+    });
+}
+
+// Sistema de polling automático estilo Uber
+let pollingInterval = null;
+let isPollingActive = false;
+
+// Función pública para activar el refresh (se puede llamar desde cualquier lugar)
+function triggerBannerRefresh() {
+    refreshBannerWithAnimation();
+}
+
+// Inicializar polling automático
+function initializePolling() {
+    // Activar polling cada 30 segundos automáticamente
+    startPolling();
+}
+
+function startPolling() {
+    if (pollingInterval) return; // Ya está activo
+    
+    isPollingActive = true;
+    
+    // Polling cada 45 segundos
+    pollingInterval = setInterval(() => {
+        console.log('🔄 Polling automático - Buscando contenido nuevo...');
+        detectAndUpdateTrendingBanner();
+    }, 45000);
+    
+    console.log('✅ Polling automático activado');
+}
+
+function stopPolling() {
+    if (!pollingInterval) return; // Ya está inactivo
+    
+    clearInterval(pollingInterval);
+    pollingInterval = null;
+    isPollingActive = false;
+    
+    console.log('⏹️ Polling automático desactivado');
 }
 
 // Base de datos simulada de series con estadísticas
