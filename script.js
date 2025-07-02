@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeAuth();
     
     // Initialize plans carousel navigation
-    initializePlansCarousel();
+    // initializePlansCarousel(); // Comentado temporalmente
 
     // Auth screen event listeners
     setupAuthEventListeners();
@@ -2045,6 +2045,7 @@ let currentCategory = 'todos';
 // Base de datos completa de series
 function getAllSeries() {
     return [
+        // Trending Series
         {
             id: 'la-nina-ceo',
             title: 'La Niña de los Cuatro CEO',
@@ -2097,6 +2098,7 @@ function getAllSeries() {
             isTrending: false,
             releaseDate: '2024-09-25'
         },
+        // New Releases
         {
             id: 'comedia-real',
             title: 'La Comedia del Emperador',
@@ -2110,6 +2112,193 @@ function getAllSeries() {
             isTrending: false,
             releaseDate: '2024-12-15'
         },
+        {
+            id: 'princesa-rebelde',
+            title: 'La Princesa Rebelde',
+            thumbnail: 'https://via.placeholder.com/280x400/EC4899/fff?text=Princesa+Rebelde',
+            genre: 'Romance Histórico',
+            category: 'romance',
+            episodes: '30 eps',
+            rating: '9.1',
+            year: '2024',
+            isNew: true,
+            isTrending: false,
+            releaseDate: '2024-12-10'
+        },
+        {
+            id: 'heredero-venganza',
+            title: 'El Heredero de la Venganza',
+            thumbnail: 'https://via.placeholder.com/280x400/DC2626/fff?text=Heredero+Venganza',
+            genre: 'Drama Empresarial',
+            category: 'drama',
+            episodes: '33 eps',
+            rating: '8.9',
+            year: '2024',
+            isNew: true,
+            isTrending: false,
+            releaseDate: '2024-12-05'
+        },
+        // Romance Collection
+        {
+            id: 'amor-prohibido',
+            title: 'Amor Prohibido en el Palacio',
+            thumbnail: 'https://via.placeholder.com/280x400/F472B6/fff?text=Amor+Prohibido',
+            genre: 'Romance Histórico',
+            category: 'romance',
+            episodes: '40 eps',
+            rating: '9.3',
+            year: '2024',
+            isNew: false,
+            isTrending: false,
+            releaseDate: '2024-11-20'
+        },
+        {
+            id: 'segunda-oportunidad',
+            title: 'Segunda Oportunidad de Amor',
+            thumbnail: 'https://via.placeholder.com/280x400/FB7185/fff?text=Segunda+Oportunidad',
+            genre: 'Romance Moderno',
+            category: 'romance',
+            episodes: '36 eps',
+            rating: '8.7',
+            year: '2024',
+            isNew: false,
+            isTrending: false,
+            releaseDate: '2024-10-25'
+        },
+        {
+            id: 'destino-cruzado',
+            title: 'Destino Cruzado',
+            thumbnail: 'https://via.placeholder.com/280x400/BE185D/fff?text=Destino+Cruzado',
+            genre: 'Romance Fantasía',
+            category: 'romance',
+            episodes: '38 eps',
+            rating: '9.0',
+            year: '2024',
+            isNew: false,
+            isTrending: false,
+            releaseDate: '2024-09-30'
+        },
+        // Action & Adventure
+        {
+            id: 'guerrero-inmortal',
+            title: 'El Guerrero Inmortal',
+            thumbnail: 'https://via.placeholder.com/280x400/059669/fff?text=Guerrero+Inmortal',
+            genre: 'Acción Fantasía',
+            category: 'accion',
+            episodes: '44 eps',
+            rating: '9.4',
+            year: '2024',
+            isNew: false,
+            isTrending: false,
+            releaseDate: '2024-11-10'
+        },
+        {
+            id: 'legion-sombras',
+            title: 'La Legión de las Sombras',
+            thumbnail: 'https://via.placeholder.com/280x400/374151/fff?text=Legión+Sombras',
+            genre: 'Acción Misterio',
+            category: 'accion',
+            episodes: '35 eps',
+            rating: '8.8',
+            year: '2024',
+            isNew: false,
+            isTrending: false,
+            releaseDate: '2024-10-15'
+        },
+        {
+            id: 'espada-divina',
+            title: 'La Espada Divina',
+            thumbnail: 'https://via.placeholder.com/280x400/1F2937/fff?text=Espada+Divina',
+            genre: 'Acción Histórica',
+            category: 'accion',
+            episodes: '41 eps',
+            rating: '9.1',
+            year: '2024',
+            isNew: false,
+            isTrending: false,
+            releaseDate: '2024-09-20'
+        },
+        // Comedy Corner
+        {
+            id: 'vida-chef',
+            title: 'Mi Vida de Chef',
+            thumbnail: 'https://via.placeholder.com/280x400/FBBF24/fff?text=Chef+Vida',
+            genre: 'Comedia Romántica',
+            category: 'comedia',
+            episodes: '32 eps',
+            rating: '8.6',
+            year: '2024',
+            isNew: false,
+            isTrending: false,
+            releaseDate: '2024-11-05'
+        },
+        {
+            id: 'oficina-loca',
+            title: 'La Oficina Más Loca',
+            thumbnail: 'https://via.placeholder.com/280x400/34D399/fff?text=Oficina+Loca',
+            genre: 'Comedia Empresarial',
+            category: 'comedia',
+            episodes: '28 eps',
+            rating: '8.4',
+            year: '2024',
+            isNew: false,
+            isTrending: false,
+            releaseDate: '2024-10-20'
+        },
+        {
+            id: 'familia-millonaria',
+            title: 'Mi Familia Millonaria',
+            thumbnail: 'https://via.placeholder.com/280x400/60A5FA/fff?text=Familia+Millonaria',
+            genre: 'Comedia Familiar',
+            category: 'comedia',
+            episodes: '36 eps',
+            rating: '8.5',
+            year: '2024',
+            isNew: false,
+            isTrending: false,
+            releaseDate: '2024-09-15'
+        },
+        // Fantasy Worlds
+        {
+            id: 'reino-perdido',
+            title: 'El Reino Perdido',
+            thumbnail: 'https://via.placeholder.com/280x400/7C3AED/fff?text=Reino+Perdido',
+            genre: 'Fantasía Épica',
+            category: 'fantasia',
+            episodes: '39 eps',
+            rating: '9.2',
+            year: '2024',
+            isNew: false,
+            isTrending: false,
+            releaseDate: '2024-10-30'
+        },
+        {
+            id: 'magia-prohibida',
+            title: 'Magia Prohibida',
+            thumbnail: 'https://via.placeholder.com/280x400/C026D3/fff?text=Magia+Prohibida',
+            genre: 'Fantasía Misterio',
+            category: 'fantasia',
+            episodes: '37 eps',
+            rating: '8.9',
+            year: '2024',
+            isNew: false,
+            isTrending: false,
+            releaseDate: '2024-10-05'
+        },
+        {
+            id: 'portal-tiempo',
+            title: 'El Portal del Tiempo',
+            thumbnail: 'https://via.placeholder.com/280x400/F97316/fff?text=Portal+Tiempo',
+            genre: 'Fantasía Sci-Fi',
+            category: 'fantasia',
+            episodes: '42 eps',
+            rating: '9.0',
+            year: '2024',
+            isNew: false,
+            isTrending: false,
+            releaseDate: '2024-09-10'
+        },
+        // Historical Series
         {
             id: 'thriller-palacio',
             title: 'Secretos del Palacio Imperial',
@@ -2638,6 +2827,61 @@ function initializeSeriesTagging() {
     initializeTrendingBannerDetector();
 }
 
+// Función para mostrar el reproductor TikTok
+function showTikTokPlayer(seriesTitle, episode) {
+    const player = document.getElementById('tiktokPlayer');
+    const video = document.getElementById('mainVideo');
+    const episodeTitle = document.getElementById('episodeTitle');
+    const episodeDescription = document.getElementById('episodeDescription');
+    
+    // Configurar información del episodio
+    episodeTitle.textContent = `${seriesTitle} - Episodio ${episode}`;
+    episodeDescription.textContent = getEpisodeDescription(seriesTitle, episode);
+    
+    // Configurar video (simulado)
+    video.src = getVideoUrl(seriesTitle, episode);
+    
+    // Mostrar player
+    player.classList.add('active');
+    
+    // Agregar a historial
+    addToWatchHistory(seriesTitle, episode, Math.floor(Math.random() * 100));
+    addToRecentlyWatched(seriesTitle, episode, getCurrentSeriesThumbnail(seriesTitle));
+    
+    // Bloquear scroll del body
+    document.body.style.overflow = 'hidden';
+}
+
+// Función para cerrar el reproductor
+function closeTikTokPlayer() {
+    const player = document.getElementById('tiktokPlayer');
+    player.classList.remove('active');
+    
+    // Restaurar scroll del body
+    document.body.style.overflow = 'auto';
+}
+
+// Función para obtener descripción del episodio
+function getEpisodeDescription(seriesTitle, episode) {
+    const descriptions = {
+        'La Niña de los Cuatro CEO': {
+            1: 'El encuentro destinado que cambiará todo...',
+            2: 'Las primeras impresiones nunca mienten',
+            3: 'Una propuesta que nadie esperaba',
+            4: 'Los secretos del pasado salen a la luz',
+            5: 'Los conflictos de poder se intensifican'
+        }
+    };
+    
+    return descriptions[seriesTitle]?.[episode] || 'Continuación de la historia...';
+}
+
+// Función para obtener URL del video (simulado)
+function getVideoUrl(seriesTitle, episode) {
+    // En una implementación real, esto vendría de un API
+    return 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+}
+
 // Sistema de detector automático para banner dinámico
 function initializeTrendingBannerDetector() {
     console.log('📈 Inicializando detector de banner dinámico...');
@@ -2997,6 +3241,13 @@ function updateBannerToSeries(series) {
         
     }, 300);
 }
+
+// Función para inicializar carrusel de planes (placeholder)
+function initializePlansCarousel() {
+    console.log('📋 Carrusel de planes inicializado');
+    // Esta función se puede implementar más tarde si es necesaria
+}
+
 
 // Mostrar notificación de cambio en tendencias
 function showTrendingChangeNotification(series) {
