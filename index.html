@@ -240,7 +240,7 @@
     <div class="monetization-modal-overlay" id="monetizationModal">
         <div class="monetization-modal-container-fullscreen">
             <div class="monetization-header">
-                <h2>🎬 Centro de Membresías Beemo</h2>
+                <h2>Centro de Membresías Beemo</h2>
                 <button class="monetization-close" id="monetizationClose">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -589,8 +589,8 @@
 
                             <div class="earn-option">
                                 <div class="earn-icon">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM8 15v-1.5c0-.83.67-1.5 1.5-1.5.83 0 1.5.67 1.5 1.5V15H8zm2.5-4C9.67 11 9 10.33 9 9.5S9.67 8 10.5 8s1.5.67 1.5 1.5S11.33 11 10.5 11zm5 4v-1.5c0-.83.67-1.5 1.5-1.5.83 0 1.5.67 1.5 1.5V15H13.5zm2.5-4c-.83 0-1.5-.67-1.5-1.5S15.67 8 16.5 8s1.5.67 1.5 1.5S17.33 11 16.5 11z"/>
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zm-2-8.5l-7 4.5V10l7 4.5z"/>
                                     </svg>
                                 </div>
                                 <div class="earn-info">
@@ -942,6 +942,64 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- TikTok Style Video Player -->
+    <div class="tiktok-player" id="tiktokPlayer">
+        <div class="video-container-tiktok">
+            <video id="mainVideo" autoplay muted loop>
+                <source src="" type="video/mp4">
+            </video>
+            
+            <!-- Marca de agua estilo Uber en esquina izquierda -->
+            <div class="uber-watermark">
+                <div class="watermark-logo">
+                    <span class="logo-text">Beemo</span>
+                    <div class="logo-accent"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="video-controls-tiktok">
+            <button class="tiktok-btn like-btn" data-content-id="la-nina-ceo" onclick="toggleLike('la-nina-ceo', 'series')">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+                <span class="likes-counter">1.2M</span>
+            </button>
+
+            <button class="tiktok-btn share-btn">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/>
+                </svg>
+                <span>Compartir</span>
+            </button>
+
+            <button class="tiktok-btn episodes-btn" onclick="showEpisodesModal()">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                </svg>
+                <span>Episodios</span>
+            </button>
+
+            <button class="tiktok-btn report-btn" onclick="showReportModal()">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/>
+                </svg>
+                <span>Reportar</span>
+            </button>
+        </div>
+
+        <div class="video-info-tiktok">
+            <h3 id="episodeTitle">La Niña de los Cuatro CEO - Episodio 1</h3>
+            <p id="episodeDescription">El encuentro destinado que cambiará todo...</p>
+        </div>
+
+        <button class="close-player" onclick="closeTikTokPlayer()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+            </svg>
+        </button>
     </div>
 
     <!-- Notification Container -->
@@ -1375,15 +1433,271 @@
             </div>
         </section>
 
-        <!-- Available Series -->
+        <!-- Trending Now -->
         <section class="content-section">
-            <h2 class="section-title">Series Disponibles</h2>
+            <h2 class="section-title">Tendencia Ahora</h2>
             <div class="content-grid">
-                <div class="content-card" data-series-id="la-nina-ceo" data-release-date="2024-12-20">
+                <div class="content-card" data-series-id="la-nina-ceo" data-release-date="2024-12-20" onclick="showTikTokPlayer('La Niña de los Cuatro CEO', 1)">
+                    <div class="series-badge trending-badge">TENDENCIA</div>
                     <img src="https://www.dropbox.com/scl/fi/r24wdvq29de6w6djkaqsc/IMG_4044.png?rlkey=5e2lge2dv00n427p0i5jdqxgy&st=65b6ye7u&raw=1" alt="La Niña CEO">
                     <div class="card-info">
                         <h3>La Niña de los Cuatro CEO</h3>
                         <p>Romance Empresarial • 45 eps</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="content-card" data-series-id="emperador-dragon" data-release-date="2024-11-15" onclick="showTikTokPlayer('El Emperador Dragón Renacido', 1)">
+                    <div class="series-badge popular-badge">POPULAR</div>
+                    <img src="https://via.placeholder.com/280x400/8B5CF6/fff?text=Emperador+Dragón" alt="Emperador Dragón">
+                    <div class="card-info">
+                        <h3>El Emperador Dragón Renacido</h3>
+                        <p>Fantasía Épica • 38 eps</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="content-card" data-series-id="ceo-secreto" data-release-date="2024-10-10" onclick="showTikTokPlayer('Mi Esposo es un CEO Secreto', 1)">
+                    <img src="https://via.placeholder.com/280x400/EF4444/fff?text=CEO+Secreto" alt="CEO Secreto">
+                    <div class="card-info">
+                        <h3>Mi Esposo es un CEO Secreto</h3>
+                        <p>Romance Moderno • 42 eps</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="content-card" data-series-id="maestro-artes" data-release-date="2024-09-25" onclick="showTikTokPlayer('El Maestro de las Artes Marciales', 1)">
+                    <img src="https://via.placeholder.com/280x400/F59E0B/fff?text=Artes+Marciales" alt="Artes Marciales">
+                    <div class="card-info">
+                        <h3>El Maestro de las Artes Marciales</h3>
+                        <p>Acción Histórica • 35 eps</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- New Releases -->
+        <section class="content-section">
+            <h2 class="section-title">Nuevos Lanzamientos</h2>
+            <div class="content-grid">
+                <div class="content-card" data-series-id="comedia-real" data-release-date="2024-12-15" onclick="showTikTokPlayer('La Comedia del Emperador', 1)">
+                    <div class="series-badge new-badge">NUEVA</div>
+                    <img src="https://via.placeholder.com/280x400/10B981/fff?text=Comedia+Real" alt="Comedia Real">
+                    <div class="card-info">
+                        <h3>La Comedia del Emperador</h3>
+                        <p>Comedia Histórica • 28 eps</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="content-card" data-series-id="princesa-rebelde" data-release-date="2024-12-10" onclick="showTikTokPlayer('La Princesa Rebelde', 1)">
+                    <div class="series-badge new-badge">NUEVA</div>
+                    <img src="https://via.placeholder.com/280x400/EC4899/fff?text=Princesa+Rebelde" alt="Princesa Rebelde">
+                    <div class="card-info">
+                        <h3>La Princesa Rebelde</h3>
+                        <p>Romance Histórico • 30 eps</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="content-card" data-series-id="heredero-venganza" data-release-date="2024-12-05" onclick="showTikTokPlayer('El Heredero de la Venganza', 1)">
+                    <div class="series-badge new-badge">NUEVA</div>
+                    <img src="https://via.placeholder.com/280x400/DC2626/fff?text=Heredero+Venganza" alt="Heredero Venganza">
+                    <div class="card-info">
+                        <h3>El Heredero de la Venganza</h3>
+                        <p>Drama Empresarial • 33 eps</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Romance Collection -->
+        <section class="content-section">
+            <h2 class="section-title">Colección Romance</h2>
+            <div class="content-grid">
+                <div class="content-card" data-series-id="amor-prohibido" data-release-date="2024-11-20" onclick="showTikTokPlayer('Amor Prohibido en el Palacio', 1)">
+                    <img src="https://via.placeholder.com/280x400/F472B6/fff?text=Amor+Prohibido" alt="Amor Prohibido">
+                    <div class="card-info">
+                        <h3>Amor Prohibido en el Palacio</h3>
+                        <p>Romance Histórico • 40 eps</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="content-card" data-series-id="segunda-oportunidad" data-release-date="2024-10-25" onclick="showTikTokPlayer('Segunda Oportunidad de Amor', 1)">
+                    <img src="https://via.placeholder.com/280x400/FB7185/fff?text=Segunda+Oportunidad" alt="Segunda Oportunidad">
+                    <div class="card-info">
+                        <h3>Segunda Oportunidad de Amor</h3>
+                        <p>Romance Moderno • 36 eps</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="content-card" data-series-id="destino-cruzado" data-release-date="2024-09-30" onclick="showTikTokPlayer('Destino Cruzado', 1)">
+                    <img src="https://via.placeholder.com/280x400/BE185D/fff?text=Destino+Cruzado" alt="Destino Cruzado">
+                    <div class="card-info">
+                        <h3>Destino Cruzado</h3>
+                        <p>Romance Fantasía • 38 eps</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Action & Adventure -->
+        <section class="content-section">
+            <h2 class="section-title">Acción y Aventura</h2>
+            <div class="content-grid">
+                <div class="content-card" data-series-id="guerrero-inmortal" data-release-date="2024-11-10" onclick="showTikTokPlayer('El Guerrero Inmortal', 1)">
+                    <img src="https://via.placeholder.com/280x400/059669/fff?text=Guerrero+Inmortal" alt="Guerrero Inmortal">
+                    <div class="card-info">
+                        <h3>El Guerrero Inmortal</h3>
+                        <p>Acción Fantasía • 44 eps</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="content-card" data-series-id="legion-sombras" data-release-date="2024-10-15" onclick="showTikTokPlayer('La Legión de las Sombras', 1)">
+                    <img src="https://via.placeholder.com/280x400/374151/fff?text=Legión+Sombras" alt="Legión Sombras">
+                    <div class="card-info">
+                        <h3>La Legión de las Sombras</h3>
+                        <p>Acción Misterio • 35 eps</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="content-card" data-series-id="espada-divina" data-release-date="2024-09-20" onclick="showTikTokPlayer('La Espada Divina', 1)">
+                    <img src="https://via.placeholder.com/280x400/1F2937/fff?text=Espada+Divina" alt="Espada Divina">
+                    <div class="card-info">
+                        <h3>La Espada Divina</h3>
+                        <p>Acción Histórica • 41 eps</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Comedy Corner -->
+        <section class="content-section">
+            <h2 class="section-title">Rincón de Comedia</h2>
+            <div class="content-grid">
+                <div class="content-card" data-series-id="vida-chef" data-release-date="2024-11-05" onclick="showTikTokPlayer('Mi Vida de Chef', 1)">
+                    <img src="https://via.placeholder.com/280x400/FBBF24/fff?text=Chef+Vida" alt="Chef Vida">
+                    <div class="card-info">
+                        <h3>Mi Vida de Chef</h3>
+                        <p>Comedia Romántica • 32 eps</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="content-card" data-series-id="oficina-loca" data-release-date="2024-10-20" onclick="showTikTokPlayer('La Oficina Más Loca', 1)">
+                    <img src="https://via.placeholder.com/280x400/34D399/fff?text=Oficina+Loca" alt="Oficina Loca">
+                    <div class="card-info">
+                        <h3>La Oficina Más Loca</h3>
+                        <p>Comedia Empresarial • 28 eps</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="content-card" data-series-id="familia-millonaria" data-release-date="2024-09-15" onclick="showTikTokPlayer('Mi Familia Millonaria', 1)">
+                    <img src="https://via.placeholder.com/280x400/60A5FA/fff?text=Familia+Millonaria" alt="Familia Millonaria">
+                    <div class="card-info">
+                        <h3>Mi Familia Millonaria</h3>
+                        <p>Comedia Familiar • 36 eps</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Fantasy Worlds -->
+        <section class="content-section">
+            <h2 class="section-title">Mundos de Fantasía</h2>
+            <div class="content-grid">
+                <div class="content-card" data-series-id="reino-perdido" data-release-date="2024-10-30" onclick="showTikTokPlayer('El Reino Perdido', 1)">
+                    <img src="https://via.placeholder.com/280x400/7C3AED/fff?text=Reino+Perdido" alt="Reino Perdido">
+                    <div class="card-info">
+                        <h3>El Reino Perdido</h3>
+                        <p>Fantasía Épica • 39 eps</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="content-card" data-series-id="magia-prohibida" data-release-date="2024-10-05" onclick="showTikTokPlayer('Magia Prohibida', 1)">
+                    <img src="https://via.placeholder.com/280x400/C026D3/fff?text=Magia+Prohibida" alt="Magia Prohibida">
+                    <div class="card-info">
+                        <h3>Magia Prohibida</h3>
+                        <p>Fantasía Misterio • 37 eps</p>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="content-card" data-series-id="portal-tiempo" data-release-date="2024-09-10" onclick="showTikTokPlayer('El Portal del Tiempo', 1)">
+                    <img src="https://via.placeholder.com/280x400/F97316/fff?text=Portal+Tiempo" alt="Portal Tiempo">
+                    <div class="card-info">
+                        <h3>El Portal del Tiempo</h3>
+                        <p>Fantasía Sci-Fi • 42 eps</p>
                     </div>
                     <button class="play-btn">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -1398,11 +1712,25 @@
         <section class="content-section">
             <h2 class="section-title">Próximamente</h2>
             <div class="content-grid">
-                <div class="content-card" style="opacity: 0.6;">
+                <div class="content-card coming-soon" style="opacity: 0.6;">
                     <img src="https://via.placeholder.com/280x400/2a2a2a/fff?text=Próximamente" alt="Coming Soon">
                     <div class="card-info">
                         <h3>Más series llegando pronto...</h3>
-                        <p>Mantente atento</p>
+                        <p>Mantente atento a nuevos lanzamientos</p>
+                    </div>
+                </div>
+                <div class="content-card coming-soon" style="opacity: 0.6;">
+                    <img src="https://via.placeholder.com/280x400/4a5568/fff?text=En+Desarrollo" alt="En Desarrollo">
+                    <div class="card-info">
+                        <h3>Series en desarrollo</h3>
+                        <p>Contenido exclusivo en camino</p>
+                    </div>
+                </div>
+                <div class="content-card coming-soon" style="opacity: 0.6;">
+                    <img src="https://via.placeholder.com/280x400/718096/fff?text=Temporada+2" alt="Temporada 2">
+                    <div class="card-info">
+                        <h3>Nuevas temporadas</h3>
+                        <p>Continuaciones esperadas</p>
                     </div>
                 </div>
             </div>
