@@ -2097,7 +2097,7 @@ body {
     border: none;
     position: relative;
     width: 140px;
-    height: 190px;
+    height: 210px;
     opacity: 1;
     visibility: visible;
     justify-self: start;
@@ -2121,10 +2121,10 @@ body {
     bottom: 0;
     background: linear-gradient(
         180deg, 
-        rgba(0, 0, 0, 0.1) 0%,
-        rgba(0, 0, 0, 0.2) 20%,
-        rgba(0, 0, 0, 0.4) 60%,
-        rgba(0, 0, 0, 0.8) 100%
+        rgba(0, 0, 0, 0.05) 0%,
+        rgba(0, 0, 0, 0.1) 30%,
+        rgba(0, 0, 0, 0.3) 70%,
+        rgba(0, 0, 0, 0.6) 100%
     );
     z-index: 2;
     opacity: 1;
@@ -2146,10 +2146,11 @@ body {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center;
+    object-position: center top;
     background: transparent;
     transition: all 0.4s ease;
     border-radius: 12px;
+    display: block;
 }
 
 .content-card:hover img {
@@ -2390,7 +2391,7 @@ body {
 @media (max-width: 768px) {
     .content-card {
         width: 120px;
-        height: 170px;
+        height: 180px;
     }
     
     .content-grid {
