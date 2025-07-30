@@ -2473,7 +2473,7 @@ function updateContentGrid(series) {
     }, 300);
 }
 
-// Crear card de serie
+// Crear card de serie con overlay estilo Netflix
 function createSeriesCard(serie) {
     const card = document.createElement('div');
     card.className = 'content-card';
@@ -2483,11 +2483,13 @@ function createSeriesCard(serie) {
     card.style.transform = 'translateY(30px)';
     card.style.transition = 'all 0.4s ease';
     
+    // Determinar el estilo del título según el idioma
+    const titleStyle = getNetflixTitleStyle(serie.title);
+    
     card.innerHTML = `
         <img src="${serie.thumbnail}" alt="${serie.title}" loading="lazy">
-        <div class="card-info">
-            <h3>${serie.title}</h3>
-            <p>${serie.episodes}</p>
+        <div class="card-title-overlay">
+            <h3 class="card-title-netflix ${titleStyle.class}">${titleStyle.title}</h3>
         </div>
         <button class="play-btn" onclick="showTikTokPlayer('${serie.title}', 1)">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -2502,6 +2504,116 @@ function createSeriesCard(serie) {
     });
     
     return card;
+}
+
+// Función para determinar el estilo del título estilo Netflix
+function getNetflixTitleStyle(title) {
+    // Detectar si contiene caracteres chinos o es una traducción
+    const hasChineseElements = /[\u4e00-\u9fff]/.test(title);
+    const isMixedStyle = title.includes('CEO') || title.includes('Dragón') || title.includes('Emperador');
+    
+    // Mapeo de títulos con estilo Netflix
+    const netflixTitles = {
+        'La Niña de los Cuatro CEO': {
+            title: '四大总裁的小女孩',
+            class: 'chinese-style'
+        },
+        'El Emperador Dragón Renacido': {
+            title: '重生龙帝',
+            class: 'chinese-style'
+        },
+        'Mi Esposo es un CEO Secreto': {
+            title: '我的神秘CEO丈夫',
+            class: 'chinese-style'
+        },
+        'El Maestro de las Artes Marciales': {
+            title: '武林宗师',
+            class: 'chinese-style'
+        },
+        'La Comedia del Emperador': {
+            title: '皇帝喜剧',
+            class: 'chinese-style'
+        },
+        'La Princesa Rebelde': {
+            title: '叛逆公主',
+            class: 'chinese-style'
+        },
+        'El Heredero de la Venganza': {
+            title: '复仇继承人',
+            class: 'chinese-style'
+        },
+        'Amor Prohibido en el Palacio': {
+            title: '宫中禁恋',
+            class: 'chinese-style'
+        },
+        'Segunda Oportunidad de Amor': {
+            title: '爱的第二次机会',
+            class: 'chinese-style'
+        },
+        'Destino Cruzado': {
+            title: '交错命运',
+            class: 'chinese-style'
+        },
+        'El Guerrero Inmortal': {
+            title: '不死战神',
+            class: 'chinese-style'
+        },
+        'La Legión de las Sombras': {
+            title: '暗影军团',
+            class: 'chinese-style'
+        },
+        'La Espada Divina': {
+            title: '神剑',
+            class: 'chinese-style'
+        },
+        'Mi Vida de Chef': {
+            title: '厨师人生',
+            class: 'chinese-style'
+        },
+        'La Oficina Más Loca': {
+            title: '疯狂办公室',
+            class: 'chinese-style'
+        },
+        'Mi Familia Millonaria': {
+            title: '我的豪门家族',
+            class: 'chinese-style'
+        },
+        'El Reino Perdido': {
+            title: '失落王国',
+            class: 'chinese-style'
+        },
+        'Magia Prohibida': {
+            title: '禁忌魔法',
+            class: 'chinese-style'
+        },
+        'El Portal del Tiempo': {
+            title: '时空之门',
+            class: 'chinese-style'
+        },
+        'Secretos del Palacio Imperial': {
+            title: '皇宫秘密',
+            class: 'chinese-style'
+        }
+    };
+    
+    // Si es el idioma actual no es español, mantener título original pero con estilo
+    if (currentLanguage !== 'es' && currentLanguage !== 'zh') {
+        return {
+            title: title,
+            class: 'spanish-style'
+        };
+    }
+    
+    // Si está en chino o es específicamente un título mapeado
+    if (netflixTitles[title]) {
+        return netflixTitles[title];
+    }
+    
+    // Por defecto, estilo español
+    return {
+        title: title,
+        class: 'spanish-style'
+    };
 }
 
 // Watch history management
