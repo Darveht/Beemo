@@ -2483,22 +2483,11 @@ function createSeriesCard(serie) {
     card.style.transform = 'translateY(30px)';
     card.style.transition = 'all 0.4s ease';
     
-    // Determinar etiqueta
-    let badge = '';
-    if (serie.isNew) {
-        badge = '<div class="series-badge new-badge">NUEVA</div>';
-    } else if (serie.isTrending) {
-        badge = '<div class="series-badge trending-badge">TENDENCIA</div>';
-    } else if (parseFloat(serie.rating) >= 9.5) {
-        badge = '<div class="series-badge popular-badge">POPULAR</div>';
-    }
-    
     card.innerHTML = `
-        ${badge}
         <img src="${serie.thumbnail}" alt="${serie.title}" loading="lazy">
         <div class="card-info">
             <h3>${serie.title}</h3>
-            <p>${serie.genre} • ${serie.episodes}</p>
+            <p>${serie.episodes}</p>
         </div>
         <button class="play-btn" onclick="showTikTokPlayer('${serie.title}', 1)">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">

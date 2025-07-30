@@ -2072,7 +2072,7 @@ body {
 
 .content-grid {
     display: flex;
-    gap: 1.5rem;
+    gap: 0.75rem;
     overflow-x: auto;
     padding: 1rem 0 2rem 0;
     scrollbar-width: none;
@@ -2085,62 +2085,26 @@ body {
 }
 
 .content-card {
-    background: #ffffff;
-    border-radius: 20px;
+    background: #141414;
+    border-radius: 8px;
     overflow: hidden;
     cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: all 0.3s ease;
     border: none;
     position: relative;
-    width: 180px;
-    height: 260px;
+    width: 140px;
+    height: 190px;
     opacity: 1;
     visibility: visible;
     justify-self: start;
     flex-shrink: 0;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-}
-
-/* Etiquetas automáticas para series - más discretas */
-.series-badge {
-    position: absolute;
-    top: 0.75rem;
-    left: 0.75rem;
-    padding: 0.25rem 0.6rem;
-    border-radius: 8px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    z-index: 10;
-    backdrop-filter: blur(10px);
-    pointer-events: none;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.new-badge {
-    background: rgba(239, 68, 68, 0.9);
-    color: white;
-}
-
-.trending-badge {
-    background: rgba(245, 158, 11, 0.9);
-    color: white;
-}
-
-.popular-badge {
-    background: rgba(59, 130, 246, 0.9);
-    color: white;
-}
-
-.exclusive-badge {
-    background: rgba(147, 51, 234, 0.9);
-    color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .content-card:hover {
-    transform: translateY(-12px) scale(1.02);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    z-index: 10;
 }
 
 .content-card::before {
@@ -2150,11 +2114,11 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.02) 100%);
-    z-index: 1;
+    background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.8) 100%);
+    z-index: 2;
     transition: opacity 0.3s ease;
     opacity: 0;
-    border-radius: 20px;
+    border-radius: 8px;
 }
 
 .content-card:hover::before {
@@ -2163,53 +2127,56 @@ body {
 
 .content-card img {
     width: 100%;
-    height: 180px;
+    height: 100%;
     object-fit: cover;
-    object-position: center top;
-    background: #f7f7f7;
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    object-position: center;
+    background: #2a2a2a;
+    transition: all 0.3s ease;
 }
 
 .content-card:hover img {
-    transform: scale(1.08);
-    filter: brightness(1.05) contrast(1.05);
+    transform: scale(1.1);
+    filter: brightness(0.8);
 }
 
 .card-info {
-    padding: 1.25rem;
-    height: 80px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    position: relative;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem 0.75rem 0.75rem;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
     z-index: 3;
-    background: #ffffff;
-    gap: 0.5rem;
+    transform: translateY(100%);
+    transition: all 0.3s ease;
+}
+
+.content-card:hover .card-info {
+    transform: translateY(0);
 }
 
 .card-info h3 {
-    font-size: 1rem;
-    font-weight: 700;
-    margin: 0;
-    color: #000000;
-    line-height: 1.3;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 0 0 0.25rem 0;
+    color: #ffffff;
+    line-height: 1.2;
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     text-align: left;
-    min-height: 2.6rem;
-    letter-spacing: -0.01em;
 }
 
 .card-info p {
-    color: #666666;
-    font-size: 0.85rem;
+    color: #cccccc;
+    font-size: 0.7rem;
     margin: 0;
     text-align: left;
-    font-weight: 500;
+    font-weight: 400;
     opacity: 0.8;
+    line-height: 1.2;
 }
 
 .play-btn {
@@ -2217,22 +2184,22 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.85);
-    color: white;
+    background: rgba(255, 255, 255, 0.9);
+    color: #000;
     border: none;
-    padding: 1.2rem;
+    padding: 0.75rem;
     border-radius: 50%;
     cursor: pointer;
-    width: 64px;
-    height: 64px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: all 0.3s ease;
     opacity: 0;
-    backdrop-filter: blur(20px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 4;
 }
 
 .content-card:hover .play-btn {
@@ -2241,42 +2208,51 @@ body {
 }
 
 .play-btn:hover {
-    background: rgba(0, 0, 0, 0.95);
+    background: rgba(255, 255, 255, 1);
     transform: translate(-50%, -50%) scale(1.1);
-    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
-    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
 .play-btn svg {
-    margin-left: 4px;
-    width: 24px;
-    height: 24px;
+    margin-left: 2px;
+    width: 16px;
+    height: 16px;
 }
 
-/* Mobile specific play button improvements */
+/* Mobile responsive */
 @media (max-width: 768px) {
+    .content-card {
+        width: 120px;
+        height: 170px;
+    }
+    
+    .content-grid {
+        gap: 0.5rem;
+        padding: 0.5rem 0 1.5rem 0;
+    }
+    
+    .card-info {
+        padding: 0.75rem 0.5rem 0.5rem;
+    }
+    
+    .card-info h3 {
+        font-size: 0.75rem;
+        -webkit-line-clamp: 1;
+    }
+    
+    .card-info p {
+        font-size: 0.65rem;
+    }
+    
     .play-btn {
-        opacity: 0;
-        background: rgba(255, 255, 255, 0.9);
-        border-color: rgba(255, 255, 255, 0.8);
-        width: 40px;
-        height: 40px;
-        padding: 0.6rem;
+        width: 32px;
+        height: 32px;
+        padding: 0.5rem;
     }
-
-    .content-card:hover .play-btn {
-        opacity: 1;
-    }
-
-    .play-btn:active {
-        transform: scale(0.95);
-        background: #10a37f;
-        color: white;
-    }
-
+    
     .play-btn svg {
-        width: 16px;
-        height: 16px;
+        width: 12px;
+        height: 12px;
     }
 }
 
