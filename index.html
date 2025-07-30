@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beemo</title>
+    <title>比莫</title>
     <link href="style.css" rel="stylesheet" type="text/css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://js.stripe.com/v3/"></script>
@@ -20,7 +20,7 @@
 
         <div class="welcome-content">
             <div class="welcome-logo">
-                <h1>Beemo</h1>
+                <h1>比莫</h1>
             </div>
 
             <div class="welcome-message">
@@ -107,7 +107,7 @@
 
         <div class="auth-content">
             <div class="auth-logo">
-                <h1>Beemo</h1>
+                <h1>比莫</h1>
                 <p>Únete a la comunidad</p>
             </div>
 
@@ -187,16 +187,17 @@
 
             <div class="search-content">
                 <div class="search-suggestions">
-                    <h3>Populares</h3>
-                    <div class="suggestion-item">Romance Histórico</div>
-                    <div class="suggestion-item">Artes Marciales</div>
-                    <div class="suggestion-item">Comedia Romántica</div>
-                    <div class="suggestion-item">Drama Imperial</div>
-                    <div class="suggestion-item">Fantasía Antigua</div>
+                    <h3>热门</h3>
+                    <div class="suggestion-item">古代言情</div> <!-- Romance Histórico -->
+                    <div class="suggestion-item">武侠</div>       <!-- Artes Marciales -->
+                    <div class="suggestion-item">浪漫喜剧</div>   <!-- Comedia Romántica -->
+                    <div class="suggestion-item">宫廷剧</div>     <!-- Drama Imperial -->
+                    <div class="suggestion-item">古装奇幻</div>   <!-- Fantasía Antigua -->
+
                 </div>
 
                 <div class="search-results" id="searchResults" style="display: none;">
-                    <h3>Resultados</h3>
+                    <h3>结果</h3>
                     <div class="results-list" id="resultsList"></div>
                 </div>
             </div>
@@ -221,13 +222,14 @@
             </div>
 
             <div class="expanded-search-categories">
-                <div class="expanded-category-chip active" data-category="todos">Todos</div>
-                <div class="expanded-category-chip" data-category="romance">Romance</div>
-                <div class="expanded-category-chip" data-category="accion">Acción</div>
-                <div class="expanded-category-chip" data-category="comedia">Comedia</div>
-                <div class="expanded-category-chip" data-category="drama">Drama Imperial</div>
-                <div class="expanded-category-chip" data-category="fantasia">Fantasía</div>
-                <div class="expanded-category-chip" data-category="artes">Artes Marciales</div>
+                <div class="expanded-category-chip active" data-category="todos">全部</div>     
+                <div class="expanded-category-chip" data-category="romance">言情</div>            
+                <div class="expanded-category-chip" data-category="accion">动作</div>              
+                <div class="expanded-category-chip" data-category="comedia">喜剧</div>            
+                <div class="expanded-category-chip" data-category="drama">宫廷剧</div>             
+                <div class="expanded-category-chip" data-category="fantasia">奇幻</div>           
+                <div class="expanded-category-chip" data-category="artes">武侠</div>              
+
             </div>
 
             <div class="expanded-search-results" id="expandedSearchResults">
