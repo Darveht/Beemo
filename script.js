@@ -2506,113 +2506,47 @@ function createSeriesCard(serie) {
     return card;
 }
 
-// Función para determinar el estilo del título estilo Netflix
+// Función para determinar el estilo del título estilo Netflix - Solo títulos en español
 function getNetflixTitleStyle(title) {
-    // Detectar si contiene caracteres chinos o es una traducción
-    const hasChineseElements = /[\u4e00-\u9fff]/.test(title);
-    const isMixedStyle = title.includes('CEO') || title.includes('Dragón') || title.includes('Emperador');
+    // Estilos rotativos para variedad visual
+    const titleStyles = [
+        'chinese-style',    // Con borde inferior y espaciado chino
+        'spanish-style',    // Cursiva con subrayado
+        'elegant-style',    // Serif con borde lateral
+        'modern-style'      // Mayúsculas con marco
+    ];
     
-    // Mapeo de títulos con estilo Netflix
-    const netflixTitles = {
-        'La Niña de los Cuatro CEO': {
-            title: '四大总裁的小女孩',
-            class: 'chinese-style'
-        },
-        'El Emperador Dragón Renacido': {
-            title: '重生龙帝',
-            class: 'chinese-style'
-        },
-        'Mi Esposo es un CEO Secreto': {
-            title: '我的神秘CEO丈夫',
-            class: 'chinese-style'
-        },
-        'El Maestro de las Artes Marciales': {
-            title: '武林宗师',
-            class: 'chinese-style'
-        },
-        'La Comedia del Emperador': {
-            title: '皇帝喜剧',
-            class: 'chinese-style'
-        },
-        'La Princesa Rebelde': {
-            title: '叛逆公主',
-            class: 'chinese-style'
-        },
-        'El Heredero de la Venganza': {
-            title: '复仇继承人',
-            class: 'chinese-style'
-        },
-        'Amor Prohibido en el Palacio': {
-            title: '宫中禁恋',
-            class: 'chinese-style'
-        },
-        'Segunda Oportunidad de Amor': {
-            title: '爱的第二次机会',
-            class: 'chinese-style'
-        },
-        'Destino Cruzado': {
-            title: '交错命运',
-            class: 'chinese-style'
-        },
-        'El Guerrero Inmortal': {
-            title: '不死战神',
-            class: 'chinese-style'
-        },
-        'La Legión de las Sombras': {
-            title: '暗影军团',
-            class: 'chinese-style'
-        },
-        'La Espada Divina': {
-            title: '神剑',
-            class: 'chinese-style'
-        },
-        'Mi Vida de Chef': {
-            title: '厨师人生',
-            class: 'chinese-style'
-        },
-        'La Oficina Más Loca': {
-            title: '疯狂办公室',
-            class: 'chinese-style'
-        },
-        'Mi Familia Millonaria': {
-            title: '我的豪门家族',
-            class: 'chinese-style'
-        },
-        'El Reino Perdido': {
-            title: '失落王国',
-            class: 'chinese-style'
-        },
-        'Magia Prohibida': {
-            title: '禁忌魔法',
-            class: 'chinese-style'
-        },
-        'El Portal del Tiempo': {
-            title: '时空之门',
-            class: 'chinese-style'
-        },
-        'Secretos del Palacio Imperial': {
-            title: '皇宫秘密',
-            class: 'chinese-style'
-        }
+    // Mapeo de títulos específicos con sus estilos preferidos
+    const preferredStyles = {
+        'La Niña de los Cuatro CEO': 'chinese-style',
+        'El Emperador Dragón Renacido': 'elegant-style',
+        'Mi Esposo es un CEO Secreto': 'modern-style',
+        'El Maestro de las Artes Marciales': 'chinese-style',
+        'La Comedia del Emperador': 'spanish-style',
+        'La Princesa Rebelde': 'elegant-style',
+        'El Heredero de la Venganza': 'modern-style',
+        'Amor Prohibido en el Palacio': 'elegant-style',
+        'Segunda Oportunidad de Amor': 'spanish-style',
+        'Destino Cruzado': 'chinese-style',
+        'El Guerrero Inmortal': 'modern-style',
+        'La Legión de las Sombras': 'chinese-style',
+        'La Espada Divina': 'elegant-style',
+        'Mi Vida de Chef': 'spanish-style',
+        'La Oficina Más Loca': 'modern-style',
+        'Mi Familia Millonaria': 'spanish-style',
+        'El Reino Perdido': 'elegant-style',
+        'Magia Prohibida': 'chinese-style',
+        'El Portal del Tiempo': 'modern-style',
+        'Secretos del Palacio Imperial': 'elegant-style'
     };
     
-    // Si es el idioma actual no es español, mantener título original pero con estilo
-    if (currentLanguage !== 'es' && currentLanguage !== 'zh') {
-        return {
-            title: title,
-            class: 'spanish-style'
-        };
-    }
+    // Usar estilo preferido o aleatorio
+    const styleClass = preferredStyles[title] || titleStyles[Math.floor(Math.random() * titleStyles.length)];
     
-    // Si está en chino o es específicamente un título mapeado
-    if (netflixTitles[title]) {
-        return netflixTitles[title];
-    }
-    
-    // Por defecto, estilo español
+    // Siempre devolver el título en español con el estilo visual chino
     return {
         title: title,
-        class: 'spanish-style'
+        class: styleClass
     };
 }
 
