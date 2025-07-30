@@ -2097,7 +2097,7 @@ body {
     border: none;
     position: relative;
     width: 140px;
-    height: 210px;
+    height: 220px;
     opacity: 1;
     visibility: visible;
     justify-self: start;
@@ -2111,7 +2111,7 @@ body {
     z-index: 10;
 }
 
-/* Overlay gradient permanente estilo Netflix */
+/* Overlay gradient más sutil para no tapar la imagen */
 .content-card::before {
     content: '';
     position: absolute;
@@ -2121,10 +2121,10 @@ body {
     bottom: 0;
     background: linear-gradient(
         180deg, 
-        rgba(0, 0, 0, 0.05) 0%,
-        rgba(0, 0, 0, 0.1) 30%,
-        rgba(0, 0, 0, 0.3) 70%,
-        rgba(0, 0, 0, 0.6) 100%
+        transparent 0%,
+        transparent 60%,
+        rgba(0, 0, 0, 0.2) 80%,
+        rgba(0, 0, 0, 0.4) 100%
     );
     z-index: 2;
     opacity: 1;
@@ -2158,40 +2158,39 @@ body {
     filter: brightness(0.7) contrast(1.2);
 }
 
-/* Overlay de título estilo Netflix - Centro de la imagen */
+/* Overlay de título en la parte inferior con estilo chino elegante */
 .card-title-overlay {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90%;
+    bottom: 0;
+    left: 0;
+    right: 0;
     z-index: 3;
     opacity: 1;
     transition: all 0.4s ease;
-    background: rgba(0, 0, 0, 0.4);
-    border-radius: 8px;
-    padding: 0.8rem 1rem;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: linear-gradient(
+        180deg,
+        transparent 0%,
+        rgba(0, 0, 0, 0.3) 30%,
+        rgba(0, 0, 0, 0.7) 100%
+    );
+    border-radius: 0 0 12px 12px;
+    padding: 1.5rem 0.8rem 0.8rem 0.8rem;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .card-title-netflix {
     font-family: 'Noto Sans SC', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 1rem;
-    font-weight: 900;
-    background: linear-gradient(135deg, #FFD700, #FFA500, #FF8C00, #FFD700);
-    background-size: 300% 300%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    line-height: 1.3;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.2;
     margin: 0;
     text-shadow: 
-        0 0 20px rgba(255, 215, 0, 0.6),
-        0 0 40px rgba(255, 215, 0, 0.4),
-        2px 2px 4px rgba(0, 0, 0, 0.8);
-    letter-spacing: 0.3px;
-    text-align: center;
+        1px 1px 3px rgba(0, 0, 0, 0.8),
+        0 0 8px rgba(255, 255, 255, 0.3);
+    letter-spacing: 0.2px;
+    text-align: left;
     word-wrap: break-word;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -2200,7 +2199,7 @@ body {
     position: relative;
     text-transform: none;
     font-style: normal;
-    animation: goldShimmer 3s ease-in-out infinite;
+    transition: all 0.3s ease;
 }
 
 /* Animación dorada y efectos especiales */
@@ -2247,65 +2246,64 @@ body {
     50% { opacity: 1; }
 }
 
-/* Estilos con efectos dorados chinos elegantes */
+/* Estilos inspirados en caligrafía china pero elegantes y sutiles */
 .card-title-netflix.chinese-style {
-    font-family: 'Noto Sans SC', 'Source Han Sans', 'PingFang SC', 'Inter', sans-serif;
-    font-weight: 900;
-    letter-spacing: 1px;
-    border-bottom: 2px solid rgba(255, 215, 0, 0.8);
-    padding-bottom: 0.3rem;
-    background: linear-gradient(135deg, #FFD700, #DAA520, #B8860B, #FFD700);
-    background-size: 400% 400%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+    font-family: 'Noto Sans SC', 'Inter', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    color: #f8f9fa;
+    position: relative;
+}
+
+.card-title-netflix.chinese-style::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, #ff6b6b, #ffd93d);
+    border-radius: 2px;
 }
 
 .card-title-netflix.spanish-style {
-    font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-weight: 800;
-    letter-spacing: 0.4px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    color: #e3f2fd;
     font-style: italic;
-    background: linear-gradient(135deg, #FFA500, #FFD700, #FF8C00, #FFA500);
-    background-size: 300% 300%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-decoration: underline;
-    text-decoration-color: rgba(255, 215, 0, 0.6);
-    text-underline-offset: 3px;
+    position: relative;
 }
 
 .card-title-netflix.elegant-style {
-    font-family: 'Noto Serif SC', 'Times New Roman', serif;
-    font-weight: 700;
-    letter-spacing: 0.6px;
-    background: linear-gradient(135deg, #DAA520, #FFD700, #B8860B, #DAA520);
-    background-size: 350% 350%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    border-left: 3px solid rgba(255, 215, 0, 0.8);
-    padding-left: 0.5rem;
-    text-shadow: 0 0 10px rgba(218, 165, 32, 0.6);
+    font-family: 'Noto Sans SC', serif;
+    font-weight: 500;
+    letter-spacing: 0.4px;
+    color: #fff3e0;
+    position: relative;
+}
+
+.card-title-netflix.elegant-style::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 60%;
+    height: 2px;
+    background: linear-gradient(90deg, #ffd54f, transparent);
+    border-radius: 1px;
 }
 
 .card-title-netflix.modern-style {
-    font-family: 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    background: linear-gradient(135deg, #FFD700, #FFA500, #FF8C00, #FFD700);
-    background-size: 300% 300%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    border: 2px solid rgba(255, 215, 0, 0.6);
-    padding: 0.4rem 0.8rem;
-    border-radius: 8px;
-    background-color: rgba(0, 0, 0, 0.5);
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: #ffffff;
+    text-transform: none;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    border-left: 3px solid #4fc3f7;
 }
 
 /* Hover effect mejorado con efectos dorados */
@@ -2391,7 +2389,7 @@ body {
 @media (max-width: 768px) {
     .content-card {
         width: 120px;
-        height: 180px;
+        height: 190px;
     }
     
     .content-grid {
