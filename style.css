@@ -2096,8 +2096,8 @@ body {
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     border: none;
     position: relative;
-    width: 140px;
-    height: 220px;
+    width: 160px;
+    height: 240px;
     opacity: 1;
     visibility: visible;
     justify-self: start;
@@ -2122,9 +2122,9 @@ body {
     background: linear-gradient(
         180deg, 
         transparent 0%,
-        transparent 60%,
-        rgba(0, 0, 0, 0.2) 80%,
-        rgba(0, 0, 0, 0.4) 100%
+        transparent 70%,
+        rgba(0, 0, 0, 0.1) 85%,
+        rgba(0, 0, 0, 0.3) 100%
     );
     z-index: 2;
     opacity: 1;
@@ -2135,27 +2135,27 @@ body {
 .content-card:hover::before {
     background: linear-gradient(
         180deg, 
-        rgba(0, 0, 0, 0.2) 0%,
-        rgba(0, 0, 0, 0.4) 20%,
-        rgba(0, 0, 0, 0.6) 60%,
-        rgba(0, 0, 0, 0.9) 100%
+        rgba(0, 0, 0, 0.1) 0%,
+        rgba(0, 0, 0, 0.2) 30%,
+        rgba(0, 0, 0, 0.4) 70%,
+        rgba(0, 0, 0, 0.7) 100%
     );
 }
 
 .content-card img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    object-position: center top;
-    background: transparent;
+    object-fit: contain;
+    object-position: center;
+    background: #000000;
     transition: all 0.4s ease;
     border-radius: 12px;
     display: block;
 }
 
 .content-card:hover img {
-    transform: scale(1.15);
-    filter: brightness(0.7) contrast(1.2);
+    transform: scale(1.05);
+    filter: brightness(0.8) contrast(1.1);
 }
 
 /* Overlay de título en la parte inferior con estilo chino elegante */
